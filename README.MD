@@ -1,3 +1,7 @@
+![Cafe POS Cover](./screenshorts/cover.png)
+
+
+
 # ☕ Cafe POS System
 
 A modern **Point of Sale (POS) system** for cafés, built with **MERN stack** and **TypeScript**, featuring **real-time order management**, dashboard reports, and role-based access.
