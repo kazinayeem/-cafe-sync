@@ -7,16 +7,16 @@ function App() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       {/* Background Animation */}
       <BackgroundLines children className="absolute inset-0 z-0" />
 
       {/* Centered Landing Card */}
-      <div className="relative z-10 max-w-lg rounded-2xl bg-white p-8 shadow-lg text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+      <div className="relative z-10 max-w-lg rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg text-center">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
           ☕ Cafe POS System
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
           A modern Point of Sale system built with{" "}
           <span className="font-semibold">MERN</span> +{" "}
           <span className="font-semibold">TypeScript</span>.
@@ -25,7 +25,7 @@ function App() {
         </p>
         <button
           onClick={() => navigate("/login")}
-          className="rounded-xl bg-blue-600 px-6 py-2 text-white font-medium shadow hover:bg-blue-700 transition"
+          className="rounded-xl bg-blue-600 px-6 py-2 text-white font-medium shadow hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition"
         >
           Get Started
         </button>
