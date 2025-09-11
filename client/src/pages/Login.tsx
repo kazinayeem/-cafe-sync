@@ -1,16 +1,27 @@
-"use client";
-
+import { useDispatch } from "react-redux";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { cn } from "@/lib/utils";
 import type React from "react";
+import { login } from "@/store/userSlice";
+import type { AppDispatch } from "@/store";
 
 export default function Login() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleLogin = () => {
+    dispatch(
+      login({
+        name: "Admin User",
+        email: "admin@cafe.com",
+      })
+    );
+  };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Login form submitted");
+    handleLogin();
   };
 
   return (
