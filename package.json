@@ -1,0 +1,28 @@
+{
+  "name": "cafe-sync",
+  "version": "1.0.0",
+  "description": "A modern **Point of Sale (POS) system** for cafés, built with **MERN stack** and **TypeScript**, featuring **real-time order management**, dashboard reports, and role-based access.",
+  "homepage": "https://github.com/kazinayeem/-cafe-sync#readme",
+  "bugs": {
+    "url": "https://github.com/kazinayeem/-cafe-sync/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kazinayeem/-cafe-sync.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
