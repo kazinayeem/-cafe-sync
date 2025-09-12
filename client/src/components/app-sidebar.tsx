@@ -8,6 +8,9 @@ import {
   FileText,
   CreditCard,
   ShoppingCart,
+  Tag,
+  Box,
+  Percent,
 } from "lucide-react";
 
 import {
@@ -23,28 +26,35 @@ import {
 
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { Link } from "react-router";
 
 export function AppSidebar() {
   const { role } = useSelector((state: RootState) => state.user);
 
+  // Base items for all users
   const baseItems = [
-    { title: "Home", url: "/", icon: Home },
+    { title: "Home", url: "/dashboard", icon: Home },
+    { title: "Tables", url: "/dashboard/tables", icon: Users },
     { title: "Orders", url: "/orders", icon: ShoppingCart },
     { title: "Calendar", url: "/calendar", icon: Calendar },
     { title: "Search", url: "/search", icon: Search },
   ];
 
+  // Admin-specific items
   const adminItems = [
-    { title: "Staff", url: "/staff", icon: Users },
-    { title: "Reports", url: "/reports", icon: FileText },
-    { title: "Payments", url: "/payments", icon: CreditCard },
-    { title: "Settings", url: "/settings", icon: Settings },
+    { title: "Menu Items", url: "/dashboard/menu", icon: Box },
+    { title: "Categories", url: "/dashboard/categories", icon: Tag },
+    { title: "Discounts & Offers", url: "/dashboard/discounts", icon: Percent },
+    { title: "Staff", url: "/dashboard/staff", icon: Users },
+    { title: "Reports", url: "/dashboard/reports", icon: FileText },
+    { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
+    { title: "Settings", url: "/dashboard/settings", icon: Settings },
   ];
 
   const items = role === "admin" ? [...baseItems, ...adminItems] : baseItems;
 
   return (
-    <Sidebar className="">
+    <Sidebar>
       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
         {/* Branding */}
         <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
@@ -64,13 +74,13 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
+                    <Link
+                      to={item.url}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 text-lg hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
                     >
                       <item.icon className="h-5 w-5" />
                       <span className="font-medium">{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

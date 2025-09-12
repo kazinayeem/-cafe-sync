@@ -15,6 +15,9 @@ import { ThemeProvider } from "./components/theme-provider";
 import Dashboard from "./dashboard/Dashboard";
 import DashboardHome from "./dashboard/DashboardHome";
 import ProtectedRoute from "./ProtectedRoute";
+import TableManager from "./components/TableManager";
+import { Toaster } from "react-hot-toast";
+import StaffManagement from "./dashboard/staff/StaffManagement";
 
 // const router = createBrowserRouter([
 //   {
@@ -52,6 +55,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />}>
                 <Route index element={<DashboardHome />} />
+                <Route path="tables" element={<TableManager />} />
+                <Route path="staff" element={<StaffManagement />} />
                 <Route path="settings" element={<div>Settings Page</div>} />
               </Route>
             </Route>
@@ -59,6 +64,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             {/* Catch-all 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster position="top-center" reverseOrder={false} />
         </BrowserRouter>
       </Provider>
     </ThemeProvider>

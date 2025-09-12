@@ -3,18 +3,43 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 import userRoutes from "./routes/userRoutes";
+import http from "http";
+import { Server } from "socket.io";
+import tableRoutes from "./routes/tableRoutes";
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://cafe-sync.vercel.app",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://cafe-sync.vercel.app/",
+    origin: allowedOrigins,
+    credentials: true,
   })
 );
+
+export const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
 app.use(express.json());
+
+
+// --- Socket.IO Realtime Handling ---
+io.on("connection", (socket) => {
+  console.log("🔌 User connected:", socket.id);
+  socket.on("disconnect", () => console.log("❌ User disconnected:", socket.id));
+});
+
 
 // Routes
 app.get("/", (req: Request, res: Response) => {
@@ -22,6 +47,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/tables", tableRoutes);
 // Example route for testing errors
 app.get("/error", (req: Request) => {
   throw new Error("Test error!");
@@ -44,8 +70,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
   connectDB();
 });
