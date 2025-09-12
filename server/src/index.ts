@@ -6,6 +6,8 @@ import userRoutes from "./routes/userRoutes";
 import http from "http";
 import { Server } from "socket.io";
 import tableRoutes from "./routes/tableRoutes";
+import categoryRoutes from "./routes/categoryRoutes";
+import productRoutes from "./routes/productRoutes";
 dotenv.config();
 
 const app = express();
@@ -33,13 +35,13 @@ export const io = new Server(server, {
 });
 app.use(express.json());
 
-
 // --- Socket.IO Realtime Handling ---
 io.on("connection", (socket) => {
   console.log("🔌 User connected:", socket.id);
-  socket.on("disconnect", () => console.log("❌ User disconnected:", socket.id));
+  socket.on("disconnect", () =>
+    console.log("❌ User disconnected:", socket.id)
+  );
 });
-
 
 // Routes
 app.get("/", (req: Request, res: Response) => {
@@ -48,7 +50,10 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/tables", tableRoutes);
-// Example route for testing errors
+app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
+
+// Test Error Route
 app.get("/error", (req: Request) => {
   throw new Error("Test error!");
 });
@@ -69,7 +74,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     message: err.message || "Internal Server Error",
   });
 });
-
 
 server.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
