@@ -7,7 +7,9 @@ import { Types } from "mongoose";
 // Create new order
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { items, totalPrice, paymentMethod, table } = req.body;
+    const { items, totalPrice, paymentMethod, tableId } = req.body;
+
+    
     if (!items || items.length === 0) {
       return res
         .status(400)
@@ -18,7 +20,7 @@ export const createOrder = async (req: Request, res: Response) => {
       items,
       totalPrice,
       paymentMethod: paymentMethod || "cash",
-      table,
+      table : tableId,
     });
     await order.populate("table items.product");
 

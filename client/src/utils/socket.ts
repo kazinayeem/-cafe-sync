@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 
-export const socket = io("https://cafe-sync-mhnc.vercel.app", {
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+export const socket = io(apiUrl, {
   withCredentials: true,
 });
