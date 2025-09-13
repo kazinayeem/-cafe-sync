@@ -1,7 +1,7 @@
 import type { IUser } from "@/types/User";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_URL = "http://localhost:5000/api/users";
+const API_URL =  process.env.VITE_API_BASE_URL || "https://cafe-sync-mhnc.vercel.app/api";
 
 export interface StaffInput {
   name: string;

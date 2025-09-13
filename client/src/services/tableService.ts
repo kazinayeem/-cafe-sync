@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/tables";
-
+const API_URL =
+  process.env.VITE_API_BASE_URL + "/api/tables" ||
+  "https://cafe-sync-mhnc.vercel.app/api/tables";
 // ✅ Get all tables
 export const getTables = async () => {
   const res = await axios.get(API_URL);

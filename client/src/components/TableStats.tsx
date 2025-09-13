@@ -9,7 +9,7 @@ interface Stats {
   available: number;
 }
 
-const API_URL = "http://localhost:5000/api/tables";
+const API_URL = "https://cafe-sync-mhnc.vercel.app/api/tables";
 
 export default function TableSpotlightCard() {
   const [stats, setStats] = useState<Stats>({ total: 0, available: 0 });
