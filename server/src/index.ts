@@ -18,6 +18,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://cafe-sync.vercel.app",
   "http://localhost:5173",
+  process.env.FRONTEND_URL || "http://localhost:5173",
 ];
 
 app.use(
