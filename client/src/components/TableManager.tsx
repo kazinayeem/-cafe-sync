@@ -72,7 +72,6 @@ export default function TableManager() {
     };
   }, []);
 
-  // --- Table Actions ---
   const confirmToggleStatus = (table: Table) => {
     setSelectedTable(table);
     setStatusDialogOpen(true);

@@ -1,7 +1,7 @@
 import type { IUser } from "@/types/User";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_URL =  process.env.VITE_API_BASE_URL || "https://cafe-sync-mhnc.vercel.app/api";
+
 
 export interface StaffInput {
   name: string;
@@ -15,7 +15,7 @@ export interface StaffInput {
 export const staffApi = createApi({
   reducerPath: "staffApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_URL,
+    baseUrl: import.meta.env.VITE_API_URL + "/api/users",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) headers.set("Authorization", `Bearer ${token}`);

@@ -7,7 +7,7 @@ export interface Category {
   items?: any[];
   createdAt?: string;
 }
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export const categoryApi = createApi({
   reducerPath: "categoryApi",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl + "/api" }),

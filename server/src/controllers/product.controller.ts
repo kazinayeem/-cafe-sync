@@ -66,11 +66,33 @@ export const getProductById = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updated = await Product.findByIdAndUpdate(id, req.body, {
-      new: true,
-    }).populate("category", "name");
-    if (!updated) return handleError(res, "Product not found", null, 404);
-    res.json({ success: true, data: updated });
+    const { category, ...rest } = req.body;
+
+    // get existing product
+    const product = await Product.findById(id);
+    if (!product) return handleError(res, "Product not found", null, 404);
+
+    const oldCategoryId = product.category?.toString();
+
+    // update fields
+    if (category) product.category = category;
+    Object.assign(product, rest);
+    await product.save();
+
+    // if category changed, update both old and new
+    if (category && oldCategoryId !== category) {
+      if (oldCategoryId) {
+        await Category.findByIdAndUpdate(oldCategoryId, {
+          $pull: { items: product._id },
+        });
+      }
+      await Category.findByIdAndUpdate(category, {
+        $addToSet: { items: product._id },
+      });
+    }
+
+    await product.populate("category", "name");
+    res.json({ success: true, data: product });
   } catch (error) {
     handleError(res, "Error updating product", error);
   }

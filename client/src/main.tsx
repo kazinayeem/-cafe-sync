@@ -20,6 +20,7 @@ import { Toaster } from "react-hot-toast";
 import StaffManagement from "./dashboard/staff/StaffManagement";
 import CategoryManagement from "./dashboard/category/CategoryManagement";
 import ProductManagement from "./dashboard/product/ProductManagement";
+import OrdersList from "./pages/OrderList";
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -41,6 +42,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <Route path="tables" element={<TableManager />} />
                 <Route path="staff" element={<StaffManagement />} />
                 <Route path="categories" element={<CategoryManagement />} />
+                  <Route path="orders" element={<OrdersList />} />
                 <Route path="menu" element={<ProductManagement />} />
                 <Route path="settings" element={<div>Settings Page</div>} />
                 {/* 404 page */}

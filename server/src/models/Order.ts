@@ -1,5 +1,6 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import { IProduct } from "./Product";
+import { ITable } from "./Table";
 
 export interface IOrderItem {
   product: IProduct["_id"];
@@ -11,6 +12,7 @@ export interface IOrder extends Document {
   totalPrice: number;
   status: "pending" | "preparing" | "served" | "cancelled";
   paymentMethod: "cash" | "card" | "online";
+  table?: Types.ObjectId | ITable;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -34,6 +36,7 @@ const orderSchema = new Schema<IOrder>(
       enum: ["cash", "card", "online"],
       default: "cash",
     },
+    table: { type: Schema.Types.ObjectId, ref: "Table", required: false },
   },
   { timestamps: true }
 );

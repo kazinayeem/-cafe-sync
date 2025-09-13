@@ -35,7 +35,7 @@ export function AppSidebar() {
   const baseItems = [
     { title: "Home", url: "/dashboard", icon: Home },
     { title: "Tables", url: "/dashboard/tables", icon: Users },
-    { title: "Orders", url: "/orders", icon: ShoppingCart },
+    { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
     { title: "Calendar", url: "/calendar", icon: Calendar },
     { title: "Search", url: "/search", icon: Search },
   ];

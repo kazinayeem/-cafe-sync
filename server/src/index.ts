@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import tableRoutes from "./routes/tableRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
+import orderRoutes from "./routes/orderRoutes";
 dotenv.config();
 
 const app = express();
@@ -53,7 +54,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/tables", tableRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
-
+app.use("/api/orders", orderRoutes);
 // Test Error Route
 app.get("/error", (req: Request) => {
   throw new Error("Test error!");

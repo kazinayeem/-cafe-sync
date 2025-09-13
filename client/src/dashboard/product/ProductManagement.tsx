@@ -137,7 +137,7 @@ export default function ProductManagement() {
               <CardHeader className="pb-2">
                 <CardTitle>{product.name}</CardTitle>
                 <CardDescription className="dark:text-gray-400">
-                  {product.category.name || "Uncategorized"}
+                  {product?.category?.name || "Uncategorized"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-sm dark:text-gray-300">

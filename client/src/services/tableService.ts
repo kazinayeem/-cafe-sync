@@ -1,27 +1,22 @@
 import axios from "axios";
 
-const API_URL =
-  process.env.VITE_API_BASE_URL + "/api/tables" ||
-  "https://cafe-sync-mhnc.vercel.app/api/tables";
-// ✅ Get all tables
+const API_URL = import.meta.env.VITE_API_URL + "/api/tables";
+
 export const getTables = async () => {
   const res = await axios.get(API_URL);
   return res.data;
 };
 
-// ✅ Add a new table
 export const addTable = async (name: string, seats: number) => {
   const res = await axios.post(API_URL, { name, seats });
   return res.data;
 };
 
-// ✅ Update table status
 export const updateTableStatus = async (id: string, status: string) => {
   const res = await axios.post(`${API_URL}/${id}/status`, { status });
   return res.data;
 };
 
-// ✅ Edit table name and seats
 export const updateTable = async (
   id: string,
   name?: string,
@@ -31,7 +26,6 @@ export const updateTable = async (
   return res.data;
 };
 
-// ✅ Delete table
 export const deleteTable = async (id: string) => {
   const res = await axios.delete(`${API_URL}/${id}`);
   return res.data;
