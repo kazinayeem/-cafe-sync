@@ -6,6 +6,7 @@ import {
   getOrderById,
   updateOrder,
   deleteOrder,
+  getTodayOrderSummaryController,
 } from "../controllers/order.Controller";
 
 const router = Router();
@@ -30,4 +31,5 @@ router.put("/:id", updateOrder);
 // @desc    Delete order
 router.delete("/:id", deleteOrder);
 
+router.get("/summary/today", getTodayOrderSummaryController);
 export default router;

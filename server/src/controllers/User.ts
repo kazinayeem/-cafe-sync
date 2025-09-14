@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
 
+
+
+
 // -------------------- Super Admin --------------------
 export const createSuperAdmin = async (req: Request, res: Response) => {
   try {
@@ -115,7 +118,7 @@ export const addStaff = async (req: Request, res: Response) => {
     if (existing)
       return res.status(400).json({ message: "Email already registered" });
 
-    const hashedPassword = await bcrypt.hash(password || "12345", 10); // default password
+    const hashedPassword = await bcrypt.hash(password || "12345", 10); 
 
     const staff = new User({
       name,

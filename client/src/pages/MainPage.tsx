@@ -72,7 +72,7 @@ export default function MainPage() {
         />
 
         {/* Products Grid */}
-        <div className="w-full p-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 mt-8">
+        <div className="w-full p-2 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 mt-8">
           {products
             .filter(
               (prod) =>
@@ -83,9 +83,7 @@ export default function MainPage() {
               <ProductCard
                 key={prod._id ?? idx}
                 product={prod}
-                onAdd={() => {
-                  console.log("Add clicked:", prod);
-                }}
+                onAdd={() => console.log("Add clicked:", prod)}
               />
             ))}
         </div>

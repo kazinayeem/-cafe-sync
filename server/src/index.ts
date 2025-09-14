@@ -4,17 +4,21 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 import userRoutes from "./routes/userRoutes";
 import http from "http";
+import morgan from "morgan";
 import { Server } from "socket.io";
 import tableRoutes from "./routes/tableRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
 import orderRoutes from "./routes/orderRoutes";
+import logger from "./utils/logger";
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
-
+app.use(
+  morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } })
+);
 const allowedOrigins = [
   "http://localhost:3000",
   "https://cafe-sync.vercel.app",

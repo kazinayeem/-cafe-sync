@@ -3,13 +3,70 @@ import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import { Table } from "../models/Table";
 import { Types } from "mongoose";
+import { getTodayOrderSummary } from "./orderSummaryService";
+import { io } from "..";
+
+export const getTodayOrderSummaryController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const summary = await getTodayOrderSummary();
+    return res.status(200).json({ success: true, data: summary });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+// export const getTodayOrderSummary = async (req: Request, res: Response) => {
+//   try {
+//     // Today's start and end
+//     const startOfDay = new Date();
+//     startOfDay.setHours(0, 0, 0, 0);
+
+//     const endOfDay = new Date();
+//     endOfDay.setHours(23, 59, 59, 999);
+
+//     // Aggregate orders created today
+//     const summary = await Order.aggregate([
+//       {
+//         $match: {
+//           createdAt: { $gte: startOfDay, $lte: endOfDay },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$status", // group by order status
+//           count: { $sum: 1 },
+//         },
+//       },
+//     ]);
+
+//     // Convert result into an object (e.g., { served: 3, waiting: 2 })
+//     const statusCounts: Record<string, number> = {};
+//     summary.forEach((s) => {
+//       statusCounts[s._id] = s.count;
+//     });
+
+//     // Also include total orders
+//     const totalOrders = summary.reduce((sum, s) => sum + s.count, 0);
+
+//     return res.status(200).json({
+//       success: true,
+//       data: {
+//         totalOrders,
+//         ...statusCounts,
+//       },
+//     });
+//   } catch (err: any) {
+//     return res.status(500).json({ success: false, message: err.message });
+//   }
+// };
 
 // Create new order
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { items, totalPrice, paymentMethod, tableId } = req.body;
 
-    
     if (!items || items.length === 0) {
       return res
         .status(400)
@@ -20,10 +77,11 @@ export const createOrder = async (req: Request, res: Response) => {
       items,
       totalPrice,
       paymentMethod: paymentMethod || "cash",
-      table : tableId,
+      table: tableId,
     });
     await order.populate("table items.product");
-
+    const summary = await getTodayOrderSummary();
+    io.emit("orderSummaryUpdate", summary);
     return res.status(201).json({ success: true, data: order });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
@@ -87,6 +145,10 @@ export const updateOrder = async (req: Request, res: Response) => {
     }
 
     await order.save();
+    const summary = await getTodayOrderSummary();
+    io.emit("orderSummaryUpdate", summary);
+    console.log(summary);
+
     return res.status(200).json({ success: true, data: order });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });

@@ -51,14 +51,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
     <div>
       <Card
         key={product._id}
-        className="flex flex-col items-center p-5 rounded-xl shadow-md 
-                 hover:shadow-xl transition transform hover:-translate-y-1 
-                 bg-white dark:bg-gray-800 group relative"
+        className="w-full flex flex-col items-center p-5 rounded-xl shadow-md 
+             hover:shadow-xl transition transform hover:-translate-y-1 
+             bg-white dark:bg-gray-800 group relative"
       >
         {/* Product image */}
         <div
-          className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 
-                      bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4 overflow-hidden"
+          className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 
+               bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4 overflow-hidden"
         >
           <img
             src={product?.imageUrl ?? "/placeholder-coffee.png"}
@@ -66,7 +66,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="w-full h-full object-contain"
           />
         </div>
-
         {/* Name + Price */}
         <CardContent className="w-full flex flex-col items-center px-0 py-2 text-center">
           <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 dark:text-gray-100 line-clamp-1">
