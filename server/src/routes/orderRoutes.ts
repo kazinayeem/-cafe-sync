@@ -8,6 +8,7 @@ import {
   deleteOrder,
   getTodayOrderSummaryController,
 } from "../controllers/order.Controller";
+import { getOrderReport } from "../controllers/orderReport.Controller";
 
 const router = Router();
 
@@ -32,4 +33,8 @@ router.put("/:id", updateOrder);
 router.delete("/:id", deleteOrder);
 
 router.get("/summary/today", getTodayOrderSummaryController);
+
+// 📊 Sales summary
+router.get("/summary/report", getOrderReport);
+
 export default router;

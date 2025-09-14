@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { socket } from "../utils/socket";
+
 import {
   getTables,
   addTable,
@@ -10,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Swal from "sweetalert2";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -18,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
+import { Loader } from "lucide-react";
 
 interface Table {
   _id: string;
@@ -33,7 +36,7 @@ export default function TableManager() {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-
+  const [isUpdatingTable, setIsUpdatingTable] = useState(false);
   const [tableName, setTableName] = useState("");
   const [tableSeats, setTableSeats] = useState<number | "">("");
 
@@ -72,9 +75,27 @@ export default function TableManager() {
     };
   }, []);
 
-  const confirmToggleStatus = (table: Table) => {
-    setSelectedTable(table);
-    setStatusDialogOpen(true);
+  const confirmToggleStatus = async (table: Table) => {
+    const newStatus = table.status === "free" ? "occupied" : "free";
+
+    const result = await Swal.fire({
+      title: `${newStatus === "occupied" ? "Book" : "Unbook"} Table "${
+        table.name
+      }"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: newStatus === "occupied" ? "Book" : "Unbook",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      await updateTableStatus(table._id, newStatus);
+      Swal.fire(
+        "Success!",
+        `Table "${table.name}" is now ${newStatus.toUpperCase()}.`,
+        "success"
+      );
+    }
   };
 
   const toggleStatus = async () => {
@@ -94,15 +115,42 @@ export default function TableManager() {
 
   const handleEditTable = async () => {
     if (!selectedTable || !tableName || tableSeats === "") return;
-    await updateTable(selectedTable._id, tableName, Number(tableSeats));
-    setEditDialogOpen(false);
-    setSelectedTable(null);
+
+    try {
+      setIsUpdatingTable(true); // ✅ start loading
+      await updateTable(selectedTable._id, tableName, Number(tableSeats));
+      setEditDialogOpen(false);
+      setSelectedTable(null);
+      Swal.fire(
+        "Success!",
+        `Table "${tableName}" updated successfully.`,
+        "success"
+      );
+    } catch (error) {
+      Swal.fire("Error!", "Failed to update table.", "error");
+    } finally {
+      setIsUpdatingTable(false);
+    }
   };
 
   const handleDeleteTable = async (table: Table) => {
-    if (!confirm(`Are you sure you want to delete table "${table.name}"?`))
-      return;
-    await deleteTable(table._id);
+    const result = await Swal.fire({
+      title: `Delete "${table.name}"?`,
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      await deleteTable(table._id);
+      Swal.fire(
+        "Deleted!",
+        `Table "${table.name}" has been deleted.`,
+        "success"
+      );
+    }
   };
 
   const handleAddTable = async () => {
@@ -230,7 +278,12 @@ export default function TableManager() {
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleEditTable}>Update</Button>
+            <Button onClick={handleEditTable} disabled={isUpdatingTable}>
+              {isUpdatingTable ? (
+                <Loader className="animate-spin w-4 h-4 mr-2 inline-block" />
+              ) : null}
+              {isUpdatingTable ? "Updating..." : "Update"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

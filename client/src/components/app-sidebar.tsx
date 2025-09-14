@@ -47,6 +47,7 @@ export function AppSidebar() {
     { title: "Discounts & Offers", url: "/dashboard/discounts", icon: Percent },
     { title: "Staff", url: "/dashboard/staff", icon: Users },
     { title: "Reports", url: "/dashboard/reports", icon: FileText },
+     
     { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
     { title: "Settings", url: "/dashboard/settings", icon: Settings },
   ];

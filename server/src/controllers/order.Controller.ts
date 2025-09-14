@@ -17,55 +17,11 @@ export const getTodayOrderSummaryController = async (
     return res.status(500).json({ success: false, message: err.message });
   }
 };
-// export const getTodayOrderSummary = async (req: Request, res: Response) => {
-//   try {
-//     // Today's start and end
-//     const startOfDay = new Date();
-//     startOfDay.setHours(0, 0, 0, 0);
-
-//     const endOfDay = new Date();
-//     endOfDay.setHours(23, 59, 59, 999);
-
-//     // Aggregate orders created today
-//     const summary = await Order.aggregate([
-//       {
-//         $match: {
-//           createdAt: { $gte: startOfDay, $lte: endOfDay },
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: "$status", // group by order status
-//           count: { $sum: 1 },
-//         },
-//       },
-//     ]);
-
-//     // Convert result into an object (e.g., { served: 3, waiting: 2 })
-//     const statusCounts: Record<string, number> = {};
-//     summary.forEach((s) => {
-//       statusCounts[s._id] = s.count;
-//     });
-
-//     // Also include total orders
-//     const totalOrders = summary.reduce((sum, s) => sum + s.count, 0);
-
-//     return res.status(200).json({
-//       success: true,
-//       data: {
-//         totalOrders,
-//         ...statusCounts,
-//       },
-//     });
-//   } catch (err: any) {
-//     return res.status(500).json({ success: false, message: err.message });
-//   }
-// };
 
 // Create new order
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { items, totalPrice, paymentMethod, tableId } = req.body;
+    const { items, paymentMethod, tableId } = req.body;
 
     if (!items || items.length === 0) {
       return res
@@ -73,15 +29,27 @@ export const createOrder = async (req: Request, res: Response) => {
         .json({ success: false, message: "No items provided" });
     }
 
+    // Calculate total price based on item prices and quantities
+    const totalPrice = items.reduce(
+      (sum: number, item: any) => sum + item.price * item.quantity,
+      0
+    );
+
+    // Create the order
     const order = await Order.create({
-      items,
+      items, // each item must have: product, quantity, size, price
       totalPrice,
       paymentMethod: paymentMethod || "cash",
-      table: tableId,
+      table: tableId || null,
     });
+
+    // Populate references for response
     await order.populate("table items.product");
+
+    // Emit live update to frontend
     const summary = await getTodayOrderSummary();
     io.emit("orderSummaryUpdate", summary);
+
     return res.status(201).json({ success: true, data: order });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
@@ -89,13 +57,37 @@ export const createOrder = async (req: Request, res: Response) => {
 };
 
 // Get all orders
+
 export const getOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await Order.find()
-      .populate("items.product")
-      .populate("table")
-      .sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, data: orders });
+    const { page = 1, limit = 10, status, startDate, endDate } = req.query;
+
+    const query: any = {};
+
+    if (status && status !== "all") query.status = status;
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate as string);
+      if (endDate) query.createdAt.$lte = new Date(endDate as string);
+    }
+
+    const total = await Order.countDocuments(query);
+    const orders = await Order.find(query)
+      .populate("table items.product")
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit))
+      .sort({ createdAt: -1 }); // newest first
+
+    return res.json({
+      data: orders,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }

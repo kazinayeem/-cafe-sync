@@ -73,6 +73,8 @@ const OrderSidebar = () => {
         items: items.map((item) => ({
           product: item.productId,
           quantity: item.quantity,
+          size: item.size,
+          price: item.price,
         })),
         totalPrice,
         paymentMethod: "cash",
@@ -81,7 +83,7 @@ const OrderSidebar = () => {
       // Include table if selected
       if (selectedTable) payload.tableId = selectedTable;
 
-   await createOrder(payload).unwrap();
+      await createOrder(payload).unwrap();
       toast.success(
         `Order placed successfully!${
           selectedTable

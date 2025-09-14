@@ -21,7 +21,8 @@ import StaffManagement from "./dashboard/staff/StaffManagement";
 import CategoryManagement from "./dashboard/category/CategoryManagement";
 import ProductManagement from "./dashboard/product/ProductManagement";
 import OrdersList from "./pages/OrderList";
-
+import ProfilePage from "./pages/ProfilePage";
+import SummaryManagement from "./pages/SummaryManagement";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -42,8 +43,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <Route path="tables" element={<TableManager />} />
                 <Route path="staff" element={<StaffManagement />} />
                 <Route path="categories" element={<CategoryManagement />} />
-                  <Route path="orders" element={<OrdersList />} />
+                <Route path="orders" element={<OrdersList />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="menu" element={<ProductManagement />} />
+                <Route path="reports" element={<SummaryManagement />} />
                 <Route path="settings" element={<div>Settings Page</div>} />
                 {/* 404 page */}
                 <Route path="*" element={<NotFound />} />

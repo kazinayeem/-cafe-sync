@@ -28,7 +28,7 @@ export default function OrderSummary() {
     fetchInitialSummary();
   }, []);
 
-  // Realtime updates
+  
   useEffect(() => {
     socket.on("orderSummaryUpdate", (data) => {
       setSummary(data);

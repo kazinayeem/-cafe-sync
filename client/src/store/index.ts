@@ -5,6 +5,7 @@ import { categoryApi } from "@/services/categoryApi";
 import { productApi } from "@/services/productApi";
 import cartReducer from "./cartSlice";
 import { orderApi } from "@/services/orderApi";
+import { userApi } from "@/services/userApi";
 
 export const store = configureStore({
   reducer: {
@@ -14,12 +15,14 @@ export const store = configureStore({
     [staffApi.reducerPath]: staffApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [productApi.reducerPath]: productApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(staffApi.middleware)
       .concat(categoryApi.middleware)
       .concat(orderApi.middleware)
+      .concat(userApi.middleware)
       .concat(productApi.middleware),
 });
 

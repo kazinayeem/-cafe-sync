@@ -39,7 +39,9 @@ export default function Navbar() {
                 <div className="flex items-center gap-2 cursor-pointer">
                   <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>{name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:flex flex-col">
                     <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
@@ -53,7 +55,9 @@ export default function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48">
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <DropdownMenuItem
+                  onClick={() => navigate("/dashboard/profile")}
+                >
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/settings")}>
@@ -63,7 +67,9 @@ export default function Navbar() {
                   Notifications
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

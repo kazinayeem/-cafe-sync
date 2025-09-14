@@ -2,9 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
-
-
-
+import { AuthRequest } from "../middleware/authMiddleware";
 
 // -------------------- Super Admin --------------------
 export const createSuperAdmin = async (req: Request, res: Response) => {
@@ -118,7 +116,7 @@ export const addStaff = async (req: Request, res: Response) => {
     if (existing)
       return res.status(400).json({ message: "Email already registered" });
 
-    const hashedPassword = await bcrypt.hash(password || "12345", 10); 
+    const hashedPassword = await bcrypt.hash(password || "12345", 10);
 
     const staff = new User({
       name,
@@ -201,5 +199,63 @@ export const toggleStaffActive = async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ success: false, message: "Error toggling staff status", error });
+  }
+};
+
+export const getUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findById(req.user.id).select("-passwordHash");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching profile", error });
+  }
+};
+export const updateUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { name, email, password } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update fields if provided
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.passwordHash = await bcrypt.hash(password, salt);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        active: user.active,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating profile", error });
   }
 };

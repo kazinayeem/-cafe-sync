@@ -5,6 +5,8 @@ import { ITable } from "./Table";
 export interface IOrderItem {
   product: IProduct["_id"];
   quantity: number;
+  size: string;
+  price: number;
 }
 
 export interface IOrder extends Document {
@@ -20,6 +22,8 @@ export interface IOrder extends Document {
 const orderItemSchema = new Schema<IOrderItem>({
   product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   quantity: { type: Number, required: true },
+  size: { type: String, required: true },
+  price: { type: Number, required: true },
 });
 
 const orderSchema = new Schema<IOrder>(
