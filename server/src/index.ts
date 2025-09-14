@@ -81,14 +81,12 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// server.listen(PORT, () => {
-//   console.log(`🚀 Server is running on http://localhost:${PORT}`);
-//   connectDB();
-// });
-
-server.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  server.listen(PORT, () => {
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    connectDB();
+  });
+}
 
 connectDB();
 export default server;
