@@ -86,10 +86,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 //   connectDB();
 // });
 
-if (process.env.NODE_ENV !== "production") {
-  server.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  });
-}
+server.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+});
+
 connectDB();
 export default server;

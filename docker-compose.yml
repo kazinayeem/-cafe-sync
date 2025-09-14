@@ -1,28 +1,9 @@
 version: "3.9"
 
 services:
-  server:
-    build: ./server
-    container_name: cafe-pos-server
-    ports:
-      - "5000:5000"
-    environment:
-      - NODE_ENV=production
-      - PORT=5000
-      - MONGO_URI=mongodb://mongo:27017/cafe-pos
-    depends_on:
-      - mongo
-
-  client:
-    build: ./client
-    container_name: cafe-pos-client
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - server
-
+  # =========================
+  # MongoDB
+  # =========================
   mongo:
     image: mongo:7
     container_name: cafe-pos-mongo
@@ -30,6 +11,39 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    restart: always
+
+  # =========================
+  # Backend Server
+  # =========================
+  server:
+    build: ./server
+    container_name: cafe-pos-server
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/cafe-pos
+    depends_on:
+      - mongo
+    restart: always
+
+  # =========================
+  # Frontend Vite Client
+  # =========================
+  client:
+    build: ./client
+    container_name: cafe-pos-client
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      VITE_API_URL: http://localhost:5000
+      VITE_API_BASE_URL: http://localhost:5000
+    depends_on:
+      - server
+    restart: always
 
 volumes:
   mongo-data:

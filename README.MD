@@ -1,4 +1,3 @@
-![Cafe POS Cover](./screenshorts/cover.png)
 
 
 

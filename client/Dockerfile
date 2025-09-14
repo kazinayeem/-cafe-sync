@@ -4,7 +4,7 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy package.json and lockfile
 COPY package*.json ./
 
 # Install dependencies
@@ -13,14 +13,11 @@ RUN npm install
 # Copy all files
 COPY . .
 
-# Build React app
+# Build the Vite app
 RUN npm run build
 
-# Install serve to serve production build
-RUN npm install -g serve
+# Expose port for preview
+EXPOSE 4173
 
-# Expose port
-EXPOSE 3000
-
-# Serve React build
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Run Vite preview in production mode
+CMD ["npm", "run", "preview", "--", "--port", "3000", "--host"]
