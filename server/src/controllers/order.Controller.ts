@@ -81,23 +81,33 @@ export const getOrders = async (req: Request, res: Response) => {
       if (endDate) query.createdAt.$lte = new Date(endDate as string);
     }
 
-    // Filter by Order ID (partial match)
-    if (orderId && (orderId as string).length >= 3) {
-      // Convert _id to string for regex match
-      query._id = {
-        $regex: new RegExp(`^${orderId}`, "i"), // matches beginning of ObjectId string
-      };
-    }
-
-    const total = await Order.countDocuments(query);
+    // Fetch all matching orders first (without _id filter)
     const orders = await Order.find(query)
       .populate("table items.product")
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit))
       .sort({ createdAt: -1 });
 
+    // Partial _id search in JS
+    let filteredOrders = orders;
+    if (orderId) {
+      const searchTerm = (orderId as string).toLowerCase();
+      filteredOrders = orders.filter((order) => {
+        const idStr =
+          order._id instanceof Types.ObjectId
+            ? order._id.toString()
+            : String(order._id);
+        return idStr.toLowerCase().startsWith(searchTerm);
+      });
+    }
+
+    // Pagination
+    const total = filteredOrders.length;
+    const paginatedOrders = filteredOrders.slice(
+      (Number(page) - 1) * Number(limit),
+      Number(page) * Number(limit)
+    );
+
     return res.json({
-      data: orders,
+      data: paginatedOrders,
       pagination: {
         total,
         page: Number(page),
