@@ -2,13 +2,6 @@ import { useState, useEffect } from "react";
 import { useGetSalesSummaryQuery } from "@/services/orderApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -22,8 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { generatePDF } from "@/components/GeneratePdf";
+import Swal from "sweetalert2";
 
-// Define the correct types to match what is being passed to generatePDF
 interface OrderItem {
   product: { name: string };
   size: string;
@@ -34,11 +27,12 @@ interface OrderItem {
 interface Order {
   _id: string;
   table?: { tableNumber: string };
+  customerName?: string;
   status: string;
   totalPrice: number;
   paymentMethod: string;
   createdAt: string;
-  items: OrderItem[]; // <-- ADD THIS LINE
+  items: OrderItem[];
 }
 
 interface StatusBreakdownItem {
@@ -46,44 +40,69 @@ interface StatusBreakdownItem {
   count: number;
 }
 
+// interface SalesSummaryResponse {
+//   summary: { totalOrders: number; totalSales: number };
+//   statusBreakdown: StatusBreakdownItem[];
+//   allData: { [key: string]: Order[] };
+// }
+
 const SummaryManagement = () => {
-  const [filter, setFilter] = useState<"today" | "week" | "month" | "custom">(
-    "today"
-  );
+  // --- States ---
   const [status, setStatus] = useState<string>("all");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [openDetails, setOpenDetails] = useState(false);
+  const [search, setSearch] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  });
+  const [endDate, setEndDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  });
+  const [openDetails, setOpenDetails] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  const apiFilter: "today" | "week" | "month" | undefined =
-    filter === "custom" ? undefined : filter;
-
+  // --- API Params ---
   const { data, isLoading, refetch } = useGetSalesSummaryQuery({
-    filter: apiFilter,
-    startDate: filter === "custom" && startDate ? startDate : undefined,
-    endDate: filter === "custom" && endDate ? endDate : undefined,
+    startDate: new Date(`${startDate}T00:00:00+06:00`).toISOString(),
+    endDate: new Date(`${endDate}T23:59:59+06:00`).toISOString(),
     status: status !== "all" ? status : undefined,
+    search: search,
   });
 
   useEffect(() => {
-    refetch();
-  }, [filter, status, startDate, endDate, refetch]);
+    const fetchData = async () => {
+      Swal.fire({
+        title: "Loading...",
+        text: "Fetching orders, please wait.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-  const handleApplyFilter = () => refetch();
+      try {
+        await refetch();
+      } finally {
+        Swal.close();
+      }
+    };
 
+    fetchData();
+  }, [status, startDate, endDate, search, refetch]);
+
+  // --- Extracted Data ---
   const summary = data?.summary ?? { totalOrders: 0, totalSales: 0 };
   const statusBreakdown = data?.statusBreakdown ?? [];
   const allData = data?.allData ?? {};
 
-  const getStatusCount = (status: string) =>
-    statusBreakdown.find((s: StatusBreakdownItem) => s._id === status)?.count ??
-    0;
+  const getStatusCount = (st: string) =>
+    statusBreakdown.find((s: StatusBreakdownItem) => s._id === st)?.count ?? 0;
 
   const filteredOrders: Order[] = selectedStatus
-    ? (allData[selectedStatus as keyof typeof allData] as Order[]) ?? []
-    : (Object.values(allData).flat() as Order[]);
+    ? allData[selectedStatus as keyof typeof allData] ?? []
+    : Object.values(allData).flat();
 
+  // --- Utils ---
   const formatPrice = (price: number) => `৳${price.toLocaleString("en-US")}`;
 
   const formatDate = (dateString: string) =>
@@ -95,8 +114,8 @@ const SummaryManagement = () => {
       minute: "2-digit",
     });
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
+  const getStatusVariant = (st: string) => {
+    switch (st) {
       case "pending":
         return "secondary";
       case "preparing":
@@ -110,6 +129,7 @@ const SummaryManagement = () => {
     }
   };
 
+  // --- Render ---
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header & Export */}
@@ -118,7 +138,7 @@ const SummaryManagement = () => {
         <Button
           onClick={() =>
             generatePDF(
-              filter,
+              "custom",
               startDate,
               endDate,
               status,
@@ -139,78 +159,52 @@ const SummaryManagement = () => {
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-4 gap-4 items-end">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Time Period</label>
-              <Select
-                value={filter}
-                onValueChange={(val) => setFilter(val as typeof filter)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+            {/* Status Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Order Status</label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="preparing">Preparing</SelectItem>
-                  <SelectItem value="served">Served</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="border rounded p-2 w-full"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="preparing">Preparing</option>
+                <option value="served">Served</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
 
-            {filter === "custom" && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Start Date</label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">End Date</label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
+            {/* Search */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Search</label>
+              <Input
+                disabled
+                type="text"
+                placeholder="Search by Order ID or Product Name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-            {filter !== "custom" && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium opacity-0">Apply</label>
-                <Button className="w-full" onClick={handleApplyFilter}>
-                  Apply Filters
-                </Button>
-              </div>
-            )}
+            {/* Custom Dates */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Start Date</label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">End Date</label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
-
-          {filter === "custom" && (
-            <div className="mt-4">
-              <Button className="w-full" onClick={handleApplyFilter}>
-                Apply Filters
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -357,7 +351,7 @@ const SummaryManagement = () => {
             <Button
               onClick={() =>
                 generatePDF(
-                  filter,
+                  "custom",
                   startDate,
                   endDate,
                   status,

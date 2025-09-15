@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import { Table } from "../models/Table";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { getTodayOrderSummary } from "./orderSummaryService";
 import { io } from "..";
 
@@ -60,16 +60,33 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 10, status, startDate, endDate } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      startDate,
+      endDate,
+      orderId,
+    } = req.query;
 
     const query: any = {};
 
+    // Filter by status
     if (status && status !== "all") query.status = status;
 
+    // Filter by date range
     if (startDate || endDate) {
       query.createdAt = {};
       if (startDate) query.createdAt.$gte = new Date(startDate as string);
       if (endDate) query.createdAt.$lte = new Date(endDate as string);
+    }
+
+    // Filter by Order ID (partial match)
+    if (orderId && (orderId as string).length >= 3) {
+      // Convert _id to string for regex match
+      query._id = {
+        $regex: new RegExp(`^${orderId}`, "i"), // matches beginning of ObjectId string
+      };
     }
 
     const total = await Order.countDocuments(query);
@@ -77,7 +94,7 @@ export const getOrders = async (req: Request, res: Response) => {
       .populate("table items.product")
       .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit))
-      .sort({ createdAt: -1 }); // newest first
+      .sort({ createdAt: -1 });
 
     return res.json({
       data: orders,

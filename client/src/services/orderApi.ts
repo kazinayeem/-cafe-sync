@@ -85,13 +85,22 @@ export const orderApi = createApi({
         status?: "pending" | "preparing" | "served" | "cancelled";
         startDate?: string;
         endDate?: string;
+        orderId?: string;
       }
     >({
-      query: ({ page = 1, limit = 10, status, startDate, endDate } = {}) => {
+      query: ({
+        page = 1,
+        limit = 10,
+        status,
+        startDate,
+        endDate,
+        orderId,
+      } = {}) => {
         let url = `/?page=${page}&limit=${limit}`;
         if (status) url += `&status=${status}`;
         if (startDate) url += `&startDate=${startDate}`;
         if (endDate) url += `&endDate=${endDate}`;
+        if (orderId) url += `&orderId=${orderId}`;
         return url;
       },
       providesTags: ["Orders"],
@@ -123,21 +132,29 @@ export const orderApi = createApi({
     }),
 
     // 📊 Get Sales Summary
+    // 📊 Get Sales Summary
     getSalesSummary: builder.query<
       SalesSummaryResponse,
       {
-        filter?: "today" | "week" | "month";
-        startDate?: string;
-        endDate?: string;
+        startDate: string;
+        endDate: string;
         status?: string;
+        search?: string;
       }
     >({
-      query: ({ filter, startDate, endDate, status } = {}) => {
+      query: ({ startDate, endDate, status, search }) => {
         let url = `/summary/report?`;
-        if (filter) url += `filter=${filter}&`;
-        if (startDate) url += `startDate=${startDate}&`;
-        if (endDate) url += `endDate=${endDate}&`;
-        if (status) url += `status=${status}&`;
+
+        url += `startDate=${startDate}&endDate=${endDate}&`;
+
+        if (status && status !== "all") {
+          url += `status=${status}&`;
+        }
+
+        if (search) {
+          url += `search=${encodeURIComponent(search)}&`;
+        }
+
         return url;
       },
       providesTags: ["Summary"],
