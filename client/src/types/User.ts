@@ -63,6 +63,7 @@ export interface Order {
   status: string;
   paymentMethod: string;
   table?: Table | null;
+  createdAt: string;
 }
 
 export interface OrdersResponse {

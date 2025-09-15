@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import {
@@ -26,18 +26,21 @@ import { cn } from "@/lib/utils";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { Order, OrdersResponse } from "@/types/User";
 
-const OrdersListExpandable = () => {
+const OrdersDashboard = () => {
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(20); 
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const ref: RefObject<HTMLDivElement | null> = useRef(null);
-  const isInitialLoad = useRef(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const [status, setStatus] = useState<"pending" | "preparing" | "served" | "cancelled" | "">("");
+  const [status, setStatus] = useState<
+    "pending" | "preparing" | "served" | "cancelled" | ""
+  >("");
   const today = new Date();
-  const localToday = today.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const localToday = today.toLocaleDateString("en-CA", {
+    timeZone: "Asia/Dhaka",
+  });
   const [startDate, setStartDate] = useState<string>(localToday);
   const [endDate, setEndDate] = useState<string>(localToday);
   const start = new Date(`${startDate}T00:00:00+06:00`).toISOString();
@@ -52,13 +55,18 @@ const OrdersListExpandable = () => {
     orderId?: string;
   }>({
     page: 1,
-    limit: 10,
+    limit: 20,
     status: "",
     startDate: start,
     endDate: end,
   });
 
-  const { data: response, isLoading, isError, isFetching } = useGetOrdersQuery(
+  const {
+    data: response,
+    isLoading,
+    isError,
+    isFetching,
+  } = useGetOrdersQuery(
     {
       page: query.page,
       limit: query.limit,
@@ -68,20 +76,18 @@ const OrdersListExpandable = () => {
       orderId: query.orderId,
     },
     { refetchOnMountOrArgChange: true }
-  ) as { data?: OrdersResponse; isLoading: boolean; isError: boolean; isFetching: boolean };
+  ) as {
+    data?: OrdersResponse;
+    isLoading: boolean;
+    isError: boolean;
+    isFetching: boolean;
+  };
 
   const [deleteOrder] = useDeleteOrderMutation();
   const [updateOrder] = useUpdateOrderMutation();
 
   const orders = response?.data ?? [];
   const totalPages = response?.pagination?.totalPages ?? 1;
-
-  useEffect(() => {
-    if (isInitialLoad.current && !isLoading && !isFetching && orders.length > 0) {
-      setActiveOrder(orders[0]);
-      isInitialLoad.current = false;
-    }
-  }, [orders, isLoading, isFetching]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -112,29 +118,112 @@ const OrdersListExpandable = () => {
     setQuery((prev) => ({ ...prev, page: p }));
   };
 
-  useOutsideClick(ref as React.RefObject<HTMLDivElement>, () => setActiveOrder(null));
+  useOutsideClick(ref as React.RefObject<HTMLDivElement>, () =>
+    setActiveOrder(null)
+  );
 
   if (isLoading) return <LoadingSkeleton />;
-  if (isError) return <p className="text-red-500 text-center p-8">Error loading orders.</p>;
+  if (isError)
+    return (
+      <p className="text-red-500 text-center p-8 dark:text-red-400">
+        Error loading orders.
+      </p>
+    );
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen font-sans p-4 sm:p-8">
-      <h1 className="text-xl sm:text-2xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-8">
-        Orders Dashboard 📈
-      </h1>
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans p-4 sm:p-8">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-0">
+          Orders
+        </h1>
+        {/* <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search a name, order, or etc"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          <Select
+            value={status || "all"}
+            onValueChange={(val) =>
+              setStatus(
+                val === "all"
+                  ? ""
+                  : (val as "pending" | "preparing" | "served" | "cancelled")
+              )
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="preparing">Preparing</SelectItem>
+              <SelectItem value="served">Served</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div> */}
+      </div>
 
-      {/* Filters */}
+      <div className="flex justify-start space-x-2 mb-6">
+        <Button
+          onClick={() => setStatus("")} // <-- use "" instead of "all"
+          className={cn(
+            "rounded-full px-6 py-2 transition-colors",
+            status === ""
+              ? "bg-black dark:bg-gray-700 text-white"
+              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+          )}
+        >
+          All
+        </Button>
+
+        <Button
+          onClick={() => setStatus("preparing")}
+          className={cn(
+            "rounded-full px-6 py-2 transition-colors",
+            status === "preparing"
+              ? "bg-black dark:bg-gray-700 text-white"
+              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+          )}
+        >
+          On Process
+        </Button>
+        <Button
+          onClick={() => setStatus("served")}
+          className={cn(
+            "rounded-full px-6 py-2 transition-colors",
+            status === "served"
+              ? "bg-black dark:bg-gray-700 text-white"
+              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+          )}
+        >
+          Completed
+        </Button>
+      </div>
+
+      {/* Re-added filter section */}
       <div className="p-2">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Filter Orders
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           {/* Items per page */}
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               Items per page
             </label>
-            <Select value={String(limit)} onValueChange={(val) => setLimit(Number(val))}>
+            <Select
+              value={String(limit)}
+              onValueChange={(val) => setLimit(Number(val))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Items per page" />
               </SelectTrigger>
@@ -237,34 +326,113 @@ const OrdersListExpandable = () => {
         </div>
       </div>
 
-      {/* Orders List */}
-      <div className="grid gap-6 mt-6">
+      {/* Orders Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
+          <p className="text-center text-gray-500 dark:text-gray-400 py-12 col-span-full">
             No orders found.
           </p>
         ) : (
           orders.map((order) => (
-            <motion.div
+            <div
               key={order._id}
-              layout
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between cursor-pointer border border-gray-200 dark:border-gray-700"
               onClick={() => setActiveOrder(order)}
-              className="cursor-pointer bg-white dark:bg-gray-800 shadow-xl rounded-xl p-4 sm:p-6 flex flex-col gap-4 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
-              <div className="flex justify-between items-start flex-wrap gap-2">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    Order #{order._id.substring(0, 8)}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className={cn(
+                        "rounded-full w-8 h-8 text-white flex items-center justify-center font-bold",
+                        order.status === "preparing"
+                          ? "bg-red-500"
+                          : "bg-green-500"
+                      )}
+                    >
+                      {"TA"}
+                    </span>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      {"Takeaway"}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Order #{order._id.substring(0, 10)} |{" "}
+                    {order.table?.name || "Takeaway"}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-                    Payment: {order.paymentMethod}
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {new Date(order.createdAt).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-                <p className="text-green-600 dark:text-green-400 text-lg font-bold">
-                  ${order.totalPrice.toFixed(2)}
-                </p>
+                <div className="flex flex-col items-end">
+                  <span
+                    className={cn(
+                      "text-xs font-semibold px-2 py-1 rounded-full",
+                      order.status === "preparing"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-400"
+                        : "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
+                    )}
+                  >
+                    {order.status === "preparing" ? "In Progress" : "Ready"}
+                  </span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {new Date(order.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
+                </div>
               </div>
-            </motion.div>
+
+              <div className="flex flex-col gap-2 mb-4">
+                {order.items.slice(0, 3).map((item, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">
+                        {item.quantity}
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {item.product?.name ?? "Product deleted"}
+                      </span>
+                    </div>
+                    <span className="text-gray-900 dark:text-gray-100 font-medium">
+                      {(item.quantity * item.price).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                {order.items.length > 3 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    +{order.items.length - 3} more
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Total {order.totalPrice.toFixed(2)}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    See Details
+                  </Button>
+                  <Button
+                    className="bg-yellow-400 text-black hover:bg-yellow-500 transition-colors"
+                    disabled={isFetching}
+                  >
+                    Pay Bills
+                  </Button>
+                </div>
+              </div>
+            </div>
           ))
         )}
       </div>
@@ -274,7 +442,11 @@ const OrdersListExpandable = () => {
         <Pagination className="flex-wrap justify-center">
           <PaginationContent>
             <PaginationPrevious>
-              <Button onClick={() => goToPage(page - 1)} disabled={page === 1} className="h-10 w-10 rounded-full">
+              <Button
+                onClick={() => goToPage(page - 1)}
+                disabled={page === 1}
+                className="h-10 w-10 rounded-full"
+              >
                 Prev
               </Button>
             </PaginationPrevious>
@@ -294,7 +466,11 @@ const OrdersListExpandable = () => {
               </PaginationItem>
             ))}
             <PaginationNext>
-              <Button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="h-10 w-10 rounded-full">
+              <Button
+                onClick={() => goToPage(page + 1)}
+                disabled={page === totalPages}
+                className="h-10 w-10 rounded-full"
+              >
                 Next
               </Button>
             </PaginationNext>
@@ -320,29 +496,49 @@ const OrdersListExpandable = () => {
                 onClick={() => setActiveOrder(null)}
                 className="absolute top-4 right-4 rounded-full bg-gray-200 dark:bg-gray-800 p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
 
-              {/* Order Details */}
-              <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">Order Details</h2>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">ID: {activeOrder._id}</p>
+              <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
+                Order Details
+              </h2>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+                ID: {activeOrder._id}
+              </p>
 
               <div className="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-4 border-gray-200 dark:border-gray-700">
                 <div>
                   <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                    Total: ${activeOrder.totalPrice.toFixed(2)}
+                    Total: {activeOrder.totalPrice.toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-300">Payment: {activeOrder.paymentMethod}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
+                    Payment: {activeOrder.paymentMethod}
+                  </p>
                 </div>
                 {activeOrder?.table && (
                   <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-700 dark:text-gray-400">Table: {activeOrder.table.name}</p>
+                    <p className="text-lg font-semibold text-gray-700 dark:text-gray-400">
+                      Table: {activeOrder.table.name}
+                    </p>
                     <p
                       className={cn(
                         "text-sm font-medium",
-                        activeOrder.table.status === "occupied" ? "text-red-500" : "text-green-500"
+                        activeOrder.table.status === "occupied"
+                          ? "text-red-500"
+                          : "text-green-500"
                       )}
                     >
                       Status: {activeOrder.table.status}
@@ -351,36 +547,48 @@ const OrdersListExpandable = () => {
                 )}
               </div>
 
-              {/* Items */}
-              <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">Items</h3>
+              <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">
+                Items
+              </h3>
               <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-2">
-                {activeOrder.items.map((item) => (
+                {activeOrder?.items?.map((item) => (
                   <div
                     key={item._id}
                     className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700"
                   >
-                    <img
-                      src={item.product.imageUrl}
-                      alt={item.product.name}
-                      className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                    />
+                    {item.product?.imageUrl ? (
+                      <img
+                        src={item.product.imageUrl}
+                        alt={item.product.name}
+                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-300 dark:bg-gray-700 flex items-center justify-center rounded-lg text-gray-600 dark:text-gray-300 text-xs">
+                        No Image
+                      </div>
+                    )}
                     <div className="flex-1 flex flex-col">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">{item.product.name}</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {item.product?.name ?? "Product Deleted"}
+                      </p>
                       <p className="text-sm text-gray-500 dark:text-gray-300">
                         Size: {item.size} - ${item.price}
                       </p>
-                      <p className="text-green-600 dark:text-green-400 font-bold mt-1">Qty: {item.quantity}</p>
+                      <p className="text-green-600 dark:text-green-400 font-bold mt-1">
+                        Qty: {item.quantity}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Status & Delete */}
               <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex-1">
                   <Select
                     value={activeOrder.status}
-                    onValueChange={(val) => handleStatusChange(activeOrder._id, val)}
+                    onValueChange={(val) =>
+                      handleStatusChange(activeOrder._id, val)
+                    }
                     disabled={updatingId === activeOrder._id}
                   >
                     <SelectTrigger className="w-full">
@@ -395,7 +603,10 @@ const OrdersListExpandable = () => {
                   </Select>
                 </div>
                 <div className="flex-1 flex gap-3">
-                  <Button className="w-full bg-red-500 text-white hover:bg-red-600" onClick={() => deleteOrder(activeOrder._id)}>
+                  <Button
+                    className="w-full bg-red-500 text-white hover:bg-red-600"
+                    onClick={() => deleteOrder(activeOrder._id)}
+                  >
                     Delete Order
                   </Button>
                 </div>
@@ -408,4 +619,4 @@ const OrdersListExpandable = () => {
   );
 };
 
-export default OrdersListExpandable;
+export default OrdersDashboard;

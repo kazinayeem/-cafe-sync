@@ -10,7 +10,7 @@ import {
   deleteStaff,
   getUserProfile,
   updateUserProfile,
-} from "../controllers/User";
+} from "../controllers/user.controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();

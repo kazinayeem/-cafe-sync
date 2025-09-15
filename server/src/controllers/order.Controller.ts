@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import { Table } from "../models/Table";
 import mongoose, { Types } from "mongoose";
-import { getTodayOrderSummary } from "./orderSummaryService";
+import { getTodayOrderSummary } from "./orderSummaryService.controller";
 import { io } from "..";
 
 export const getTodayOrderSummaryController = async (

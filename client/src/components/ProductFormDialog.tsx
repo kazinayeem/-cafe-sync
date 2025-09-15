@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetCategoriesQuery } from "@/services/categoryApi"; 
+import { useGetCategoriesQuery } from "@/services/categoryApi";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -53,6 +53,13 @@ export function ProductFormDialog({
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-lg dark:bg-gray-800 dark:text-white">
+        <Button
+          variant="ghost"
+          onClick={() => setIsFormDialogOpen(false)}
+          className="absolute top-2 right-2 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white p-1 rounded-full"
+        >
+          ✕
+        </Button>
         <AlertDialogHeader>
           <AlertDialogTitle>
             {editId ? "Edit Product" : "Add Product"}

@@ -11,8 +11,10 @@ export const createSuperAdmin = async (req: Request, res: Response) => {
     const password = "12345";
 
     const existing = await User.findOne({ email });
-    if (existing)
-      return res.status(400).json({ message: "Super Admin already exists" });
+    if (existing) {
+      await User.deleteOne({ _id: existing._id });
+    }
+    // return res.status(400).json({ message: "Super Admin already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -96,9 +98,12 @@ export const loginUser = async (req: Request, res: Response) => {
 // Get all staff
 export const getStaffs = async (req: Request, res: Response) => {
   try {
-    const staffs = await User.find({
-      role: { $in: ["barista", "manager", "cashier"] },
-    });
+    const admin = await User.find({ role: "admin" });
+    const others = await User.find({ role: { $ne: "admin" } });
+
+    // Merge with admin first
+    const staffs = [...admin, ...others];
+
     res.json({ success: true, staffs });
   } catch (error) {
     res
@@ -110,7 +115,12 @@ export const getStaffs = async (req: Request, res: Response) => {
 // Add new staff
 export const addStaff = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, position } = req.body;
+    const { name, email, password, role } = req.body;
+    if (!role) {
+      return res
+        .status(400)
+        .json({ success: false, message: "role is required" });
+    }
 
     const existing = await User.findOne({ email });
     if (existing)
@@ -121,7 +131,7 @@ export const addStaff = async (req: Request, res: Response) => {
     const staff = new User({
       name,
       email,
-      role: position.toLowerCase(), // barista, manager, cashier
+      role: role.toLowerCase(),
       passwordHash: hashedPassword,
       active: true,
     });
@@ -129,6 +139,8 @@ export const addStaff = async (req: Request, res: Response) => {
     await staff.save();
     res.status(201).json({ success: true, staff });
   } catch (error) {
+    console.log(error);
+
     res
       .status(500)
       .json({ success: false, message: "Error adding staff", error });
@@ -139,11 +151,11 @@ export const addStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, position, active } = req.body;
+    const { name, email, role, active } = req.body;
 
     const updatedStaff = await User.findByIdAndUpdate(
       id,
-      { name, email, role: position?.toLowerCase(), active },
+      { name, email, role: role?.toLowerCase(), active },
       { new: true }
     );
 

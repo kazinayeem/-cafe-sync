@@ -6,7 +6,7 @@ import {
   getTableStats,
   deleteTable,
   updateTable,
-} from "../controllers/tableController";
+} from "../controllers/table.Controller";
 
 const router = express.Router();
 

@@ -24,8 +24,9 @@ import {
   useGetProductsQuery,
   useUpdateProductMutation,
 } from "@/services/productApi";
-import { Pencil, Trash2 } from "lucide-react";
+import { CheckCircle, Pencil, Trash2, XCircle } from "lucide-react";
 import { ProductFormDialog } from "@/components/ProductFormDialog";
+import Swal from "sweetalert2";
 
 export default function ProductManagement() {
   const { data: productsResponse, isLoading } = useGetProductsQuery();
@@ -63,35 +64,97 @@ export default function ProductManagement() {
     setEditId(null);
   };
 
+  // Handle Add / Edit Product
   const handleSubmit = async () => {
     try {
+      // Show loading
+      Swal.fire({
+        title: editId ? "Updating product..." : "Adding product...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
       if (editId) {
+        // Update existing product
         await updateProduct({ id: editId, body: formData }).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "Product updated!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       } else {
+        // Add new product
         await addProduct(formData).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "Product added!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
+
+      // Close form and reset
       setIsFormDialogOpen(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error?.data?.message || "Failed to save product.",
+      });
       console.error("Error saving product:", error);
     }
   };
 
+  // Open Edit Dialog
   const handleEdit = (product: any) => {
     const { _id, __v, createdAt, updatedAt, ...rest } = product;
-    setFormData(rest);
+    setFormData(rest); // populate form
     setEditId(product._id);
     setIsFormDialogOpen(true);
   };
 
+  // Delete Product
   const handleDelete = async () => {
-    if (confirmDeleteId) {
+    if (!confirmDeleteId) return;
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
       try {
+        Swal.fire({
+          title: "Deleting product...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
         await deleteProduct(confirmDeleteId).unwrap();
-      } catch (err) {
+
+        Swal.fire({
+          icon: "success",
+          title: "Product deleted!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        setConfirmDeleteId(null);
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err?.data?.message || "Failed to delete product.",
+        });
         console.error("Delete failed:", err);
       }
-      setConfirmDeleteId(null);
     }
   };
 
@@ -125,13 +188,15 @@ export default function ProductManagement() {
           products.map((product: any) => (
             <Card
               key={product._id}
-              className="relative dark:bg-gray-800 dark:text-white dark:border-gray-700 overflow-hidden"
+              className={`relative dark:bg-gray-800 dark:text-white dark:border-gray-700 overflow-hidden 
+    ${!product.available ? "opacity-70 grayscale" : ""}`}
             >
               {product.imageUrl && (
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="w-full h-48 object-cover rounded-t-md"
+                  className={`w-full h-48 object-cover rounded-t-md transition 
+        ${!product.available ? "blur-sm" : ""}`}
                 />
               )}
               <CardHeader className="pb-2">
@@ -141,8 +206,15 @@ export default function ProductManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-sm dark:text-gray-300">
-                <p className="mb-2 line-clamp-2">{product.description}</p>
-                <p>Available: {product.available ? "✅ Yes" : "❌ No"}</p>
+                <p
+                  className={`mb-2 line-clamp-2 flex gap-2 ${
+                    product.available ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {product.available ? "Available" : "Not Available"}{" "}
+                  <p>{product.available ? "✅ Yes" : "❌ No"}</p>
+                </p>
+
                 <p>
                   Sizes: S:{product.sizes.small || 0} | L:
                   {product.sizes.large || 0} | XL:
@@ -165,6 +237,53 @@ export default function ProductManagement() {
                   className="dark:text-red-400 dark:hover:bg-gray-700"
                 >
                   <Trash2 className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  className="flex items-center justify-center p-2 rounded-md"
+                  size="sm"
+                  variant="ghost"
+                  onClick={async () => {
+                    Swal.fire({
+                      title: "Updating...",
+                      allowOutsideClick: false,
+                      didOpen: () => {
+                        Swal.showLoading();
+                      },
+                    });
+
+                    try {
+                      await updateProduct({
+                        id: product._id,
+                        body: { available: !product.available },
+                      }).unwrap();
+
+                      Swal.close();
+                      Swal.fire({
+                        icon: "success",
+                        title: "Updated!",
+                        text: `Product is now ${
+                          !product.available ? "available" : "unavailable"
+                        }.`,
+                        timer: 1500,
+                        showConfirmButton: false,
+                      });
+                    } catch (err) {
+                      Swal.close();
+                      Swal.fire({
+                        icon: "error",
+                        title: "Failed!",
+                        text: "Could not update product.",
+                      });
+                      console.error(err);
+                    }
+                  }}
+                >
+                  {product.available ? (
+                    <XCircle className="h-5 w-5 text-red-500 hover:text-red-600 transition-colors" />
+                  ) : (
+                    <CheckCircle className="h-5 w-5 text-green-500 hover:text-green-600 transition-colors" />
+                  )}
                 </Button>
               </CardFooter>
             </Card>

@@ -10,7 +10,6 @@ import {
   AlertDialogTitle,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   useAddStaffMutation,
@@ -64,7 +64,7 @@ interface StaffForm {
 }
 
 export default function StaffManagement() {
-  const { data, refetch } = useGetAllStaffQuery(undefined, {
+  const { data, refetch, isLoading } = useGetAllStaffQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
   const staffs = data?.staffs || [];
@@ -80,6 +80,7 @@ export default function StaffManagement() {
 
   const { register, reset, handleSubmit, setValue } = useForm<StaffForm>();
 
+  // ✅ Add staff
   const handleAddStaff = handleSubmit(async (formData) => {
     try {
       await addStaff({ ...formData, role: "staff" }).unwrap();
@@ -92,6 +93,7 @@ export default function StaffManagement() {
     }
   });
 
+  // ✅ Edit staff
   const handleEditStaff = handleSubmit(async (formData) => {
     if (!selectedStaff) return;
     try {
@@ -100,7 +102,7 @@ export default function StaffManagement() {
         data: {
           name: formData.name,
           email: formData.email,
-          role: formData.position,
+          role: formData.position.toLowerCase(),
           password: formData.password || undefined,
         },
       }).unwrap();
@@ -114,6 +116,7 @@ export default function StaffManagement() {
     }
   });
 
+  // ✅ Delete staff
   const handleDeleteStaff = async (id: string) => {
     if (!confirm("Are you sure you want to delete this staff?")) return;
     try {
@@ -125,6 +128,7 @@ export default function StaffManagement() {
     }
   };
 
+  // ✅ Toggle active
   const toggleActive = async (staff: Staff) => {
     try {
       await toggleStaffActive({
@@ -140,6 +144,7 @@ export default function StaffManagement() {
     }
   };
 
+  // ✅ Open edit dialog
   const openEditDialog = (staff: Staff) => {
     setSelectedStaff(staff);
     setValue("name", staff.name);
@@ -149,16 +154,18 @@ export default function StaffManagement() {
     setEditOpen(true);
   };
 
+  // ✅ Table Columns
   const columns = useMemo<ColumnDef<Staff>[]>(
     () => [
       { accessorKey: "name", header: "Name" },
       { accessorKey: "email", header: "Email" },
-      { accessorKey: "role", header: "Role" },
+      { accessorKey: "role", header: "Position" },
       {
         id: "status",
         header: "Status",
         cell: ({ row }) => {
           const isActive = row.original.active;
+
           return (
             <Badge
               variant="outline"
@@ -176,27 +183,36 @@ export default function StaffManagement() {
       {
         id: "actions",
         header: "Actions",
-        cell: ({ row }) => (
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => openEditDialog(row.original)}>
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => handleDeleteStaff(row.original._id)}
-            >
-              Delete
-            </Button>
-            <Button
-              size="sm"
-              variant={row.original.active ? "destructive" : "outline"}
-              onClick={() => toggleActive(row.original)}
-            >
-              {row.original.active ? "Deactivate" : "Activate"}
-            </Button>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const staff = row.original;
+
+          // ❌ Hide Edit/Delete for admin
+          if (staff.role === "admin") {
+            return <div className="text-gray-500 italic">Super Admin</div>;
+          }
+
+          return (
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => openEditDialog(staff)}>
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleDeleteStaff(staff._id)}
+              >
+                Delete
+              </Button>
+              <Button
+                size="sm"
+                variant={staff.active ? "destructive" : "outline"}
+                onClick={() => toggleActive(staff)}
+              >
+                {staff.active ? "Deactivate" : "Activate"}
+              </Button>
+            </div>
+          );
+        },
       },
     ],
     []
@@ -210,6 +226,7 @@ export default function StaffManagement() {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">👥 Staff Management</h2>
         <AlertDialog open={addOpen} onOpenChange={setAddOpen}>
@@ -224,14 +241,18 @@ export default function StaffManagement() {
               onSubmit={handleAddStaff}
               className="flex flex-col gap-3 mt-4"
             >
-              <Input placeholder="Name" {...register("name")} />
-              <Input placeholder="Email" {...register("email")} />
+              <Input placeholder="Name" {...register("name")} required />
+              <Input placeholder="Email" {...register("email")} required />
               <Input
                 placeholder="Password"
                 type="password"
                 {...register("password")}
+                required
               />
-              <Select {...register("position")}>
+              <Select
+                onValueChange={(val) => setValue("position", val)}
+                defaultValue=""
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Position" />
                 </SelectTrigger>
@@ -256,47 +277,60 @@ export default function StaffManagement() {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
+        {isLoading ? (
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex gap-3">
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/4" />
+              </div>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
                       {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
-                    </TableCell>
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No staff found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No staff found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       {/* Edit Dialog */}
@@ -306,14 +340,17 @@ export default function StaffManagement() {
             <AlertDialogTitle>Edit Staff</AlertDialogTitle>
           </AlertDialogHeader>
           <form onSubmit={handleEditStaff} className="flex flex-col gap-3 mt-4">
-            <Input placeholder="Name" {...register("name")} />
-            <Input placeholder="Email" {...register("email")} />
+            <Input placeholder="Name" {...register("name")} required />
+            <Input placeholder="Email" {...register("email")} required />
             <Input
               placeholder="Password (optional)"
               type="password"
               {...register("password")}
             />
-            <Select {...register("position")}>
+            <Select
+              onValueChange={(val) => setValue("position", val)}
+              defaultValue={selectedStaff?.position || ""}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select Position" />
               </SelectTrigger>
