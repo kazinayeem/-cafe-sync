@@ -1,5 +1,9 @@
 # ☕ Cafe POS System
 
+|                  **Application Cover**                  |     |
+| :-----------------------------------------------------: | :-: |
+| ![Main application cover image](screenshorts/cover.png) |     |
+
 A modern **Point of Sale (POS) system** for cafés, built with the **MERN stack** and **TypeScript**. This application is designed to streamline cafe operations, offering features like **real-time order management**, detailed dashboard reports, and role-based access to ensure a smooth workflow for all staff.
 
 ---
@@ -147,10 +151,6 @@ A visual walkthrough of the Cafe POS System's key features and user interface.
 |                     **Order Confirmation**                     |                   **PDF Receipt Generation**                    |
 | :------------------------------------------------------------: | :-------------------------------------------------------------: |
 | ![Screen showing order confirmation](screenshorts/image13.png) | ![Example of a generated PDF receipt](screenshorts/image14.png) |
-
-|                  **Application Cover**                  |     |
-| :-----------------------------------------------------: | :-: |
-| ![Main application cover image](screenshorts/cover.png) |     |
 
 ## 🤝 Contributing
 
