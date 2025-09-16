@@ -8,7 +8,10 @@ import {
   deleteOrder,
   getTodayOrderSummaryController,
 } from "../controllers/order.Controller";
-import { getOrderReport } from "../controllers/orderReport.Controller";
+import {
+  getSalesLast7Days,
+  getOrderReport,
+} from "../controllers/orderReport.Controller";
 
 const router = Router();
 
@@ -36,5 +39,5 @@ router.get("/summary/today", getTodayOrderSummaryController);
 
 // 📊 Sales summary
 router.get("/summary/report", getOrderReport);
-
+router.get("/sales/last-7-days", getSalesLast7Days);
 export default router;

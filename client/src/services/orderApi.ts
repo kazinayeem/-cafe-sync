@@ -57,7 +57,7 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 export const orderApi = createApi({
   reducerPath: "orderApi",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl + "/api/orders" }),
-  tagTypes: ["Orders", "Summary"],
+  tagTypes: ["Orders", "Summary", "Chart"],
   endpoints: (builder) => ({
     createOrder: builder.mutation({
       query: (order) => ({
@@ -131,8 +131,6 @@ export const orderApi = createApi({
       invalidatesTags: ["Orders", "Summary"],
     }),
 
-    // 📊 Get Sales Summary
-    // 📊 Get Sales Summary
     getSalesSummary: builder.query<
       SalesSummaryResponse,
       {
@@ -159,6 +157,17 @@ export const orderApi = createApi({
       },
       providesTags: ["Summary"],
     }),
+
+    getSalesByDateRange: builder.query<
+      { success: boolean; data: { date: string; totalSales: number }[] },
+      { startDate: string; endDate: string }
+    >({
+      query: ({ startDate, endDate }) =>
+        `/sales/last-7-days?startDate=${encodeURIComponent(
+          startDate
+        )}&endDate=${encodeURIComponent(endDate)}`,
+      providesTags: ["Chart"],
+    }),
   }),
 });
 
@@ -169,4 +178,5 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useGetSalesSummaryQuery,
+  useGetSalesByDateRangeQuery,
 } = orderApi;

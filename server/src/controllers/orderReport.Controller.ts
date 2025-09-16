@@ -92,3 +92,63 @@ export const getOrderReport = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/**
+ * Get last 7 days sales for chart
+ */
+export const getSalesLast7Days = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "startDate and endDate are required",
+        });
+    }
+
+    const start = new Date(startDate as string); // frontend should send ISO string with timezone
+    const end = new Date(endDate as string);
+
+    const salesData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          totalSales: { $sum: "$totalPrice" },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Fill missing dates with 0
+    const result: { date: string; totalSales: number; totalOrders: number }[] =
+      [];
+    const dayCount =
+      Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    for (let i = 0; i < dayCount; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const dateStr = d.toISOString().slice(0, 10);
+
+      const found = salesData.find((s) => s._id === dateStr);
+      result.push({
+        date: dateStr,
+        totalSales: found ? found.totalSales : 0,
+        totalOrders: found ? found.totalOrders : 0,
+      });
+    }
+
+    res.status(200).json({ success: true, data: result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

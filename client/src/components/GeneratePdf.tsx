@@ -169,8 +169,11 @@ export const generatePDF = (
       y += 8;
 
       // Order Items Table
+      // Order Items Table
       const tableBody = order.items.map((item) => [
-        `${item.product.name}${item.size ? ` (${item.size})` : ""}`,
+        `${item.product?.name || "Unknown Item"}${
+          item.size ? ` (${item.size})` : ""
+        }`,
         formatPrice(item.price),
         item.quantity.toString(),
         formatPrice(item.price * item.quantity),
