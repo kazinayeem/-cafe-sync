@@ -24,9 +24,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
-import { Link } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
+import { Link, useNavigate } from "react-router";
+import { DropdownMenuItem } from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
 
 export function AppSidebar() {
   const { role } = useSelector((state: RootState) => state.user);
@@ -36,24 +38,26 @@ export function AppSidebar() {
     { title: "Home", url: "/dashboard", icon: Home },
     { title: "Tables", url: "/dashboard/tables", icon: Users },
     { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
-    { title: "Calendar", url: "/calendar", icon: Calendar },
-    { title: "Search", url: "/search", icon: Search },
   ];
 
   // Admin-specific items
   const adminItems = [
     { title: "Menu Items", url: "/dashboard/menu", icon: Box },
     { title: "Categories", url: "/dashboard/categories", icon: Tag },
-    { title: "Discounts & Offers", url: "/dashboard/discounts", icon: Percent },
     { title: "Staff", url: "/dashboard/staff", icon: Users },
     { title: "Reports", url: "/dashboard/reports", icon: FileText },
-     
-    { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-    { title: "Settings", url: "/dashboard/settings", icon: Settings },
   ];
 
   const items = role === "admin" ? [...baseItems, ...adminItems] : baseItems;
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
+  const handleLogout = () => {
+    dispatch({ type: "user/logout" });
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
   return (
     <Sidebar>
       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
@@ -86,7 +90,14 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
+          </SidebarGroupContent>{" "}
+          <Button
+            className="mt-5"
+            onClick={handleLogout}
+            variant={"destructive"}
+          >
+            Logout
+          </Button>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
