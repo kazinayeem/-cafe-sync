@@ -5,6 +5,7 @@ import { removeItem, updateQuantity, clearCart } from "@/store/cartSlice";
 import { useCreateOrderMutation } from "@/services/orderApi";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 import {
   Select,
   SelectTrigger,
@@ -21,20 +22,113 @@ interface Table {
   status: "free" | "occupied";
 }
 
+const TAX_RATE = 0;
+
 const OrderSidebar = () => {
   const dispatch = useDispatch();
   const { items, totalPrice } = useSelector((state: RootState) => state.cart);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
-
   const [tables, setTables] = useState<Table[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
 
-  // Fetch initial tables
+  // Load tables
   useEffect(() => {
     getTables().then((data) => setTables(data.tables));
   }, []);
+  const printReceipt = (orderId?: string) => {
+    // Open a new window for the receipt
+    const receiptWindow = window.open(
+      "",
+      "PrintReceipt",
+      "width=800,height=600"
+    );
+    if (!receiptWindow) return;
 
-  // Realtime table updates via socket
+    const now = new Date();
+    const formattedDate = now.toLocaleString();
+
+    // Write HTML content to the new window
+    receiptWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          body { 
+            font-family: monospace; 
+            font-size: 12px; 
+            width: 240px; /* Thermal printer-friendly width */
+            margin: 0; 
+            padding: 5px;
+          }
+          h2, h3 { text-align: center; margin: 0; }
+          .line { border-bottom: 1px dashed #000; margin: 5px 0; }
+          .row { display: flex; justify-content: space-between; }
+          .total { font-weight: bold; font-size: 14px; margin-top: 5px; }
+          .small { font-size: 10px; color: #555; }
+        </style>
+      </head>
+      <body>
+        <!-- Cafe Info -->
+        <h2>☕ Cafe Sync</h2>
+        <h3>Mirpur, Dhaka, Bangladesh 1206</h3>
+        <p class="small">Tel: 012-345-6789</p>
+        <div class="line"></div>
+
+        <!-- Order Info -->
+        <p class="small">Order ID: ${orderId || "N/A"}</p>
+        <p class="small">Date: ${formattedDate}</p>
+        ${
+          selectedTable
+            ? `<p class="small">Table: ${
+                tables.find((t) => t._id === selectedTable)?.name
+              }</p>`
+            : ""
+        }
+        <div class="line"></div>
+
+        <!-- Items -->
+        ${items
+          .map(
+            (item) =>
+              `<div class="row"><span>${item.name} x${
+                item.quantity
+              }</span><span>${(item.price * item.quantity).toFixed(
+                2
+              )}</span></div>`
+          )
+          .join("")}
+
+        <div class="line"></div>
+
+        <!-- Totals -->
+        <div class="row"><span>Subtotal</span><span>${totalPrice.toFixed(
+          2
+        )}</span></div>
+        <div class="row"><span>Discount (${discountPercent}%)</span><span>- ${(
+      (totalPrice * discountPercent) /
+      100
+    ).toFixed(2)}</span></div>
+        <div class="row"><span>Tax</span><span>${tax.toFixed(2)}</span></div>
+        <div class="row total"><span>Total</span><span>${finalTotal.toFixed(
+          2
+        )}</span></div>
+        <div class="line"></div>
+
+        <!-- Footer -->
+        <p style="text-align:center;">Thank you for your order!</p>
+        <p style="text-align:center;" class="small">Wifi: some-wifi / PW: 123123</p>
+        <p style="text-align:center;" class="small">Powered by NayeemSoft - kazinayee.site</p>
+      </body>
+    </html>
+  `);
+
+    // Finalize and print
+    receiptWindow.document.close();
+    receiptWindow.print();
+  };
+
+  // Socket sync
   useEffect(() => {
     socket.on("tableAdded", (newTable: Table) =>
       setTables((prev) => [...prev, newTable])
@@ -65,130 +159,158 @@ const OrderSidebar = () => {
     };
   }, []);
 
+  // Discount prompt
+  const handleDiscount = async () => {
+    const { value: discount } = await Swal.fire({
+      title: "Apply Discount",
+      input: "number",
+      inputAttributes: { min: "0", max: "100", step: "1" },
+      inputValue: discountPercent,
+      confirmButtonText: "Apply",
+      showCancelButton: true,
+      background: "#fff",
+      color: "#000",
+      confirmButtonColor: "#16a34a",
+    });
+
+    if (discount !== undefined) {
+      const num = Number(discount);
+      if (num >= 0 && num <= 100) {
+        setDiscountPercent(num);
+        toast.success(`Discount ${num}% applied`);
+      } else {
+        toast.error("Please enter a valid discount (0–100%)");
+      }
+    }
+  };
+
+  // Checkout with confirmation & print
   const handleCheckout = async () => {
     if (items.length === 0) return;
 
+    const result = await Swal.fire({
+      title: "Place Order",
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "Confirm Order",
+      denyButtonText: "Confirm + Print Receipt",
+      cancelButtonText: "Cancel",
+      icon: "question",
+    });
+
+    if (result.isDismissed) return;
+
+    const shouldPrint = result.isDenied;
+
     try {
+      // Place order API call
       const payload: any = {
-        items: items.map((item) => ({
-          product: item.productId,
-          quantity: item.quantity,
-          size: item.size,
-          price: item.price,
+        items: items.map((i) => ({
+          product: i.productId,
+          quantity: i.quantity,
+          size: i.size,
+          price: i.price,
         })),
         totalPrice,
+        discountPercent,
         paymentMethod: "cash",
+        tableId: selectedTable || undefined,
       };
 
-      // Include table if selected
-      if (selectedTable) payload.tableId = selectedTable;
+      const data = await createOrder(payload).unwrap();
 
-      await createOrder(payload).unwrap();
-      toast.success(
-        `Order placed successfully!${
-          selectedTable
-            ? ` Table: ${tables.find((t) => t._id === selectedTable)?.name}`
-            : ""
-        }`
-      );
+      toast.success("Order placed successfully!");
+
+      if (shouldPrint && data) printReceipt(data?.data?._id);
 
       dispatch(clearCart());
-
-      // Mark table as occupied if selected
+      setDiscountPercent(0);
       if (selectedTable) {
-        // Update table status in DB
         await updateTableStatus(selectedTable, "occupied");
-
-        // Update local tables state for UI
-        setTables((prev) =>
-          prev.map((t) =>
-            t._id === selectedTable ? { ...t, status: "occupied" } : t
-          )
-        );
-
-        // Reset selected table
         setSelectedTable(null);
       }
     } catch (err) {
-      console.error(err);
       toast.error("Failed to place order.");
     }
   };
 
-  return (
-    <div className="w-full mt-10 md:w-80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl shadow-lg p-6 flex flex-col gap-6 transition-colors duration-300">
-      <h2 className="text-xl font-bold border-b border-gray-300 dark:border-gray-600 pb-2">
-        Cart / POS
-      </h2>
+  // Clear cart
+  const handleClearCart = () => {
+    dispatch(clearCart());
+    toast.success("Cart cleared!");
+  };
 
-      {/* Table selection */}
-      <div>
-        <label className="text-sm font-medium mb-1 block">
-          Select Table (optional)
-        </label>
-        <Select
-          value={selectedTable ?? ""}
-          onValueChange={(val) => setSelectedTable(val || null)}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select table" />
-          </SelectTrigger>
-          <SelectContent>
-            {tables.map((t) => (
-              <SelectItem
-                key={t._id}
-                value={t._id}
-                disabled={t.status === "occupied"}
-              >
-                {t.name} {t.status === "occupied" ? "(Occupied)" : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+  const discountAmount = (totalPrice * discountPercent) / 100;
+  const tax = (totalPrice - discountAmount) * TAX_RATE;
+  const finalTotal = totalPrice - discountAmount + tax;
+
+  return (
+    <div className="w-full md:w-96 shadow-lg mt-6 dark:bg-gray-900 bg-white text-gray-900 dark:text-gray-100 p-4 md:p-6 flex flex-col rounded-xl">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+        <h2 className="text-lg md:text-xl font-bold">Order</h2>
+        <Button variant="ghost" size="sm" onClick={handleClearCart}>
+          Clear All
+        </Button>
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Products you add will appear here.
-        </p>
-      ) : (
-        <>
-          {items.map((item) => (
+      {/* Items */}
+      <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+        {items.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Products you add will appear here.
+          </p>
+        ) : (
+          items.map((item) => (
             <div
               key={`${item.productId}-${item.size}`}
-              className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 rounded-lg p-3 shadow-sm hover:shadow-md transition"
+              className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 shadow-sm"
             >
-              <div className="flex flex-col">
-                <h3 className="font-semibold text-sm sm:text-base line-clamp-1">
+              <img
+                src={item.imageUrl ?? "/placeholder-coffee.png"}
+                alt={item.name}
+                className="w-12 h-12 rounded object-cover"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm line-clamp-1">
                   {item.name}
                 </h3>
-                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
-                  Size: {item.size}
-                </span>
-                <span className="text-green-600 dark:text-green-400 font-medium">
-                  ${item.price}
+                <span className="text-xs text-gray-500 dark:text-gray-300">
+                  {item.price}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-1">
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="outline"
+                  className="h-6 w-6"
                   onClick={() =>
-                    dispatch(
-                      updateQuantity({
-                        productId: item.productId,
-                        size: item.size,
-                        quantity: item.quantity - 1 > 0 ? item.quantity - 1 : 1,
-                      })
-                    )
+                    item.quantity > 1
+                      ? dispatch(
+                          updateQuantity({
+                            productId: item.productId,
+                            size: item.size,
+                            quantity: item.quantity - 1,
+                          })
+                        )
+                      : dispatch(
+                          removeItem({
+                            productId: item.productId,
+                            size: item.size,
+                          })
+                        )
                   }
                 >
                   -
                 </Button>
-                <span className="w-5 text-center">{item.quantity}</span>
+                <span className="w-5 text-center text-xs md:text-sm">
+                  {item.quantity}
+                </span>
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="outline"
+                  className="h-6 w-6"
                   onClick={() =>
                     dispatch(
                       updateQuantity({
@@ -202,8 +324,9 @@ const OrderSidebar = () => {
                   +
                 </Button>
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="destructive"
+                  className="h-6 w-6"
                   onClick={() =>
                     dispatch(
                       removeItem({ productId: item.productId, size: item.size })
@@ -214,22 +337,74 @@ const OrderSidebar = () => {
                 </Button>
               </div>
             </div>
-          ))}
+          ))
+        )}
+      </div>
 
-          <div className="flex justify-between items-center mt-4 border-t border-gray-300 dark:border-gray-600 pt-3 font-bold text-lg">
-            <span>Total</span>
-            <span>${totalPrice}</span>
-          </div>
+      {/* Table Select */}
+      <div className="mb-4">
+        <Select
+          value={selectedTable ?? ""}
+          onValueChange={(val) => setSelectedTable(val)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Assign to Table (optional)" />
+          </SelectTrigger>
+          <SelectContent>
+            {tables.map((table) => (
+              <SelectItem
+                key={table._id}
+                value={table._id}
+                disabled={table.status === "occupied"}
+              >
+                {table.name} ({table.status})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          <Button
-            className="w-full bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-semibold"
-            onClick={handleCheckout}
-            disabled={isLoading}
-          >
-            {isLoading ? "Placing Order..." : "Checkout"}
-          </Button>
-        </>
-      )}
+      {/* Discount */}
+      <div className="mb-4 flex justify-between items-center">
+        <span className="text-sm">Discount: {discountPercent}%</span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="dark:border-gray-600"
+          onClick={handleDiscount}
+        >
+          Apply Discount
+        </Button>
+      </div>
+
+      {/* Financials */}
+      <div className="mt-auto text-sm space-y-1">
+        <div className="flex justify-between">
+          <span>Subtotal</span>
+          <span>{totalPrice.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Discount ({discountPercent}%)</span>
+          <span>- {discountAmount.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Tax</span>
+          <span>{tax.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between mt-3 border-t pt-2 font-bold text-lg">
+          <span>Total</span>
+          <span>{finalTotal.toFixed(2)}</span>
+        </div>
+      </div>
+
+      {/* Checkout */}
+      <Button
+        className="w-full mt-5 bg-green-600 hover:bg-green-700 text-white font-semibold"
+        onClick={handleCheckout}
+        disabled={isLoading || items.length === 0}
+      >
+        {isLoading ? "Placing Order..." : "Place Order"}
+      </Button>
     </div>
   );
 };
