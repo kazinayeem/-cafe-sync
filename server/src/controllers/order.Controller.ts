@@ -166,7 +166,7 @@ export const updateOrder = async (req: Request, res: Response) => {
     await order.save();
     const summary = await getTodayOrderSummary();
     io.emit("orderSummaryUpdate", summary);
-    console.log(summary);
+
 
     return res.status(200).json({ success: true, data: order });
   } catch (err: any) {

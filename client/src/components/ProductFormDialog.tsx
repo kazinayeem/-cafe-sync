@@ -120,10 +120,15 @@ export function ProductFormDialog({
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
+                  if (file.size > 1 * 1024 * 1024) {
+                    alert("File size must be less than 1MB");
+                    return;
+                  }
+
                   setFormData({
                     ...formData,
-                    imageFile: file, // store actual File
-                    imageUrl: URL.createObjectURL(file), // preview
+                    imageFile: file,
+                    imageUrl: URL.createObjectURL(file),
                   });
                 }}
               />

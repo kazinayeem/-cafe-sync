@@ -70,8 +70,7 @@ export const SettingManagement = () => {
     salesTarget: 10000,
   });
 
-  // Populate form when settings load
-  console.log(settings);
+ 
 
   useEffect(() => {
     if (settings?.data) {

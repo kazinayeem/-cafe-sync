@@ -116,8 +116,11 @@ export default function ProductManagement() {
 
   // Open Edit Dialog
   const handleEdit = (product: any) => {
-    const { _id, __v, createdAt, updatedAt, ...rest } = product;
-    setFormData(rest); // populate form
+    const { _id, __v, createdAt, category, updatedAt, ...rest } = product;
+    setFormData({
+      ...rest,
+      category: category?._id || "",
+    });
     setEditId(product._id);
     setIsFormDialogOpen(true);
   };

@@ -139,7 +139,7 @@ export const addStaff = async (req: Request, res: Response) => {
     await staff.save();
     res.status(201).json({ success: true, staff });
   } catch (error) {
-    console.log(error);
+   
 
     res
       .status(500)
@@ -194,7 +194,7 @@ export const deleteStaff = async (req: Request, res: Response) => {
 // Toggle active/inactive
 export const toggleStaffActive = async (req: Request, res: Response) => {
   try {
-    console.log("Toggle staff active called");
+  
     const { id } = req.params;
 
     const staff = await User.findById(id);

@@ -85,7 +85,10 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (name) product.name = name;
     if (category) product.category = category;
     if (description) product.description = description;
-    if (available !== undefined) product.available = available === "true";
+    if (available !== undefined) {
+      product.available = available === "true" || available === true;
+    }
+
     if (small || large || extraLarge) {
       product.sizes = {
         small: small ? Number(small) : product.sizes.small,
