@@ -1,8 +1,17 @@
 # ☕ Cafe POS System
 
-|                  **Application Cover**                  |     |
-| :-----------------------------------------------------: | :-: |
-| ![Main application cover image](screenshorts/cover.png) |     |
+|                  **Application Cover**                  |     
+| :-----------------------------------------------------: | 
+| ![Main application cover image](screenshorts/cover.png) |     
+
+## 🎥 Video Preview
+<a href="https://youtu.be/JgM4OJIKdkY" target="_blank"> <img src="https://img.youtube.com/vi/JgM4OJIKdkY/0.jpg" alt="Video Preview" width="560"/> </a>
+<iframe width="560" height="315" 
+src="https://www.youtube.com/embed/JgM4OJIKdkY?si=slyvMMwA5vpYaFwc&amp;controls=0" 
+title="YouTube video player" frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+</iframe>
 
 A modern **Point of Sale (POS) system** for cafés, built with the **MERN stack** and **TypeScript**. This application is designed to streamline cafe operations, offering features like **real-time order management**, detailed dashboard reports, and role-based access to ensure a smooth workflow for all staff.
 
