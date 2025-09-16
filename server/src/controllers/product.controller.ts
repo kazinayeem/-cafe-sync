@@ -14,13 +14,17 @@ const handleError = (
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, category, description, imageUrl, available, sizes } =
-      req.body;
+    const { name, category, description, available, sizes } = req.body;
     if (!name || !category)
       return handleError(res, "Name and category are required", null, 400);
 
     const cat = await Category.findById(category);
     if (!cat) return handleError(res, "Category not found", null, 404);
+    let imageUrl = "";
+    if (req.file) {
+      const base64 = req.file.buffer.toString("base64");
+      imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
 
     const product = new Product({
       name,
@@ -66,23 +70,37 @@ export const getProductById = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { category, ...rest } = req.body;
+    const {
+      name,
+      category,
+      description,
+      available,
+      "sizes[small]": small,
+      "sizes[large]": large,
+      "sizes[extraLarge]": extraLarge,
+    } = req.body;
 
-    // get existing product
     const product = await Product.findById(id);
     if (!product) return handleError(res, "Product not found", null, 404);
-
-    const oldCategoryId = product.category?.toString();
-
-    // update fields
+    if (name) product.name = name;
     if (category) product.category = category;
-    Object.assign(product, rest);
+    if (description) product.description = description;
+    if (available !== undefined) product.available = available === "true";
+    if (small || large || extraLarge) {
+      product.sizes = {
+        small: small ? Number(small) : product.sizes.small,
+        large: large ? Number(large) : product.sizes.large,
+        extraLarge: extraLarge ? Number(extraLarge) : product.sizes.extraLarge,
+      };
+    }
+    if (req.file) {
+      const base64 = req.file.buffer.toString("base64");
+      product.imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
     await product.save();
-
-    // if category changed, update both old and new
-    if (category && oldCategoryId !== category) {
-      if (oldCategoryId) {
-        await Category.findByIdAndUpdate(oldCategoryId, {
+    if (category && product.category.toString() !== category) {
+      if (product.category) {
+        await Category.findByIdAndUpdate(product.category, {
           $pull: { items: product._id },
         });
       }

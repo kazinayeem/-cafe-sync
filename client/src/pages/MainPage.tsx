@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 
@@ -9,7 +9,6 @@ import ProductCard from "@/components/SelectedProduct";
 import OrderSidebar from "@/components/OrderSidebar";
 
 import { useGetCategoriesQuery } from "@/services/categoryApi";
-
 import {
   useGetProductsByCategoryQuery,
   useGetProductsQuery,
@@ -24,8 +23,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useGetSettingsQuery } from "@/services/SettingsApi";
 
-// Types
+
 interface Product {
   _id?: string;
   name?: string;
@@ -39,7 +39,6 @@ interface ProductApiResponse {
   [key: string]: any;
 }
 
-// Normalize API response
 const getSafeProducts = (
   response: Product[] | ProductApiResponse | undefined,
   prodLoading: boolean
@@ -50,12 +49,26 @@ const getSafeProducts = (
   return [];
 };
 
+
+const formatAMPM = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+};
+
 export default function MainPage() {
   const { items } = useSelector((state: RootState) => state.cart);
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [isClosed, setIsClosed] = useState(false);
+  const [closedMessage, setClosedMessage] = useState("");
+
+  const { data: settingsData, isLoading: settingsLoading } =
+    useGetSettingsQuery({});
 
   // Fetch categories
   const {
@@ -64,7 +77,7 @@ export default function MainPage() {
     refetch: refetchCategories,
   } = useGetCategoriesQuery();
 
-  // Fetch products
+
   const {
     data: rawProducts,
     isLoading: prodLoading,
@@ -75,18 +88,78 @@ export default function MainPage() {
 
   const products = getSafeProducts(rawProducts, prodLoading);
 
-  // Refresh handler
+
+  useEffect(() => {
+    if (!settingsData?.data) return;
+
+    const {
+      offDays = [],
+      openingTime,
+      closingTime,
+      businessName,
+    } = settingsData.data;
+
+    const now = new Date();
+    const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
+
+    // Off day check
+    if (offDays.includes(dayName)) {
+      setIsClosed(true);
+      setClosedMessage(`${businessName} is closed today (${dayName})`);
+      return;
+    }
+
+    const [openHour, openMinute] = openingTime.split(":").map(Number);
+    const [closeHour, closeMinute] = closingTime.split(":").map(Number);
+
+    const openTime = new Date();
+    openTime.setHours(openHour, openMinute, 0, 0);
+
+    const closeTime = new Date();
+    closeTime.setHours(closeHour, closeMinute, 0, 0);
+
+    if (now < openTime || now > closeTime) {
+      setIsClosed(true);
+      setClosedMessage(
+        `${businessName} is closed now. Open hours: ${formatAMPM(
+          openingTime
+        )} - ${formatAMPM(closingTime)}`
+      );
+      return;
+    }
+
+    setIsClosed(false);
+    setClosedMessage("");
+  }, [settingsData]);
+
+
   const handleRefresh = async () => {
     setLoading(true);
     await Promise.all([refetchCategories(), refetchProducts()]);
     setLoading(false);
   };
 
+  // Show loading while settings load
+  if (settingsLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg font-semibold">Loading settings...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f9f9f9] dark:bg-gray-900 flex flex-col md:flex-row transition-colors duration-300">
-      {/* LEFT CONTENT */}
+    
       <div className="flex-1 flex flex-col items-center py-2 px-2 md:px-6 w-full overflow-y-auto">
-        {/* Top bar: Refresh + Search */}
+       
+        {isClosed && (
+          <div className="w-full p-4 mb-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-center font-semibold rounded">
+            {closedMessage}
+          </div>
+        )}
+
+       
         <div className="w-full max-w-3xl mb-4 flex items-center gap-3">
           <Button onClick={handleRefresh} disabled={loading}>
             {loading ? (
@@ -106,7 +179,7 @@ export default function MainPage() {
           />
         </div>
 
-        {/* Categories */}
+      
         <Categories
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
@@ -114,7 +187,7 @@ export default function MainPage() {
           catLoading={catLoading}
         />
 
-        {/* Products Grid */}
+     
         <div className="w-full p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
           {products
             .filter(
@@ -123,22 +196,33 @@ export default function MainPage() {
                 prod?.name?.toLowerCase()?.includes(search.toLowerCase())
             )
             .map((prod, idx) => (
-              <ProductCard key={prod._id ?? idx} product={prod} />
+              <ProductCard
+                key={prod._id ?? idx}
+                product={prod}
+                disabled={isClosed} 
+              />
             ))}
         </div>
       </div>
 
-      {/* RIGHT CONTENT (Desktop Sidebar) */}
-      <div className="hidden md:flex w-full md:w-[380px] lg:w-[420px] flex-col bg-[#f9f9f9] dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
+
+      <div className="hidden md:flex w-full md:w-[380px] lg:w-[420px] flex-col bg-[#f9f9f9] dark:bg-gray-800  border-gray-200 dark:border-gray-700">
         <div className="flex-1 overflow-y-auto">
-          <OrderSidebar />
+          <OrderSidebar disabled={isClosed} />
         </div>
       </div>
 
-      {/* MOBILE CART (Drawer) */}
+
       <Drawer>
         <DrawerTrigger asChild>
-          <button className="md:hidden fixed bottom-5 right-5 bg-black text-white p-4 rounded-full shadow-lg z-40 flex items-center gap-2">
+          <button
+            className={`md:hidden fixed bottom-5 right-5 p-4 rounded-full shadow-lg flex items-center gap-2 ${
+              isClosed
+                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                : "bg-black text-white"
+            }`}
+            disabled={isClosed}
+          >
             <span className="text-sm font-bold">{items.length || "0"}</span>
             <ShoppingCart size={24} />
           </button>
@@ -157,7 +241,7 @@ export default function MainPage() {
           </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto">
-            <OrderSidebar />
+            <OrderSidebar disabled={isClosed} />
           </div>
         </DrawerContent>
       </Drawer>

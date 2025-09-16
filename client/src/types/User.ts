@@ -91,3 +91,39 @@ export interface SalesSummaryResponse {
   orders: Order[];
   allData: Record<string, Order[]>; // group orders by status
 }
+
+export interface IBusinessSettings {
+  // 🧾 Finance
+  taxRate: number;
+  discountRate: number;
+  currency: string;
+  serviceCharge?: number;
+
+  // 🏢 Business Info
+  businessName: string;
+  address: string;
+  phone: string;
+  email?: string;
+  website?: string;
+
+  // 🖨️ Printing
+  receiptFooter?: string;
+  logoUrl?: string;
+  showTableName?: boolean;
+
+  // ⚙️ POS Behavior
+  enableDiscountInput: boolean;
+  enableTaxOverride: boolean;
+  allowNegativeStock: boolean;
+
+  // 🕒 Shifts & Timing
+  openingTime?: string; // e.g. "09:00"
+  closingTime?: string; // e.g. "23:00"
+  offDays?: string[]; // e.g. ["Friday"]
+
+  // 📊 Reports
+  lowStockAlertLevel?: number;
+  salesTarget?: number;
+
+  updatedAt?: Date;
+}

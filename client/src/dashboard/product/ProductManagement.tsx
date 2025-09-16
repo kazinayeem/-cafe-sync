@@ -64,19 +64,28 @@ export default function ProductManagement() {
     setEditId(null);
   };
 
-  // Handle Add / Edit Product
   const handleSubmit = async () => {
     try {
-      // Show loading
       Swal.fire({
         title: editId ? "Updating product..." : "Adding product...",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
       });
 
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("category", formData.category);
+      form.append("description", formData.description || "");
+      form.append("available", String(formData.available));
+      form.append("sizes[small]", String(formData.sizes.small));
+      form.append("sizes[large]", String(formData.sizes.large));
+      form.append("sizes[extraLarge]", String(formData.sizes.extraLarge));
+      if (formData.imageFile) {
+        form.append("image", formData.imageFile);
+      }
+
       if (editId) {
-        // Update existing product
-        await updateProduct({ id: editId, body: formData }).unwrap();
+        await updateProduct({ id: editId, body: form }).unwrap();
         Swal.fire({
           icon: "success",
           title: "Product updated!",
@@ -84,8 +93,7 @@ export default function ProductManagement() {
           showConfirmButton: false,
         });
       } else {
-        // Add new product
-        await addProduct(formData).unwrap();
+        await addProduct(form).unwrap();
         Swal.fire({
           icon: "success",
           title: "Product added!",
@@ -94,7 +102,6 @@ export default function ProductManagement() {
         });
       }
 
-      // Close form and reset
       setIsFormDialogOpen(false);
       resetForm();
     } catch (error: any) {

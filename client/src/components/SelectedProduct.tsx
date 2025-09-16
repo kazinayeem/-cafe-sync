@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/store/cartSlice";
 import { ShoppingCart } from "lucide-react";
+import { Badge } from "./ui/badge";
 
 type Product = {
   _id?: string;
@@ -19,9 +20,10 @@ type Product = {
 
 type ProductCardProps = {
   product: Product;
+  disabled?: boolean;
 };
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, disabled = false }: ProductCardProps) => {
   const dispatch = useDispatch();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
@@ -60,6 +62,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
           bg-white dark:bg-gray-800 group relative
           ${!isAvailable ? "filter  grayscale pointer-events-none" : ""}`}
       >
+        {" "}
+        {disabled && (
+          <div className="absolute inset-0 rounded-xl bg-black/50 flex items-center justify-center text-white font-bold text-center">
+            Closed
+          </div>
+        )}
         {/* Product image */}
         <div className="w-full h-32 sm:h-36 md:h-40 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
           <img
@@ -68,7 +76,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="w-full h-full object-cover"
           />
         </div>
-
         {/* Name */}
         <CardContent className="w-full flex flex-col px-0 py-2">
           <span className="font-semibold text-base sm:text-lg text-gray-800 dark:text-gray-100 line-clamp-1">
@@ -78,16 +85,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {/* Sizes */}
           <div className="flex gap-1 mt-3 flex-wrap">
             {Object.entries(product.sizes ?? {})
-              .filter(([_, price]) => price > 0) 
+              .filter(([_, price]) => price > 0)
               .map(([key, price]) => (
-                <Button
+                <Badge
                   key={key}
-                  variant={selectedSize === key ? "default" : "ghost"}
+                  variant={selectedSize === key ? "default" : "secondary"}
                   className="p-1 h-auto text-xs"
                   onClick={() => setSelectedSize(key)}
                 >
                   {sizeMapping[key]} - {price}
-                </Button>
+                </Badge>
               ))}
           </div>
 
@@ -101,7 +108,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {selectedSize ? "Add to Cart" : "Select Size"}
           </Button>
         </CardContent>
-
         {/* Not Available overlay */}
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-sm font-semibold rounded-xl">

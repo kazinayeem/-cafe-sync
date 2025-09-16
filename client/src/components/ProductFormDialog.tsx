@@ -112,27 +112,35 @@ export function ProductFormDialog({
             />
           </div>
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              value={formData.imageUrl}
-              onChange={(e) =>
-                setFormData({ ...formData, imageUrl: e.target.value })
-              }
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            />
-            {formData.imageUrl && (
-              <div className="mt-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Image Preview:
-                </p>
-                <img
-                  src={formData.imageUrl}
-                  alt="Product Preview"
-                  className="w-full h-32 object-cover rounded-md mt-1"
-                />
-              </div>
-            )}
+            <div>
+              <Label htmlFor="image">Product Image</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setFormData({
+                    ...formData,
+                    imageFile: file, // store actual File
+                    imageUrl: URL.createObjectURL(file), // preview
+                  });
+                }}
+              />
+
+              {formData.imageUrl && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Image Preview:
+                  </p>
+                  <img
+                    src={formData.imageUrl}
+                    alt="Product Preview"
+                    className="w-full h-32 object-cover rounded-md mt-1"
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <Label>Sizes</Label>

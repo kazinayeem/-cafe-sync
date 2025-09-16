@@ -23,6 +23,7 @@ import ProductManagement from "./dashboard/product/ProductManagement";
 import OrdersList from "./pages/OrderList";
 import ProfilePage from "./pages/ProfilePage";
 import SummaryManagement from "./pages/SummaryManagement";
+import { SettingManagement } from "./pages/SettingManagement";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -47,7 +48,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="menu" element={<ProductManagement />} />
                 <Route path="reports" element={<SummaryManagement />} />
-                <Route path="settings" element={<div>Settings Page</div>} />
+                <Route path="settings" element={<SettingManagement />} />
                 {/* 404 page */}
                 <Route path="*" element={<NotFound />} />
               </Route>

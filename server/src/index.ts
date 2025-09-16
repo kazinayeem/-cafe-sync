@@ -10,6 +10,7 @@ import tableRoutes from "./routes/tableRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
 import orderRoutes from "./routes/orderRoutes";
+import settinsRoutes from "./routes/settingsRoutes";
 import logger from "./utils/logger";
 dotenv.config();
 
@@ -59,6 +60,7 @@ app.use("/api/tables", tableRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/settings", settinsRoutes);
 // Test Error Route
 app.get("/error", (req: Request) => {
   throw new Error("Test error!");

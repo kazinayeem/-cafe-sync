@@ -1,16 +1,12 @@
 import {
   Coffee,
-  Calendar,
   Home,
-  Search,
-  Settings,
   Users,
   FileText,
-  CreditCard,
   ShoppingCart,
   Tag,
   Box,
-  Percent,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -27,8 +23,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import { Link, useNavigate } from "react-router";
-import { DropdownMenuItem } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { useGetSettingsQuery } from "@/services/SettingsApi";
 
 export function AppSidebar() {
   const { role } = useSelector((state: RootState) => state.user);
@@ -46,11 +42,14 @@ export function AppSidebar() {
     { title: "Categories", url: "/dashboard/categories", icon: Tag },
     { title: "Staff", url: "/dashboard/staff", icon: Users },
     { title: "Reports", url: "/dashboard/reports", icon: FileText },
+    { title: "Settings", url: "/dashboard/settings", icon: Settings },
   ];
 
   const items = role === "admin" ? [...baseItems, ...adminItems] : baseItems;
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { data, isLoading } = useGetSettingsQuery({});
+  const businessName = data?.data?.businessName || "CAFE";
 
   const handleLogout = () => {
     dispatch({ type: "user/logout" });
@@ -58,18 +57,31 @@ export function AppSidebar() {
     localStorage.removeItem("user");
     navigate("/login");
   };
+  if (isLoading) {
+    return (
+      <Sidebar>
+        <SidebarContent className="bg-gray-50 dark:bg-gray-900">
+          <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
+            <Coffee className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
+              Loading...
+            </span>
+          </div>
+        </SidebarContent>
+      </Sidebar>
+    );
+  }
   return (
     <Sidebar>
       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
-        {/* Branding */}
         <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
           <Coffee className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
-            CAFE SYNC
+            {businessName || "CAFE"}
           </span>
         </div>
 
-        {/* Navigation */}
+       
         <SidebarGroup className="p-4">
           <SidebarGroupLabel className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
             Navigation

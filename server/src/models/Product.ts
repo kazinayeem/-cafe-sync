@@ -1,8 +1,8 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface IProduct extends Document {
   name: string;
-  category: string;
+  category: Types.ObjectId;
   description?: string;
   imageUrl?: string;
   available: boolean;
@@ -16,11 +16,7 @@ export interface IProduct extends Document {
 const productSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true },
-    category: {
-      type: String,
-      required: true,
-      ref: "Category",
-    },
+    category: { type: Schema.Types.ObjectId, ref: "Category" },
     description: { type: String },
     imageUrl: { type: String },
     available: { type: Boolean, default: true },
