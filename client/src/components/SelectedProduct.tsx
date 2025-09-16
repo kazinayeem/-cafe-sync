@@ -79,7 +79,7 @@ const ProductCard = ({ product, disabled = false }: ProductCardProps) => {
         {/* Name */}
         <CardContent className="w-full flex flex-col px-0 py-2">
           <span className="font-semibold text-base sm:text-lg text-gray-800 dark:text-gray-100 line-clamp-1">
-            {product?.name || "Delete Product"}
+            {product?.name || "Loading.."}
           </span>
 
           {/* Sizes */}
