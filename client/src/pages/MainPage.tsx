@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/drawer";
 import { useGetSettingsQuery } from "@/services/SettingsApi";
 
-
 interface Product {
   _id?: string;
   name?: string;
@@ -48,7 +47,6 @@ const getSafeProducts = (
   if (response && Array.isArray(response.data)) return response.data;
   return [];
 };
-
 
 const formatAMPM = (time: string) => {
   const [hours, minutes] = time.split(":").map(Number);
@@ -77,7 +75,6 @@ export default function MainPage() {
     refetch: refetchCategories,
   } = useGetCategoriesQuery();
 
-
   const {
     data: rawProducts,
     isLoading: prodLoading,
@@ -87,7 +84,6 @@ export default function MainPage() {
     : useGetProductsQuery();
 
   const products = getSafeProducts(rawProducts, prodLoading);
-
 
   useEffect(() => {
     if (!settingsData?.data) return;
@@ -132,7 +128,6 @@ export default function MainPage() {
     setClosedMessage("");
   }, [settingsData]);
 
-
   const handleRefresh = async () => {
     setLoading(true);
     await Promise.all([refetchCategories(), refetchProducts()]);
@@ -150,16 +145,13 @@ export default function MainPage() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] dark:bg-gray-900 flex flex-col md:flex-row transition-colors duration-300">
-    
       <div className="flex-1 flex flex-col items-center py-2 px-2 md:px-6 w-full overflow-y-auto">
-       
         {isClosed && (
           <div className="w-full p-4 mb-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-center font-semibold rounded">
             {closedMessage}
           </div>
         )}
 
-       
         <div className="w-full max-w-3xl mb-4 flex items-center gap-3">
           <Button onClick={handleRefresh} disabled={loading}>
             {loading ? (
@@ -179,7 +171,6 @@ export default function MainPage() {
           />
         </div>
 
-      
         <Categories
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
@@ -187,7 +178,6 @@ export default function MainPage() {
           catLoading={catLoading}
         />
 
-     
         <div className="w-full p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
           {products
             .filter(
@@ -199,19 +189,17 @@ export default function MainPage() {
               <ProductCard
                 key={prod._id ?? idx}
                 product={prod}
-                disabled={isClosed} 
+                disabled={isClosed}
               />
             ))}
         </div>
       </div>
-
 
       <div className="hidden md:flex w-full md:w-[380px] lg:w-[420px] flex-col bg-[#f9f9f9] dark:bg-gray-800  border-gray-200 dark:border-gray-700">
         <div className="flex-1 overflow-y-auto">
           <OrderSidebar disabled={isClosed} />
         </div>
       </div>
-
 
       <Drawer>
         <DrawerTrigger asChild>

@@ -29,13 +29,11 @@ import { useGetSettingsQuery } from "@/services/SettingsApi";
 export function AppSidebar() {
   const { role } = useSelector((state: RootState) => state.user);
 
- 
   const baseItems = [
     { title: "Home", url: "/dashboard", icon: Home },
     { title: "Tables", url: "/dashboard/tables", icon: Users },
     { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
   ];
-
 
   const adminItems = [
     { title: "Menu Items", url: "/dashboard/menu", icon: Box },
@@ -75,13 +73,18 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
-          <Coffee className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          {/* Logo */}
+          <img
+            src="/logo.png"
+            alt="Cafe Logo"
+            className="w-40 h-30 rounded-full"
+          />
+          {/* Business Name */}
           <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
             {businessName || "CAFE"}
           </span>
         </div>
 
-       
         <SidebarGroup className="p-4">
           <SidebarGroupLabel className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
             Navigation
@@ -102,7 +105,8 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>{" "}
+          </SidebarGroupContent>
+
           <Button
             className="mt-5"
             onClick={handleLogout}
