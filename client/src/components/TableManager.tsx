@@ -40,12 +40,11 @@ export default function TableManager() {
   const [tableName, setTableName] = useState("");
   const [tableSeats, setTableSeats] = useState<number | "">("");
 
-  // Load tables
   useEffect(() => {
     getTables().then((data) => setTables(data.tables));
   }, []);
 
-  // Realtime updates
+ 
   useEffect(() => {
     socket.on("tableAdded", (newTable: Table) =>
       setTables((prev) => [...prev, newTable])

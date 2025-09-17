@@ -108,7 +108,6 @@ const ProductCard = ({ product, disabled = false }: ProductCardProps) => {
             {selectedSize ? "Add to Cart" : "Select Size"}
           </Button>
         </CardContent>
-        {/* Not Available overlay */}
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-sm font-semibold rounded-xl">
             Not Available

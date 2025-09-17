@@ -28,7 +28,7 @@ import type { Order, OrdersResponse } from "@/types/User";
 
 const OrdersDashboard = () => {
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(20); 
+  const [limit, setLimit] = useState<number>(20);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const ref: RefObject<HTMLDivElement | null> = useRef(null);

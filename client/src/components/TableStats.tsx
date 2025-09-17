@@ -15,12 +15,11 @@ export default function TableSpotlightCard() {
   const [stats, setStats] = useState<Stats>({ total: 0, available: 0 });
   const navigate = useNavigate();
 
-  // ✅ Fetch initial stats
   useEffect(() => {
     axios.get(`${API_URL}/stats`).then((res) => setStats(res.data));
   }, []);
 
-  // ✅ Realtime updates
+ 
   useEffect(() => {
     socket.on("tableStatsUpdated", (data: Stats) => {
       setStats(data);

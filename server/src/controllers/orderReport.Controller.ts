@@ -2,9 +2,6 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Order } from "../models/Order";
 
-/**
- * Generate order report
- */
 export const getOrderReport = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, status, search } = req.query;
@@ -15,7 +12,6 @@ export const getOrderReport = async (req: Request, res: Response) => {
         .json({ success: false, message: "Start and End date required" });
     }
 
-    // ✅ Use frontend dates directly
     const start = new Date(startDate as string);
     const end = new Date(endDate as string);
 
@@ -24,18 +20,14 @@ export const getOrderReport = async (req: Request, res: Response) => {
     };
 
     if (status) baseMatchQuery.status = status;
-
-    // 🔎 Unified search: Order ID OR Product Name
     let query = Order.find(baseMatchQuery)
       .populate("table")
       .populate("items.product");
 
     if (search) {
       if (mongoose.Types.ObjectId.isValid(search as string)) {
-        // Search by orderId
         baseMatchQuery._id = new mongoose.Types.ObjectId(search as string);
       } else {
-        // Search by productName
         query = query
           .where("items.product.name")
           .regex(new RegExp(search as string, "i"));
@@ -43,8 +35,6 @@ export const getOrderReport = async (req: Request, res: Response) => {
     }
 
     const orders = await query.sort({ createdAt: -1 });
-
-    // 📊 Summary aggregation
     const summaryAgg = await Order.aggregate([
       { $match: baseMatchQuery },
       {
@@ -56,8 +46,6 @@ export const getOrderReport = async (req: Request, res: Response) => {
       },
     ]);
     const summary = summaryAgg[0] || { totalOrders: 0, totalSales: 0 };
-
-    // 📊 Status breakdown aggregation
     const statusBreakdownAgg = await Order.aggregate([
       { $match: baseMatchQuery },
       {
@@ -69,8 +57,6 @@ export const getOrderReport = async (req: Request, res: Response) => {
       },
     ]);
     const statusBreakdown = statusBreakdownAgg.length ? statusBreakdownAgg : [];
-
-    // 📦 Organize orders by status
     const allData: Record<string, any[]> = {};
     orders.forEach((order) => {
       const key = order.status;
@@ -93,25 +79,21 @@ export const getOrderReport = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Get last 7 days sales for chart
- */
 export const getSalesLast7Days = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
+    console.log("-------LOG_______", startDate, endDate);
+
     if (!startDate || !endDate) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "startDate and endDate are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "startDate and endDate are required",
+      });
     }
 
-    const start = new Date(startDate as string); // frontend should send ISO string with timezone
+    const start = new Date(startDate as string);
     const end = new Date(endDate as string);
-
     const salesData = await Order.aggregate([
       {
         $match: {

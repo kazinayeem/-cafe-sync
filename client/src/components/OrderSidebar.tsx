@@ -45,24 +45,18 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
   const [discountPercent, setDiscountPercent] = useState(0);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // Fetch business settings
   const { data: settingsData } = useGetSettingsQuery({});
   const taxRate = settingsData?.data?.taxRate ?? 0;
   const defaultDiscount = settingsData?.data?.discountRate ?? 0;
   const enableDiscountInput = settingsData?.data?.enableDiscountInput;
-
-  // Initialize discount from settings
   useEffect(() => {
     setDiscountPercent(defaultDiscount);
   }, [defaultDiscount]);
 
-  // Load tables
   useEffect(() => {
     getTables().then((data) => setTables(data.tables));
   }, []);
 
-  // Socket listeners
   useEffect(() => {
     socket.on("tableAdded", (newTable: Table) =>
       setTables((prev) => [...prev, newTable])
@@ -93,7 +87,6 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
     };
   }, []);
 
-  // Checkout confirm
   const confirmCheckout = async (shouldPrint: boolean) => {
     try {
       Swal.fire({

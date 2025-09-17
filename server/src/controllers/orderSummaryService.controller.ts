@@ -11,13 +11,11 @@ export const getTodayOrderSummary = async () => {
     { $group: { _id: "$status", count: { $sum: 1 } } },
   ]);
 
-  // ✅ Define all possible statuses
   const allStatuses = ["pending", "preparing", "served", "cancelled"];
 
-  // Convert aggregation result into a dictionary
   const statusCounts: Record<string, number> = {};
   allStatuses.forEach((status) => {
-    statusCounts[status] = 0; // default 0
+    statusCounts[status] = 0;
   });
 
   summary.forEach((s) => {

@@ -114,7 +114,7 @@ export default function ProductManagement() {
     }
   };
 
-  // Open Edit Dialog
+
   const handleEdit = (product: any) => {
     const { _id, __v, createdAt, category, updatedAt, ...rest } = product;
     setFormData({
@@ -125,7 +125,7 @@ export default function ProductManagement() {
     setIsFormDialogOpen(true);
   };
 
-  // Delete Product
+
   const handleDelete = async () => {
     if (!confirmDeleteId) return;
 
@@ -177,7 +177,6 @@ export default function ProductManagement() {
         Product Management
       </h1>
 
-      {/* Product Form Dialog (Add/Edit) */}
       <ProductFormDialog
         isFormDialogOpen={isFormDialogOpen}
         setIsFormDialogOpen={setIsFormDialogOpen}
@@ -188,7 +187,7 @@ export default function ProductManagement() {
         resetForm={resetForm}
       />
 
-      {/* Products Grid */}
+    
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
         {products.length === 0 ? (
           <p className="col-span-full text-center text-gray-600 dark:text-gray-400">
@@ -301,7 +300,7 @@ export default function ProductManagement() {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      
       <AlertDialog
         open={!!confirmDeleteId}
         onOpenChange={() => setConfirmDeleteId(null)}

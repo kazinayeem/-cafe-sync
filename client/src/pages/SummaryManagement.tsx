@@ -40,14 +40,8 @@ interface StatusBreakdownItem {
   count: number;
 }
 
-// interface SalesSummaryResponse {
-//   summary: { totalOrders: number; totalSales: number };
-//   statusBreakdown: StatusBreakdownItem[];
-//   allData: { [key: string]: Order[] };
-// }
 
 const SummaryManagement = () => {
-  // --- States ---
   const [status, setStatus] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [startDate, setStartDate] = useState<string>(() => {

@@ -29,14 +29,14 @@ import { useGetSettingsQuery } from "@/services/SettingsApi";
 export function AppSidebar() {
   const { role } = useSelector((state: RootState) => state.user);
 
-  // Base items for all users
+ 
   const baseItems = [
     { title: "Home", url: "/dashboard", icon: Home },
     { title: "Tables", url: "/dashboard/tables", icon: Users },
     { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
   ];
 
-  // Admin-specific items
+
   const adminItems = [
     { title: "Menu Items", url: "/dashboard/menu", icon: Box },
     { title: "Categories", url: "/dashboard/categories", icon: Tag },

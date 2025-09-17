@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton"; // ✅ ShadCN skeleton
 import { useNavigate } from "react-router";
 
 const socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
@@ -9,6 +10,7 @@ export default function OrderSummary() {
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
   // Initial fetch
   useEffect(() => {
     const fetchInitialSummary = async () => {
@@ -28,7 +30,6 @@ export default function OrderSummary() {
     fetchInitialSummary();
   }, []);
 
-  
   useEffect(() => {
     socket.on("orderSummaryUpdate", (data) => {
       setSummary(data);
@@ -39,18 +40,25 @@ export default function OrderSummary() {
     };
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-
   return (
     <Card
-      className="dark:bg-gray-900 dark:text-white cursor-pointer  "
+      className="dark:bg-gray-900 dark:text-white cursor-pointer"
       onClick={() => navigate("/dashboard/orders")}
     >
       <CardHeader>
         <CardTitle>📊 Today's Orders</CardTitle>
       </CardHeader>
       <CardContent>
-        {summary ? (
+        {loading ? (
+          <ul className="space-y-2 text-sm">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <li key={i} className="flex justify-between items-center">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-8" />
+              </li>
+            ))}
+          </ul>
+        ) : summary ? (
           <ul className="space-y-2 text-sm">
             <li className="flex justify-between">
               <span>Total:</span>

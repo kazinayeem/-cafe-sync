@@ -24,7 +24,6 @@ const Categories = ({
     <div className="w-full mb-6">
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex gap-2 px-1 pb-2  flex-wrap">
-          {/* All Button */}
           <Button
             className={`h-10 px-5 rounded-full font-medium flex-shrink-0 text-sm
               ${
@@ -36,8 +35,6 @@ const Categories = ({
           >
             All
           </Button>
-
-          {/* Loading Skeleton */}
           {catLoading
             ? Array(5)
                 .fill(0)
@@ -62,7 +59,6 @@ const Categories = ({
                 </Button>
               ))}
         </div>
-
         <ScrollBar orientation="horizontal" className="hidden md:flex" />
       </ScrollArea>
     </div>

@@ -80,7 +80,6 @@ export default function StaffManagement() {
 
   const { register, reset, handleSubmit, setValue } = useForm<StaffForm>();
 
-  // ✅ Add staff
   const handleAddStaff = handleSubmit(async (formData) => {
     try {
       await addStaff({ ...formData, role: "staff" }).unwrap();
@@ -93,7 +92,7 @@ export default function StaffManagement() {
     }
   });
 
-  // ✅ Edit staff
+
   const handleEditStaff = handleSubmit(async (formData) => {
     if (!selectedStaff) return;
     try {
@@ -116,7 +115,7 @@ export default function StaffManagement() {
     }
   });
 
-  // ✅ Delete staff
+
   const handleDeleteStaff = async (id: string) => {
     if (!confirm("Are you sure you want to delete this staff?")) return;
     try {
@@ -128,7 +127,7 @@ export default function StaffManagement() {
     }
   };
 
-  // ✅ Toggle active
+ 
   const toggleActive = async (staff: Staff) => {
     try {
       await toggleStaffActive({
@@ -144,7 +143,7 @@ export default function StaffManagement() {
     }
   };
 
-  // ✅ Open edit dialog
+ 
   const openEditDialog = (staff: Staff) => {
     setSelectedStaff(staff);
     setValue("name", staff.name);
@@ -185,8 +184,6 @@ export default function StaffManagement() {
         header: "Actions",
         cell: ({ row }) => {
           const staff = row.original;
-
-          // ❌ Hide Edit/Delete for admin
           if (staff.role === "admin") {
             return <div className="text-gray-500 italic">Super Admin</div>;
           }
@@ -226,7 +223,6 @@ export default function StaffManagement() {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">👥 Staff Management</h2>
         <AlertDialog open={addOpen} onOpenChange={setAddOpen}>
@@ -275,7 +271,7 @@ export default function StaffManagement() {
         </AlertDialog>
       </div>
 
-      {/* Table */}
+     
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
         {isLoading ? (
           <div className="p-4 space-y-3">
@@ -333,7 +329,7 @@ export default function StaffManagement() {
         )}
       </div>
 
-      {/* Edit Dialog */}
+      
       <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>

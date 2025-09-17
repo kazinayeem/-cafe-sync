@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import { Table } from "../models/Table";
-import mongoose, { Types } from "mongoose";
+import  { Types } from "mongoose";
 import { getTodayOrderSummary } from "./orderSummaryService.controller";
 import { io } from "..";
 
@@ -18,7 +18,7 @@ export const getTodayOrderSummaryController = async (
   }
 };
 
-// Create new order
+
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { items, paymentMethod, tableId } = req.body;
@@ -29,34 +29,28 @@ export const createOrder = async (req: Request, res: Response) => {
         .json({ success: false, message: "No items provided" });
     }
 
-    // Calculate total price based on item prices and quantities
+
     const totalPrice = items.reduce(
       (sum: number, item: any) => sum + item.price * item.quantity,
       0
     );
 
-    // Create the order
+    
     const order = await Order.create({
-      items, // each item must have: product, quantity, size, price
+      items, 
       totalPrice,
       paymentMethod: paymentMethod || "cash",
       table: tableId || null,
     });
-
-    // Populate references for response
     await order.populate("table items.product");
-
-    // Emit live update to frontend
     const summary = await getTodayOrderSummary();
     io.emit("orderSummaryUpdate", summary);
-
     return res.status(201).json({ success: true, data: order });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Get all orders
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
@@ -70,23 +64,16 @@ export const getOrders = async (req: Request, res: Response) => {
     } = req.query;
 
     const query: any = {};
-
-    // Filter by status
     if (status && status !== "all") query.status = status;
-
-    // Filter by date range
     if (startDate || endDate) {
       query.createdAt = {};
       if (startDate) query.createdAt.$gte = new Date(startDate as string);
       if (endDate) query.createdAt.$lte = new Date(endDate as string);
     }
 
-    // Fetch all matching orders first (without _id filter)
     const orders = await Order.find(query)
       .populate("table items.product")
       .sort({ createdAt: -1 });
-
-    // Partial _id search in JS
     let filteredOrders = orders;
     if (orderId) {
       const searchTerm = (orderId as string).toLowerCase();
@@ -98,8 +85,6 @@ export const getOrders = async (req: Request, res: Response) => {
         return idStr.toLowerCase().startsWith(searchTerm);
       });
     }
-
-    // Pagination
     const total = filteredOrders.length;
     const paginatedOrders = filteredOrders.slice(
       (Number(page) - 1) * Number(limit),
@@ -120,7 +105,6 @@ export const getOrders = async (req: Request, res: Response) => {
   }
 };
 
-// Get single order
 export const getOrderById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -139,7 +123,7 @@ export const getOrderById = async (req: Request, res: Response) => {
   }
 };
 
-// Update order (status, paymentMethod, table)
+
 export const updateOrder = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -174,7 +158,6 @@ export const updateOrder = async (req: Request, res: Response) => {
   }
 };
 
-// Delete order
 export const deleteOrder = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

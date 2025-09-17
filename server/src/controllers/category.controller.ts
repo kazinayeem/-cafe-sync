@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Category } from "../models/Category";
 
-// ✅ Create a new category
+
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name, items } = req.body;
@@ -17,7 +17,7 @@ export const createCategory = async (req: Request, res: Response) => {
   }
 };
 
-// 📂 Get all categories
+
 export const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await Category.find().populate("items");
@@ -29,7 +29,7 @@ export const getCategories = async (req: Request, res: Response) => {
   }
 };
 
-// 📂 Get single category (with products)
+
 export const getCategoryById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -49,7 +49,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
   }
 };
 
-// ✏️ Update category
+
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -75,7 +75,7 @@ export const updateCategory = async (req: Request, res: Response) => {
   }
 };
 
-// ❌ Delete category
+
 export const deleteCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
