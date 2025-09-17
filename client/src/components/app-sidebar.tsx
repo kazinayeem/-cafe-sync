@@ -1,5 +1,4 @@
 import {
-  Coffee,
   Home,
   Users,
   FileText,
@@ -55,20 +54,20 @@ export function AppSidebar() {
     localStorage.removeItem("user");
     navigate("/login");
   };
-  if (isLoading) {
-    return (
-      <Sidebar>
-        <SidebarContent className="bg-gray-50 dark:bg-gray-900">
-          <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
-            <Coffee className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-            <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
-              Loading...
-            </span>
-          </div>
-        </SidebarContent>
-      </Sidebar>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Sidebar>
+  //       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
+  //         <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
+  //           <Coffee className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+  //           <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
+  //             Loading...
+  //           </span>
+  //         </div>
+  //       </SidebarContent>
+  //     </Sidebar>
+  //   );
+  // }
   return (
     <Sidebar>
       <SidebarContent className="bg-gray-50 dark:bg-gray-900">
@@ -81,7 +80,7 @@ export function AppSidebar() {
           />
           {/* Business Name */}
           <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
-            {businessName || "CAFE"}
+            {(!isLoading && businessName) || "CAFE"}
           </span>
         </div>
 
