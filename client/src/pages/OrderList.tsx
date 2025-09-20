@@ -523,7 +523,7 @@ const OrdersDashboard = () => {
                     key={item._id}
                     className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700"
                   >
-                    {item.product?.imageUrl ? (
+                     {/* {item.product?.imageUrl ? (
                       <img
                         src={item.product.imageUrl}
                         alt={item.product.name}
@@ -533,7 +533,7 @@ const OrdersDashboard = () => {
                       <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 text-xs font-medium">
                         No Image
                       </div>
-                    )}
+                    )} */}
                     <div className="flex-1">
                       <p className="font-semibold text-gray-800 dark:text-gray-100">
                         {item.product?.name ?? "Product Deleted"}

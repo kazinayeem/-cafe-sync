@@ -20,9 +20,10 @@ export const getOrderReport = async (req: Request, res: Response) => {
     };
 
     if (status) baseMatchQuery.status = status;
-    let query = Order.find(baseMatchQuery)
-      .populate("table")
-      .populate("items.product");
+    let query = Order.find(baseMatchQuery).populate("table").populate({
+      path: "items.product",
+      select: "-imageUrl",
+    });
 
     if (search) {
       if (mongoose.Types.ObjectId.isValid(search as string)) {

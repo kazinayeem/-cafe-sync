@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import { Table } from "../models/Table";
-import  { Types } from "mongoose";
+import { Types } from "mongoose";
 import { getTodayOrderSummary } from "./orderSummaryService.controller";
 import { io } from "..";
 
@@ -18,7 +18,6 @@ export const getTodayOrderSummaryController = async (
   }
 };
 
-
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { items, paymentMethod, tableId } = req.body;
@@ -29,15 +28,13 @@ export const createOrder = async (req: Request, res: Response) => {
         .json({ success: false, message: "No items provided" });
     }
 
-
     const totalPrice = items.reduce(
       (sum: number, item: any) => sum + item.price * item.quantity,
       0
     );
 
-    
     const order = await Order.create({
-      items, 
+      items,
       totalPrice,
       paymentMethod: paymentMethod || "cash",
       table: tableId || null,
@@ -50,7 +47,6 @@ export const createOrder = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
-
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
@@ -72,8 +68,13 @@ export const getOrders = async (req: Request, res: Response) => {
     }
 
     const orders = await Order.find(query)
-      .populate("table items.product")
+      .populate("table")
+      .populate({
+        path: "items.product",
+        select: "-imageUrl",
+      })
       .sort({ createdAt: -1 });
+
     let filteredOrders = orders;
     if (orderId) {
       const searchTerm = (orderId as string).toLowerCase();
@@ -123,7 +124,6 @@ export const getOrderById = async (req: Request, res: Response) => {
   }
 };
 
-
 export const updateOrder = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -150,7 +150,6 @@ export const updateOrder = async (req: Request, res: Response) => {
     await order.save();
     const summary = await getTodayOrderSummary();
     io.emit("orderSummaryUpdate", summary);
-
 
     return res.status(200).json({ success: true, data: order });
   } catch (err: any) {

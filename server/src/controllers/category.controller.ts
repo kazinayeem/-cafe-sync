@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Category } from "../models/Category";
 
-
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name, items } = req.body;
@@ -17,10 +16,10 @@ export const createCategory = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const categories = await Category.find().populate("items");
+    const categories = await Category.find();
+
     return res.status(200).json({ success: true, data: categories });
   } catch (error) {
     return res
@@ -28,7 +27,6 @@ export const getCategories = async (req: Request, res: Response) => {
       .json({ success: false, message: "Error fetching categories", error });
   }
 };
-
 
 export const getCategoryById = async (req: Request, res: Response) => {
   try {
@@ -48,7 +46,6 @@ export const getCategoryById = async (req: Request, res: Response) => {
       .json({ success: false, message: "Error fetching category", error });
   }
 };
-
 
 export const updateCategory = async (req: Request, res: Response) => {
   try {
@@ -74,7 +71,6 @@ export const updateCategory = async (req: Request, res: Response) => {
       .json({ success: false, message: "Error updating category", error });
   }
 };
-
 
 export const deleteCategory = async (req: Request, res: Response) => {
   try {
