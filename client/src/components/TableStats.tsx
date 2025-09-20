@@ -19,7 +19,6 @@ export default function TableSpotlightCard() {
     axios.get(`${API_URL}/stats`).then((res) => setStats(res.data));
   }, []);
 
- 
   useEffect(() => {
     socket.on("tableStatsUpdated", (data: Stats) => {
       setStats(data);
@@ -32,24 +31,30 @@ export default function TableSpotlightCard() {
 
   return (
     <Card
-      className="cursor-pointer  transition-transform 
-                 dark:bg-gray-900 dark:text-white"
+      className="cursor-pointer transition-transform duration-200 hover:scale-[1.02] hover:shadow-md
+             bg-white dark:bg-gray-900 dark:text-white rounded-xl"
       onClick={() => navigate("/dashboard/tables")}
     >
-      <CardHeader>
-        <CardTitle>📊 Table Dashboard</CardTitle>
+      <CardHeader className="px-4 pt-4">
+        <CardTitle className="text-lg sm:text-xl font-semibold">
+          📊 Table Dashboard
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <p>
+
+      <CardContent className="space-y-2 px-4">
+        <p className="text-sm sm:text-base">
           Total Tables: <span className="font-bold">{stats.total}</span>
         </p>
-        <p>
+        <p className="text-sm sm:text-base">
           Available:{" "}
-          <span className="font-bold text-green-600">{stats.available}</span>
+          <span className="font-bold text-green-600 dark:text-green-400">
+            {stats.available}
+          </span>
         </p>
       </CardContent>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 px-4 pb-4">
-        Click to manage tables in the dashboard →
+
+      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 px-4 pb-4">
+        Tap to manage tables in the dashboard →
       </p>
     </Card>
   );

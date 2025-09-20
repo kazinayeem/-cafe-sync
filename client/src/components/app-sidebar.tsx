@@ -70,16 +70,14 @@ export function AppSidebar() {
   // }
   return (
     <Sidebar>
-      <SidebarContent className="bg-gray-50 dark:bg-gray-900">
+      <SidebarContent className="bg-gray-50 dark:bg-gray-900 px-2 sm:px-4">
         <div className="flex items-center gap-3 px-6 py-5 h-20 border-b dark:border-gray-800">
-          {/* Logo */}
           <img
             src="/logo.png"
             alt="Cafe Logo"
-            className="w-40 h-30 rounded-full"
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
           />
-          {/* Business Name */}
-          <span className="font-extrabold text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
+          <span className="font-extrabold text-xl sm:text-2xl text-gray-900 dark:text-gray-100 tracking-wide">
             {(!isLoading && businessName) || "CAFE"}
           </span>
         </div>
@@ -95,7 +93,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       to={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 text-lg hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 text-base sm:text-lg hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
                     >
                       <item.icon className="h-5 w-5" />
                       <span className="font-medium">{item.title}</span>
@@ -107,9 +105,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
 
           <Button
-            className="mt-5"
+            className="mt-6 w-full text-sm sm:text-base"
             onClick={handleLogout}
-            variant={"destructive"}
+            variant="destructive"
           >
             Logout
           </Button>

@@ -40,7 +40,6 @@ interface StatusBreakdownItem {
   count: number;
 }
 
-
 const SummaryManagement = () => {
   const [status, setStatus] = useState<string>("all");
   const [search, setSearch] = useState<string>("");

@@ -42,24 +42,28 @@ export default function OrderSummary() {
 
   return (
     <Card
-      className="dark:bg-gray-900 dark:text-white cursor-pointer"
+      className="cursor-pointer transition-transform duration-200 hover:scale-[1.02] hover:shadow-md
+             bg-white dark:bg-gray-900 dark:text-white rounded-xl"
       onClick={() => navigate("/dashboard/orders")}
     >
-      <CardHeader>
-        <CardTitle>📊 Today's Orders</CardTitle>
+      <CardHeader className="px-4">
+        <CardTitle className="text-lg sm:text-xl font-semibold">
+          📊 Today's Orders
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="px-4 pb-4">
         {loading ? (
           <ul className="space-y-2 text-sm">
             {Array.from({ length: 5 }).map((_, i) => (
               <li key={i} className="flex justify-between items-center">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-8" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-10" />
               </li>
             ))}
           </ul>
         ) : summary ? (
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2 text-sm sm:text-base">
             <li className="flex justify-between">
               <span>Total:</span>
               <span className="font-medium">{summary.totalOrders || 0}</span>
@@ -72,17 +76,19 @@ export default function OrderSummary() {
               <span>👨‍🍳 Preparing:</span>
               <span className="font-medium">{summary.preparing || 0}</span>
             </li>
-            <li className="flex justify-between text-green-600">
+            <li className="flex justify-between text-green-600 dark:text-green-400">
               <span>✅ Served:</span>
               <span className="font-medium">{summary.served || 0}</span>
             </li>
-            <li className="flex justify-between text-red-500">
+            <li className="flex justify-between text-red-500 dark:text-red-400">
               <span>❌ Cancelled:</span>
               <span className="font-medium">{summary.cancelled || 0}</span>
             </li>
           </ul>
         ) : (
-          <p>No orders yet.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No orders yet.
+          </p>
         )}
       </CardContent>
     </Card>

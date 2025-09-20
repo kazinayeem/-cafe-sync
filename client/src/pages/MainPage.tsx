@@ -144,7 +144,7 @@ export default function MainPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] dark:bg-gray-900 flex flex-col md:flex-row transition-colors duration-300">
+    <div className="min-h-screen bg-[#f9f9f9] dark:bg-gray-900 flex flex-col md:flex-row transition-colors duration-300 px-2 sm:px-4 lg:px-6">
       <div className="flex-1 flex flex-col items-center py-2 px-2 md:px-6 w-full overflow-y-auto">
         {isClosed && (
           <div className="w-full p-4 mb-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-center font-semibold rounded">
@@ -152,7 +152,7 @@ export default function MainPage() {
           </div>
         )}
 
-        <div className="w-full max-w-3xl mb-4 flex items-center gap-3">
+        <div className="w-full max-w-3xl mb-4 flex flex-col sm:flex-row items-center gap-3">
           <Button onClick={handleRefresh} disabled={loading}>
             {loading ? (
               <span className="animate-spin">
@@ -178,7 +178,7 @@ export default function MainPage() {
           catLoading={catLoading}
         />
 
-        <div className="w-full p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
+        <div className="w-full p-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
           {products
             .filter(
               (prod) =>
@@ -204,10 +204,10 @@ export default function MainPage() {
       <Drawer>
         <DrawerTrigger asChild>
           <button
-            className={`md:hidden fixed bottom-5 right-5 p-4 rounded-full shadow-lg flex items-center gap-2 ${
+            className={`md:hidden fixed bottom-5 right-5 p-4 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 ${
               isClosed
                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                : "bg-black text-white"
+                : "bg-black text-white hover:bg-gray-800"
             }`}
             disabled={isClosed}
           >

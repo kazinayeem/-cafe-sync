@@ -44,7 +44,6 @@ export default function TableManager() {
     getTables().then((data) => setTables(data.tables));
   }, []);
 
- 
   useEffect(() => {
     socket.on("tableAdded", (newTable: Table) =>
       setTables((prev) => [...prev, newTable])
@@ -164,9 +163,10 @@ export default function TableManager() {
     <div className="p-4  mx-auto">
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
           🍽️ Table Manager
         </h2>
+
         <AlertDialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <AlertDialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600">
@@ -205,14 +205,14 @@ export default function TableManager() {
         {tables.map((table) => (
           <Card
             key={table._id}
-            className={`border rounded-lg shadow-sm cursor-pointer hover:shadow-lg transition-transform transform hover:scale-105
-              border-gray-200 dark:border-gray-700
-              ${
-                table.status === "free"
-                  ? "bg-white dark:bg-green-900/20"
-                  : "bg-white dark:bg-red-900/20"
-              }
-            `}
+            className={`border rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-transform duration-200 hover:scale-[1.03]
+    border-gray-200 dark:border-gray-700
+    ${
+      table.status === "free"
+        ? "bg-white dark:bg-green-900/10"
+        : "bg-white dark:bg-red-900/10"
+    }
+  `}
           >
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-center text-gray-900 dark:text-gray-100">
@@ -231,7 +231,7 @@ export default function TableManager() {
                 {table.status.toUpperCase()}
               </p>
             </CardContent>
-            <div className="flex justify-center gap-2 mb-2">
+            <div className="flex justify-center flex-wrap gap-2 mb-2 px-2">
               <Button size="sm" onClick={() => openEditDialog(table)}>
                 Edit
               </Button>
@@ -265,12 +265,14 @@ export default function TableManager() {
               placeholder="Table Name"
               value={tableName}
               onChange={(e) => setTableName(e.target.value)}
+              className="text-sm"
             />
             <Input
               type="number"
               placeholder="Seats"
               value={tableSeats}
               onChange={(e) => setTableSeats(Number(e.target.value))}
+              className="text-sm"
             />
           </div>
           <AlertDialogFooter className="mt-4 flex justify-end gap-2">
@@ -298,9 +300,11 @@ export default function TableManager() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <p className="my-4 text-center text-gray-800 dark:text-gray-200">
-            Are you sure you want to{" "}
-            {selectedTable?.status === "free" ? "book" : "unbook"} table "
-            {selectedTable?.name}"?
+            <p className="my-4 text-center text-sm text-gray-800 dark:text-gray-200">
+              Are you sure you want to{" "}
+              {selectedTable?.status === "free" ? "book" : "unbook"} table "
+              {selectedTable?.name}"?
+            </p>
           </p>
           <AlertDialogFooter className="flex justify-center gap-2">
             <Button

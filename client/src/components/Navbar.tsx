@@ -29,11 +29,15 @@ export default function Navbar() {
     <nav className="w-full border-b bg-gray-50 dark:bg-gray-900 dark:border-gray-800 h-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Sidebar Trigger */}
           <div className="flex items-center gap-2">
-            <SidebarTrigger className="p-2 border rounded-md" />
+            <SidebarTrigger className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" />
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Right Controls */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <ModeToggle />
+
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <div className="flex items-center gap-2 cursor-pointer">
@@ -44,7 +48,7 @@ export default function Navbar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:flex flex-col">
-                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate max-w-[120px]">
                       {name || "Guest"}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
@@ -53,6 +57,7 @@ export default function Navbar() {
                   </div>
                 </div>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent className="w-48">
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
                 <DropdownMenuItem

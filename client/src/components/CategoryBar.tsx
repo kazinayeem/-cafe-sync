@@ -23,36 +23,37 @@ const Categories = ({
   return (
     <div className="w-full mb-6">
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 px-1 pb-2  flex-wrap">
+        <div className="flex gap-2 px-2 pb-2 flex-wrap sm:flex-nowrap">
           <Button
-            className={`h-10 px-5 rounded-full font-medium flex-shrink-0 text-sm
-              ${
-                activeCategory === null
-                  ? "bg-black text-white dark:bg-black"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-              }`}
+            className={`h-9 sm:h-10 px-4 sm:px-5 rounded-full font-medium flex-shrink-0 text-sm transition-colors duration-200
+          ${
+            activeCategory === null
+              ? "bg-black text-white dark:bg-black"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+          }`}
             onClick={() => setActiveCategory(null)}
           >
             All
           </Button>
+
           {catLoading
             ? Array(5)
                 .fill(0)
                 .map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 w-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"
+                    className="h-9 sm:h-10 w-20 sm:w-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"
                   />
                 ))
             : categories.map((cat) => (
                 <Button
                   key={cat._id}
-                  className={`h-10 px-5 rounded-full font-medium flex-shrink-0 text-sm 
-                    ${
-                      activeCategory === cat._id
-                        ? "bg-black text-white dark:bg-black"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                    }`}
+                  className={`h-9 sm:h-10 px-4 sm:px-5 rounded-full font-medium flex-shrink-0 text-sm transition-colors duration-200
+                ${
+                  activeCategory === cat._id
+                    ? "bg-black text-white dark:bg-black"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                }`}
                   onClick={() => setActiveCategory(cat._id)}
                 >
                   {cat?.name || "N/A"}

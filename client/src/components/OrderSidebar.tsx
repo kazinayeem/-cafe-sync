@@ -172,10 +172,9 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
   const finalTotal = totalPrice - discountAmount + tax;
 
   return (
-    <div className="w-full md:w-96 shadow-lg mt-6 dark:bg-gray-900 bg-white text-gray-900 dark:text-gray-100 p-4 md:p-6 flex flex-col rounded-xl">
-      {/* Header */}
+    <div className="w-full md:w-96 shadow-lg mt-6 dark:bg-gray-900 bg-white text-gray-900 dark:text-gray-100 p-4 sm:p-5 md:p-6 flex flex-col rounded-xl">
       <div className="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 className="text-lg md:text-xl font-bold">Order</h2>
+        <h2 className="text-base sm:text-lg md:text-xl font-bold">Order</h2>
         <Button variant="ghost" size="sm" onClick={handleClearCart}>
           Clear All
         </Button>
@@ -205,7 +204,7 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
           items.map((item) => (
             <div
               key={`${item.productId}-${item.size}`}
-              className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 shadow-sm"
+              className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow"
             >
               <img
                 src={item.imageUrl ?? "/placeholder-coffee.png"}
@@ -222,7 +221,7 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-6 w-6"
+                  className="h-6 w-6 text-xs"
                   onClick={() =>
                     item.quantity > 1
                       ? dispatch(
@@ -242,7 +241,9 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
                 >
                   -
                 </Button>
-                <span className="w-5 text-center text-xs">{item.quantity}</span>
+                <span className="w-5 text-center text-xs font-medium">
+                  {item.quantity}
+                </span>
                 <Button
                   size="icon"
                   variant="outline"
@@ -262,7 +263,7 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
                 <Button
                   size="icon"
                   variant="destructive"
-                  className="h-6 w-6"
+                  className="h-6 w-6 text-xs"
                   onClick={() =>
                     dispatch(
                       removeItem({ productId: item.productId, size: item.size })
@@ -315,7 +316,7 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
 
       {/* Financials */}
       <div className="mt-auto text-sm space-y-1">
-        <div className="flex justify-between">
+        <div className="flex justify-between text-gray-700 dark:text-gray-300">
           <span>Subtotal</span>
           <span>{totalPrice.toFixed(2)}</span>
         </div>
@@ -327,15 +328,14 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
           <span>Tax ({taxRate}%)</span>
           <span>{tax.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between mt-3 border-t pt-2 font-bold text-lg">
+        <div className="flex justify-between mt-3 border-t pt-2 font-bold text-lg text-gray-900 dark:text-white">
           <span>Total</span>
           <span>{finalTotal.toFixed(2)}</span>
         </div>
       </div>
 
-      {/* Checkout */}
       <Button
-        className="w-full mt-5 bg-green-600 hover:bg-green-700 text-white font-semibold"
+        className="w-full mt-5 bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors duration-200"
         onClick={() => setConfirmOpen(true)}
         disabled={isLoading || items.length === 0 || disabled}
       >

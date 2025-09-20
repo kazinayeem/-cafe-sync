@@ -69,17 +69,21 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <BackgroundLines className="absolute inset-0 z-0" children />
+    <div className="relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4 sm:px-6">
+      <BackgroundLines children className="absolute inset-0 z-0" />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg">
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 sm:p-8 shadow-xl">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <img src="/logo.png" alt="Cafe Logo" className="w-50 h-50 mb-2" />
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
+          <img
+            src="/logo.png"
+            alt="Cafe Logo"
+            className="w-16 h-16 sm:w-20 sm:h-20 mb-2"
+          />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white text-center">
             ☕ Cafe POS System
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-center mt-2">
+          <p className="text-gray-600 dark:text-gray-300 text-center mt-2 text-sm sm:text-base">
             Login to manage orders, track sales & monitor your café performance
           </p>
         </div>
@@ -88,14 +92,14 @@ export default function Login() {
         <div className="flex justify-between gap-3 mb-6">
           <Button
             type="button"
-            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white text-sm sm:text-base"
             onClick={fillAdmin}
           >
             Admin
           </Button>
           <Button
             type="button"
-            className="flex-1 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600"
+            className="flex-1 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white text-sm sm:text-base"
             onClick={fillStaff}
           >
             Staff
@@ -104,10 +108,13 @@ export default function Login() {
 
         {/* Login Form */}
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {error && <p className="text-red-600 text-center">{error}</p>}
+          {error && <p className="text-red-600 text-center text-sm">{error}</p>}
 
           <LabelInputContainer>
-            <Label htmlFor="email" className="dark:text-gray-200">
+            <Label
+              htmlFor="email"
+              className="dark:text-gray-200 text-sm sm:text-base"
+            >
               Email
             </Label>
             <Input
@@ -116,12 +123,15 @@ export default function Login() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
             />
           </LabelInputContainer>
 
           <LabelInputContainer>
-            <Label htmlFor="password" className="dark:text-gray-200">
+            <Label
+              htmlFor="password"
+              className="dark:text-gray-200 text-sm sm:text-base"
+            >
               Password
             </Label>
             <Input
@@ -130,13 +140,13 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
             />
           </LabelInputContainer>
 
           <Button
             type="submit"
-            className="mt-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            className="mt-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm sm:text-base"
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}

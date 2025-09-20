@@ -21,7 +21,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Loader, Search } from "lucide-react";
+import { Loader, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { Order, OrdersResponse } from "@/types/User";
@@ -33,7 +33,6 @@ const OrdersDashboard = () => {
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const ref: RefObject<HTMLDivElement | null> = useRef(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
   const [status, setStatus] = useState<
     "pending" | "preparing" | "served" | "cancelled" | ""
   >("");
@@ -122,109 +121,79 @@ const OrdersDashboard = () => {
     setActiveOrder(null)
   );
 
-  if (isLoading) return <LoadingSkeleton />;
-  if (isError)
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (isError) {
     return (
-      <p className="text-red-500 text-center p-8 dark:text-red-400">
-        Error loading orders.
-      </p>
+      <div className="flex items-center justify-center min-h-[400px] bg-white dark:bg-gray-900 rounded-xl shadow-lg">
+        <p className="text-center text-base font-medium text-red-500 dark:text-red-400 px-6">
+          ⚠️ Failed to load orders. Please check your connection and try again.
+        </p>
+      </div>
     );
+  }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans p-4 sm:p-8">
-      {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-0">
-          Orders
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 lg:p-8 font-sans">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-0">
+          Orders Dashboard
         </h1>
-        {/* <div className="flex items-center space-x-2 w-full sm:w-auto">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search a name, order, or etc"
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-          <Select
-            value={status || "all"}
-            onValueChange={(val) =>
-              setStatus(
-                val === "all"
-                  ? ""
-                  : (val as "pending" | "preparing" | "served" | "cancelled")
-              )
-            }
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setStatus("")}
+            className={cn(
+              "px-6 py-2 rounded-full font-medium transition-all duration-300",
+              status === ""
+                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+            )}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="preparing">Preparing</SelectItem>
-              <SelectItem value="served">Served</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div> */}
+            All Orders
+          </Button>
+          <Button
+            onClick={() => setStatus("preparing")}
+            className={cn(
+              "px-6 py-2 rounded-full font-medium transition-all duration-300",
+              status === "preparing"
+                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+            )}
+          >
+            In Progress
+          </Button>
+          <Button
+            onClick={() => setStatus("served")}
+            className={cn(
+              "px-6 py-2 rounded-full font-medium transition-all duration-300",
+              status === "served"
+                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+            )}
+          >
+            Completed
+          </Button>
+        </div>
       </div>
 
-      <div className="flex justify-start space-x-2 mb-6">
-        <Button
-          onClick={() => setStatus("")} // <-- use "" instead of "all"
-          className={cn(
-            "rounded-full px-6 py-2 transition-colors",
-            status === ""
-              ? "bg-black dark:bg-gray-700 text-white"
-              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-          )}
-        >
-          All
-        </Button>
-
-        <Button
-          onClick={() => setStatus("preparing")}
-          className={cn(
-            "rounded-full px-6 py-2 transition-colors",
-            status === "preparing"
-              ? "bg-black dark:bg-gray-700 text-white"
-              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-          )}
-        >
-          On Process
-        </Button>
-        <Button
-          onClick={() => setStatus("served")}
-          className={cn(
-            "rounded-full px-6 py-2 transition-colors",
-            status === "served"
-              ? "bg-black dark:bg-gray-700 text-white"
-              : "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-          )}
-        >
-          Completed
-        </Button>
-      </div>
-
-      {/* Re-added filter section */}
-      <div className="p-2">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+      {/* Filter Section */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
           Filter Orders
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-          {/* Items per page */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
               Items per page
             </label>
             <Select
               value={String(limit)}
               onValueChange={(val) => setLimit(Number(val))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg">
                 <SelectValue placeholder="Items per page" />
               </SelectTrigger>
               <SelectContent>
@@ -237,9 +206,8 @@ const OrdersDashboard = () => {
             </Select>
           </div>
 
-          {/* Search Order ID */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
               Search Order ID
             </label>
             <input
@@ -247,13 +215,12 @@ const OrdersDashboard = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Enter Order ID..."
-              className="border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md p-2"
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
 
-          {/* Status */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
               Status
             </label>
             <Select
@@ -266,7 +233,7 @@ const OrdersDashboard = () => {
                 )
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -279,47 +246,46 @@ const OrdersDashboard = () => {
             </Select>
           </div>
 
-          {/* Start Date */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md p-2"
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
 
-          {/* End Date */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
               End Date
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md p-2"
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
         </div>
 
-        {/* Apply Filters Button */}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-6 flex justify-end">
           <Button
             onClick={handleSearch}
             disabled={isFetching}
-            className="bg-purple-600 text-white hover:bg-purple-700 transition-all transform hover:scale-105"
+            className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-6 py-2.5 font-medium transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isFetching ? (
               <span className="flex items-center">
-                <Loader className="animate-spin w-4 h-4 mr-2" /> Searching...
+                <Loader className="animate-spin w-5 h-5 mr-2" />
+                Searching...
               </span>
             ) : (
               <span className="flex items-center">
-                <Search className="w-4 h-4 mr-2" /> Apply Filters
+                <Search className="w-5 h-5 mr-2" />
+                Apply Filters
               </span>
             )}
           </Button>
@@ -327,33 +293,36 @@ const OrdersDashboard = () => {
       </div>
 
       {/* Orders Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {orders.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12 col-span-full">
-            No orders found.
-          </p>
+          <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 text-center">
+            <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+              No orders found for the selected filters.
+            </p>
+          </div>
         ) : (
           orders.map((order) => (
-            <div
+            <motion.div
               key={order._id}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between cursor-pointer border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+              whileHover={{ scale: 1.02 }}
               onClick={() => setActiveOrder(order)}
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-3 mb-2">
                     <span
                       className={cn(
-                        "rounded-full w-8 h-8 text-white flex items-center justify-center font-bold",
+                        "rounded-full w-10 h-10 text-white flex items-center justify-center font-semibold",
                         order.status === "preparing"
-                          ? "bg-red-500"
+                          ? "bg-orange-500"
                           : "bg-green-500"
                       )}
                     >
-                      {"TA"}
+                      TA
                     </span>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
-                      {"Takeaway"}
+                    <p className="font-semibold text-lg text-gray-800 dark:text-gray-100">
+                      Takeaway
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -372,15 +341,15 @@ const OrdersDashboard = () => {
                 <div className="flex flex-col items-end">
                   <span
                     className={cn(
-                      "text-xs font-semibold px-2 py-1 rounded-full",
+                      "text-xs font-semibold px-3 py-1 rounded-full",
                       order.status === "preparing"
-                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-400"
-                        : "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
+                        : "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"
                     )}
                   >
                     {order.status === "preparing" ? "In Progress" : "Ready"}
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                     {new Date(order.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -390,49 +359,49 @@ const OrdersDashboard = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 mb-4">
+              <div className="flex flex-col gap-3 mb-4">
                 {order.items.slice(0, 3).map((item, index) => (
                   <div key={index} className="flex justify-between text-sm">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">
-                        {item.quantity}
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 dark:text-gray-300 font-medium">
+                        {item.quantity}x
                       </span>
-                      <span className="text-gray-700 dark:text-gray-300">
+                      <span className="text-gray-700 dark:text-gray-200">
                         {item.product?.name ?? "Product deleted"}
                       </span>
                     </div>
-                    <span className="text-gray-900 dark:text-gray-100 font-medium">
-                      {(item.quantity * item.price).toFixed(2)}
+                    <span className="text-gray-800 dark:text-gray-100 font-semibold">
+                      ${(item.quantity * item.price).toFixed(2)}
                     </span>
                   </div>
                 ))}
                 {order.items.length > 3 && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    +{order.items.length - 3} more
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    +{order.items.length - 3} more items
                   </p>
                 )}
               </div>
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  Total {order.totalPrice.toFixed(2)}
+                <p className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                  Total ${order.totalPrice.toFixed(2)}
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button
-                    variant="ghost"
-                    className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    variant="outline"
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                   >
-                    See Details
+                    Details
                   </Button>
                   <Button
-                    className="bg-yellow-400 text-black hover:bg-yellow-500 transition-colors"
+                    className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg font-medium transition-all duration-300"
                     disabled={isFetching}
                   >
-                    Pay Bills
+                    Pay Bill
                   </Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>
@@ -445,33 +414,39 @@ const OrdersDashboard = () => {
               <Button
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
-                className="h-10 w-10 rounded-full"
+                className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Prev
+                <span className="sr-only">Previous</span>
+                &lt;
               </Button>
             </PaginationPrevious>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <PaginationItem key={i}>
-                <Button
-                  onClick={() => goToPage(i + 1)}
-                  className={cn(
-                    "rounded-full h-10 w-10",
-                    page === i + 1
-                      ? "bg-purple-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  {i + 1}
-                </Button>
-              </PaginationItem>
-            ))}
+            {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
+              const pageNumber =
+                i + Math.max(1, Math.min(page - 2, totalPages - 4));
+              return (
+                <PaginationItem key={i}>
+                  <Button
+                    onClick={() => goToPage(pageNumber)}
+                    className={cn(
+                      "h-10 w-10 rounded-full",
+                      page === pageNumber
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    {pageNumber}
+                  </Button>
+                </PaginationItem>
+              );
+            })}
             <PaginationNext>
               <Button
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
-                className="h-10 w-10 rounded-full"
+                className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Next
+                <span className="sr-only">Next</span>
+                &gt;
               </Button>
             </PaginationNext>
           </PaginationContent>
@@ -485,52 +460,44 @@ const OrdersDashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 grid place-items-center p-4"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/60 z-50 grid place-items-center p-4"
           >
             <motion.div
               ref={ref}
               layout
-              className="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full p-6 overflow-auto relative shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => setActiveOrder(null)}
-                className="absolute top-4 right-4 rounded-full bg-gray-200 dark:bg-gray-800 p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+                className="absolute top-4 right-4 rounded-full bg-gray-200 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-all"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
                 Order Details
               </h2>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
                 ID: {activeOrder._id}
               </p>
 
-              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-4 border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                    Total: {activeOrder.totalPrice.toFixed(2)}
+                  <p className="text-xl font-semibold text-gray-800 dark:text-white">
+                    Total: ${activeOrder.totalPrice.toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-300">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Payment: {activeOrder.paymentMethod}
                   </p>
                 </div>
                 {activeOrder?.table && (
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-700 dark:text-gray-400">
+                  <div className="text-right mt-4 sm:mt-0">
+                    <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                       Table: {activeOrder.table.name}
                     </p>
                     <p
@@ -547,14 +514,14 @@ const OrdersDashboard = () => {
                 )}
               </div>
 
-              <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
                 Items
               </h3>
-              <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-2">
+              <div className="flex flex-col gap-4 max-h-80 overflow-y-auto">
                 {activeOrder?.items?.map((item) => (
                   <div
                     key={item._id}
-                    className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700"
+                    className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700"
                   >
                     {item.product?.imageUrl ? (
                       <img
@@ -563,53 +530,49 @@ const OrdersDashboard = () => {
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gray-300 dark:bg-gray-700 flex items-center justify-center rounded-lg text-gray-600 dark:text-gray-300 text-xs">
+                      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 text-xs font-medium">
                         No Image
                       </div>
                     )}
-                    <div className="flex-1 flex flex-col">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
                         {item.product?.name ?? "Product Deleted"}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-300">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Size: {item.size} - ${item.price}
                       </p>
-                      <p className="text-green-600 dark:text-green-400 font-bold mt-1">
-                        Qty: {item.quantity}
+                      <p className="text-green-600 dark:text-green-400 font-semibold mt-1">
+                        Quantity: {item.quantity}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex-1">
-                  <Select
-                    value={activeOrder.status}
-                    onValueChange={(val) =>
-                      handleStatusChange(activeOrder._id, val)
-                    }
-                    disabled={updatingId === activeOrder._id}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Update status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="preparing">Preparing</SelectItem>
-                      <SelectItem value="served">Served</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1 flex gap-3">
-                  <Button
-                    className="w-full bg-red-500 text-white hover:bg-red-600"
-                    onClick={() => deleteOrder(activeOrder._id)}
-                  >
-                    Delete Order
-                  </Button>
-                </div>
+              <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <Select
+                  value={activeOrder.status}
+                  onValueChange={(val) =>
+                    handleStatusChange(activeOrder._id, val)
+                  }
+                  disabled={updatingId === activeOrder._id}
+                >
+                  <SelectTrigger className="w-full sm:w-1/2 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg">
+                    <SelectValue placeholder="Update status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="preparing">Preparing</SelectItem>
+                    <SelectItem value="served">Served</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  className="w-full sm:w-1/2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-all duration-300"
+                  onClick={() => deleteOrder(activeOrder._id)}
+                >
+                  Delete Order
+                </Button>
               </div>
             </motion.div>
           </motion.div>
