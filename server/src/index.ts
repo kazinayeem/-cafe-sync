@@ -12,6 +12,7 @@ import productRoutes from "./routes/productRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import settinsRoutes from "./routes/settingsRoutes";
 import logger from "./utils/logger";
+import path from "path";
 dotenv.config();
 
 const app = express();
@@ -52,7 +53,21 @@ io.on("connection", (socket) => {
 
 // Routes
 app.get("/", (req: Request, res: Response) => {
-  res.send("☕ Cafe POS Server is running!");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+app.get("/health", (req: Request, res: Response) => {
+  res.json({
+    status: "ok",
+    message: "✅ Server is healthy",
+    timestamp: new Date().toISOString(),
+  });
+});
+app.get("/time", (req: Request, res: Response) => {
+  const now = new Date();
+  res.json({
+    serverTime: now.toLocaleString(),
+    isoTime: now.toISOString(),
+  });
 });
 
 app.use("/api/users", userRoutes);

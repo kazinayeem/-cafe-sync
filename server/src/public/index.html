@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cafe POS Server</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      h1 {
+        font-size: 2rem;
+        color: #6b4226;
+      }
+      p {
+        margin: 0.5rem 0;
+      }
+      .status {
+        margin-top: 1rem;
+        padding: 0.8rem 1.2rem;
+        background: #e0ffe0;
+        border: 1px solid #4caf50;
+        border-radius: 8px;
+        font-weight: bold;
+      }
+      .links {
+        margin-top: 1.5rem;
+      }
+      a {
+        display: inline-block;
+        margin: 0.3rem;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        background: #6b4226;
+        color: #fff;
+        border-radius: 6px;
+        transition: background 0.3s;
+      }
+      a:hover {
+        background: #4a2c1a;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>☕ Cafe POS Backend API</h1>
+    <p>Welcome! Your AI-powered Cafe POS server is running.</p>
+    <div class="status">✅ Server is healthy</div>
+
+    <div class="links">
+      <a href="/health" target="_blank">Health Check</a>
+      <a href="/time" target="_blank">Server Time</a>
+    </div>
+  </body>
+</html>
