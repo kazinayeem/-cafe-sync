@@ -64,7 +64,9 @@ export interface Order {
   paymentMethod: string;
   table?: Table | null;
   createdAt: string;
-  customOrderID? : string
+  customOrderID?: string;
+  discountPercent?: number;
+  taxRate?: number;
 }
 
 export interface OrdersResponse {

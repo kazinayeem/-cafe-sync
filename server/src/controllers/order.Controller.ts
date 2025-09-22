@@ -20,7 +20,8 @@ export const getTodayOrderSummaryController = async (
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { items, paymentMethod, tableId } = req.body;
+    const { items, paymentMethod, tableId, discountPercent, taxRate } =
+      req.body;
 
     if (!items || items.length === 0) {
       return res
@@ -36,6 +37,8 @@ export const createOrder = async (req: Request, res: Response) => {
     const order = await Order.create({
       items,
       totalPrice,
+      discountPercent,
+      taxRate,
       paymentMethod: paymentMethod || "cash",
       table: tableId || null,
     });

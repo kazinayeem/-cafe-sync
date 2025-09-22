@@ -16,23 +16,21 @@ export const printReceipt = (
   tables: Table[],
   selectedTable: string | null,
   totalPrice: number,
-  settings: Settings
+  settings: Settings,
+  receiptWindow?: Window
 ) => {
   const discountAmount = (totalPrice * discountPercent) / 100;
   const tax = (totalPrice - discountAmount) * (settings.taxRate / 100);
   const finalTotal = totalPrice - discountAmount + tax;
 
-  const receiptWindow = window.open(
-    "",
-    `PrintReceipt-${data?.data?._id || "n"}`,
-    "width=800,height=600"
-  );
-  if (!receiptWindow) return;
+  const win =
+    receiptWindow ?? window.open("", "PrintReceipt", "width=800,height=600");
+  if (!win) return;
 
   const now = new Date();
   const formattedDate = now.toLocaleString();
 
-  receiptWindow.document.write(`
+  win.document.write(`
     <html>
       <head>
         <title>Receipt</title>
@@ -65,7 +63,16 @@ export const printReceipt = (
         <p class="small" style="text-align:center;">Tel: ${settings.phone}</p>
         <div class="line"></div>
 
-        <p class="small">Order ID: ${data?.data?._id || "N/A"}</p>
+       <p class="small">
+  Order ID: ${
+    data?.data?.customOrderID
+      ? data.data.customOrderID
+      : data?.data?._id
+      ? data.data._id
+      : "N/A"
+  }
+</p>
+
         <p class="small">Date: ${formattedDate}</p>
         ${
           selectedTable && tables
@@ -80,9 +87,11 @@ export const printReceipt = (
         ${items
           .map(
             (item) =>
-              `<div class="row"><span>${item.name} x${item.quantity}</span><span>${(
-                item.price * item.quantity
-              ).toFixed(2)}</span></div>`
+              `<div class="row"><span>${item.name} x${
+                item.quantity
+              }</span><span>${(item.price * item.quantity).toFixed(
+                2
+              )}</span></div>`
           )
           .join("")}
 
@@ -94,7 +103,9 @@ export const printReceipt = (
         <div class="row"><span>Discount (${discountPercent}%)</span><span>- ${discountAmount.toFixed(
     2
   )}</span></div>
-        <div class="row"><span>Tax (${settings.taxRate}%)</span><span>${tax.toFixed(2)}</span></div>
+        <div class="row"><span>Tax (${
+          settings.taxRate
+        }%)</span><span>${tax.toFixed(2)}</span></div>
         <div class="row total"><span>Total</span><span>${finalTotal.toFixed(
           2
         )}</span></div>
@@ -104,14 +115,16 @@ export const printReceipt = (
 
         <div class="footer">
           <p>${settings.receiptFooter}</p>
-          <p><a href="${settings.website}" target="_blank">${settings.website}</a></p>
+          <p><a href="${settings.website}" target="_blank">${
+    settings.website
+  }</a></p>
         </div>
       </body>
     </html>
   `);
 
-  receiptWindow.document.close();
-  receiptWindow.focus();
-  receiptWindow.print();
-  setTimeout(() => receiptWindow.close(), 800);
+  win.document.close();
+  win.focus();
+  win.print();
+  setTimeout(() => win.close(), 800);
 };

@@ -2,6 +2,17 @@ import { useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import {
   useDeleteOrderMutation,
   useGetOrdersQuery,
   useUpdateOrderMutation,
@@ -25,8 +36,29 @@ import { Loader, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { Order, OrdersResponse } from "@/types/User";
+import Swal from "sweetalert2";
+import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+
+// final price
+
+const calculateFinalPrice = (order: Order) => {
+  const subtotal = order.totalPrice;
+  const discount = (subtotal * (order.discountPercent ?? 0)) / 100;
+  const tax = ((subtotal - discount) * (order.taxRate ?? 0)) / 100;
+  return subtotal - discount + tax;
+};
 
 const OrdersDashboard = () => {
+  const { role } = useSelector((state: RootState) => state.user);
+  const [selectedPayment, setSelectedPayment] = useState<
+    "cash" | "card" | "online" | "bkash" | "nagod"
+  >("cash");
+  const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
+  const [activePaymentOrder, setActivePaymentOrder] = useState<Order | null>(
+    null
+  );
+
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(20);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -98,6 +130,10 @@ const OrdersDashboard = () => {
     } finally {
       setUpdatingId(null);
     }
+  };
+  const paybill = (order: Order) => {
+    setActivePaymentOrder(order);
+    setOpenPaymentDialog(true);
   };
 
   const handleSearch = () => {
@@ -306,7 +342,6 @@ const OrdersDashboard = () => {
               key={order._id}
               className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               whileHover={{ scale: 1.02 }}
-              onClick={() => setActiveOrder(order)}
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -388,18 +423,20 @@ const OrdersDashboard = () => {
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  Total {order.totalPrice.toFixed(2)}
+                  Total {calculateFinalPrice(order).toFixed(2)}
                 </p>
+
                 <div className="flex gap-3">
                   <Button
+                    onClick={() => setActiveOrder(order)}
                     variant="outline"
                     className="text-sm font-medium text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                   >
                     Details
                   </Button>
                   <Button
+                    onClick={() => paybill(order)}
                     className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg font-medium transition-all duration-300"
-                    disabled={isFetching}
                   >
                     Pay Bill
                   </Button>
@@ -487,14 +524,34 @@ const OrdersDashboard = () => {
                 Order Details
               </h2>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
-                ID: {activeOrder._id}
+                ID: {activeOrder.customOrderID ?? activeOrder._id}
               </p>
 
               <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div>
                   <p className="text-xl font-semibold text-gray-800 dark:text-white">
-                    Total: {activeOrder.totalPrice.toFixed(2)}
+                    Total {calculateFinalPrice(activeOrder).toFixed(2)}
                   </p>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Subtotal: {activeOrder.totalPrice.toFixed(2)} <br />
+                    Discount ({activeOrder.discountPercent ?? 0}%): -
+                    {(
+                      (activeOrder.totalPrice *
+                        (activeOrder.discountPercent ?? 0)) /
+                      100
+                    ).toFixed(2)}{" "}
+                    <br />
+                    Tax ({activeOrder.taxRate ?? 0}%): +
+                    {(
+                      ((activeOrder.totalPrice -
+                        (activeOrder.totalPrice *
+                          (activeOrder.discountPercent ?? 0)) /
+                          100) *
+                        (activeOrder.taxRate ?? 0)) /
+                      100
+                    ).toFixed(2)}
+                  </div>
+
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Payment: {activeOrder.paymentMethod}
                   </p>
@@ -527,23 +584,12 @@ const OrdersDashboard = () => {
                     key={item._id}
                     className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700"
                   >
-                    {/* {item.product?.imageUrl ? (
-                      <img
-                        src={item.product.imageUrl}
-                        alt={item.product.name}
-                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 text-xs font-medium">
-                        No Image
-                      </div>
-                    )} */}
                     <div className="flex-1">
                       <p className="font-semibold text-gray-800 dark:text-gray-100">
                         {item.product?.name ?? "Product Deleted"}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Size: {item.size} - ${item.price}
+                        Size: {item.size} - {item.price}
                       </p>
                       <p className="text-green-600 dark:text-green-400 font-semibold mt-1">
                         Quantity: {item.quantity}
@@ -571,17 +617,92 @@ const OrdersDashboard = () => {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button
-                  className="w-full sm:w-1/2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-all duration-300"
-                  onClick={() => deleteOrder(activeOrder._id)}
-                >
-                  Delete Order
-                </Button>
+                {role === "admin" && (
+                  <Button
+                    disabled={role !== "admin"}
+                    className="w-full sm:w-1/2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-all duration-300"
+                    onClick={async () => {
+                      if (role !== "admin") {
+                        Swal.fire("Only Admin Can Delete Order ");
+                        return;
+                      }
+
+                      Swal.showLoading();
+                      await deleteOrder(activeOrder._id);
+                      Swal.close();
+                      setActiveOrder(null);
+                    }}
+                  >
+                    Delete Order
+                  </Button>
+                )}
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={openPaymentDialog} onOpenChange={setOpenPaymentDialog}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Pay Bill</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select a payment method for this order.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="mt-4">
+            <Select
+              value={selectedPayment}
+              onValueChange={(val) =>
+                setSelectedPayment(
+                  val as "cash" | "card" | "online" | "bkash" | "nagod"
+                )
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="card">Card</SelectItem>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="bkash">bKash</SelectItem>
+                <SelectItem value="nagod">Nagod</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!activePaymentOrder) return;
+                try {
+                  await updateOrder({
+                    id: activePaymentOrder._id,
+                    data: { paymentMethod: selectedPayment },
+                  }).unwrap();
+                  setOpenPaymentDialog(false);
+                  Swal.fire(
+                    "✅ Success",
+                    `Payment method updated to ${selectedPayment}`,
+                    "success"
+                  );
+                } catch (error) {
+                  Swal.fire(
+                    "❌ Error",
+                    "Failed to update payment method",
+                    "error"
+                  );
+                }
+              }}
+            >
+              Confirm Payment
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

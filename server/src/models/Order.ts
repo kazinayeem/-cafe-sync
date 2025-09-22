@@ -13,6 +13,8 @@ export interface IOrder extends Document {
   customOrderID: string;
   items: IOrderItem[];
   totalPrice: number;
+  discountPercent?: number;
+  taxRate?: number;
   status: "pending" | "preparing" | "served" | "cancelled";
   paymentMethod: "cash" | "card" | "online";
   table?: Types.ObjectId | ITable;
@@ -32,6 +34,8 @@ const orderSchema = new Schema<IOrder>(
     customOrderID: { type: String, unique: true },
     items: [orderItemSchema],
     totalPrice: { type: Number, required: true },
+    discountPercent: { type: Number, required: true },
+    taxRate: { type: Number, required: true },
     status: {
       type: String,
       enum: ["pending", "preparing", "served", "cancelled"],
@@ -39,7 +43,7 @@ const orderSchema = new Schema<IOrder>(
     },
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "online"],
+      enum: ["cash", "card", "online", "bkash", "nagod"],
       default: "cash",
     },
     table: { type: Schema.Types.ObjectId, ref: "Table", required: false },

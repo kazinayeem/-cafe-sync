@@ -98,6 +98,14 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
         },
       });
 
+      const itemsToPrint = [...items]; // copy items before clearing
+
+      // Open print window early to avoid popup blocking
+      let receiptWindow: Window | null = null;
+      if (shouldPrint) {
+        receiptWindow = window.open("", "PrintReceipt", "width=800,height=600");
+      }
+
       const payload: any = {
         items: items.map((i) => ({
           product: i.productId,
@@ -106,7 +114,8 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
           price: i.price,
         })),
         totalPrice,
-        discountPercent,
+        discountPercent: discountPercent,
+        taxRate: taxRate,
         paymentMethod: "cash",
         tableId: selectedTable || undefined,
       };
@@ -123,32 +132,32 @@ const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
 
       setConfirmOpen(false);
 
-      if (shouldPrint && settingsData?.data) {
-        setTimeout(() => {
-          printReceipt(
-            data,
-            items,
-            discountPercent,
-            tables,
-            selectedTable,
-            totalPrice,
-            {
-              businessName: settingsData.data.businessName,
-              address: settingsData.data.address,
-              phone: settingsData.data.phone,
-              website: settingsData.data.website,
-              receiptFooter: settingsData.data.receiptFooter,
-              taxRate: settingsData.data.taxRate,
-            }
-          );
-        }, 300);
-      }
-
       dispatch(clearCart());
       setDiscountPercent(defaultDiscount);
       if (selectedTable) {
         await updateTableStatus(selectedTable, "occupied");
         setSelectedTable(null);
+      }
+
+      // Fill and print the receipt
+      if (shouldPrint && settingsData?.data && receiptWindow) {
+        printReceipt(
+          data,
+          itemsToPrint,
+          discountPercent,
+          tables,
+          selectedTable,
+          totalPrice,
+          {
+            businessName: settingsData.data.businessName,
+            address: settingsData.data.address,
+            phone: settingsData.data.phone,
+            website: settingsData.data.website,
+            receiptFooter: settingsData.data.receiptFooter,
+            taxRate: settingsData.data.taxRate,
+          },
+          receiptWindow
+        );
       }
     } catch (err) {
       Swal.close();
