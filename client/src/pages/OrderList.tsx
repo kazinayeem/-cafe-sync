@@ -326,9 +326,13 @@ const OrdersDashboard = () => {
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Order #{order._id.substring(0, 10)} |{" "}
-                    {order.table?.name || "Takeaway"}
+                    #
+                    {order?.customOrderID
+                      ? order.customOrderID.substring(0, 40)
+                      : order?._id?.substring(0, 40)}{" "}
+                    | {order?.table?.name || "Takeaway"}
                   </p>
+
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     {new Date(order.createdAt).toLocaleDateString("en-US", {
                       weekday: "short",
@@ -371,7 +375,7 @@ const OrdersDashboard = () => {
                       </span>
                     </div>
                     <span className="text-gray-800 dark:text-gray-100 font-semibold">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      {(item.quantity * item.price).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -384,7 +388,7 @@ const OrdersDashboard = () => {
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  Total ${order.totalPrice.toFixed(2)}
+                  Total {order.totalPrice.toFixed(2)}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -489,7 +493,7 @@ const OrdersDashboard = () => {
               <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div>
                   <p className="text-xl font-semibold text-gray-800 dark:text-white">
-                    Total: ${activeOrder.totalPrice.toFixed(2)}
+                    Total: {activeOrder.totalPrice.toFixed(2)}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Payment: {activeOrder.paymentMethod}
@@ -523,7 +527,7 @@ const OrdersDashboard = () => {
                     key={item._id}
                     className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700"
                   >
-                     {/* {item.product?.imageUrl ? (
+                    {/* {item.product?.imageUrl ? (
                       <img
                         src={item.product.imageUrl}
                         alt={item.product.name}

@@ -14,8 +14,9 @@ interface Order {
   totalPrice: number;
   createdAt: string;
   status?: string;
-  table?: { tableNumber: string }; // <-- Corrected type definition
+  table?: { name: string };
   paymentMethod?: string;
+  customOrderID?: string;
 }
 
 interface Summary {
@@ -34,14 +35,11 @@ const formatDate = (dateStr?: string | null) => {
   });
 };
 
-const formatDateTime = (dateStr?: string | null) => {
+const formatTime = (dateStr?: string | null) => {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "-";
-  return d.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  return d.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -53,7 +51,7 @@ const formatPrice = (price?: number | null) => {
 };
 
 const capitalizeFirst = (str: string) => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 };
 
 export const generatePDF = (
@@ -62,200 +60,173 @@ export const generatePDF = (
   endDate: string,
   status: string,
   summary: Summary,
-  orders: Order[]
+  orders: Order[],
 ) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF("p", "mm", "a4");
   const pageWidth = doc.internal.pageSize.width;
-  const margin = 14;
+  const margin = 20;
   let y = margin;
 
-  // --- Header ---
+  // --- COVER PAGE (Professional Layout) ---
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(26);
   doc.text("CAFE SYNC", pageWidth / 2, y, { align: "center" });
-  y += 8;
-
-  doc.setFontSize(14);
-  doc.text("SALES REPORT", pageWidth / 2, y, { align: "center" });
   y += 12;
 
-  // --- Generation Info ---
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(14);
+  doc.text("Sales Report", pageWidth / 2, y, { align: "center" });
+  y += 25;
+
+  // Generated Date
+  doc.setFont("helvetica", "italic");
   doc.setFontSize(10);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, margin, y);
-  y += 6;
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, y);
+  y += 12;
 
-  // --- Report Period ---
+  // Report Filters Section
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("REPORT PERIOD", margin, y);
+  doc.setFontSize(12);
+  doc.text("Report Filters", margin, y);
   y += 6;
+  doc.setDrawColor(200);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 8;
 
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
   doc.text(`Filter: ${capitalizeFirst(filter)}`, margin, y);
-  y += 5;
-
+  y += 6;
   if (filter === "custom") {
     doc.text(`From: ${formatDate(startDate)}`, margin, y);
-    y += 5;
+    y += 6;
     doc.text(`To: ${formatDate(endDate)}`, margin, y);
-    y += 5;
+    y += 6;
   }
-
   doc.text(
     `Status: ${status === "all" ? "All Statuses" : capitalizeFirst(status)}`,
     margin,
     y
   );
-  y += 10;
+  y += 15;
 
-  // --- Summary Section ---
+  // Summary Section
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.text("SUMMARY", margin, y);
-  y += 7;
+  doc.text("Summary", margin, y);
+  y += 6;
+  doc.setDrawColor(200);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 10;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.text(`Total Orders: ${summary.totalOrders}`, margin, y);
   y += 6;
   doc.text(`Total Revenue: ${formatPrice(summary.totalSales)}`, margin, y);
-  y += 15;
 
-  // --- Orders Details ---
+  // Footer (cover page)
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.text(
+    "Confidential Report – For internal use only",
+    pageWidth / 2,
+    doc.internal.pageSize.height - 15,
+    { align: "center" }
+  );
+
+  doc.addPage();
+
+  // --- ORDERS PAGE ---
   if (orders.length > 0) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("ORDER DETAILS", margin, y);
-    y += 10;
+    const tableBody = orders.map((order, index) => {
+      const itemsList = order.items
+        .map(
+          (item) =>
+            `${item.product?.name || "N/A"} ${
+              item.size ? `(${item.size})` : ""
+            } x${item.quantity}`
+        )
+        .join("\n");
 
-    orders.forEach((order, index) => {
-      // Check if we need a new page
-      if (y > doc.internal.pageSize.height - 60) {
-        doc.addPage();
-        y = margin;
-      }
+      return [
+        index + 1,
+        order.customOrderID || order._id,
+        `${formatDate(order.createdAt)}\n${formatTime(order.createdAt)}`,
+        order?.table?.name || "",
+        capitalizeFirst(order.status || ""),
+        capitalizeFirst(order.paymentMethod || ""),
+        itemsList,
+        formatPrice(order.totalPrice),
+      ];
+    });
 
-      // Order Header
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(`Order #${index + 1}`, margin, y);
-      y += 5;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`ID: ${order._id}`, margin, y);
-
-      // Changed this line to check for tableNumber
-      if (order.table?.tableNumber) {
-        doc.text(`Table: ${order.table.tableNumber}`, margin + 60, y);
-      }
-
-      if (order.status) {
-        doc.text(`Status: ${capitalizeFirst(order.status)}`, margin + 120, y);
-      }
-
-      y += 5;
-      doc.text(`Date: ${formatDateTime(order.createdAt)}`, margin, y);
-
-      if (order.paymentMethod) {
-        doc.text(
-          `Payment: ${capitalizeFirst(order.paymentMethod)}`,
-          margin + 60,
-          y
-        );
-      }
-
-      y += 8;
-
-      // Order Items Table
-      // Order Items Table
-      const tableBody = order.items.map((item) => [
-        `${item.product?.name || "Unknown Item"}${
-          item.size ? ` (${item.size})` : ""
-        }`,
-        formatPrice(item.price),
-        item.quantity.toString(),
-        formatPrice(item.price * item.quantity),
-      ]);
-
-      autoTable(doc, {
-        startY: y,
-        head: [["Item", "Price", "Qty", "Total"]],
-        body: tableBody,
-        theme: "grid",
-        styles: {
-          fontSize: 9,
-          cellPadding: 2,
-          lineWidth: 0.1,
-          fillColor: [255, 255, 255],
-          textColor: 0,
-        },
-        headStyles: {
-          fontStyle: "bold",
-          lineWidth: 0.2,
-          fillColor: [255, 255, 255],
-          textColor: 0,
-        },
-        alternateRowStyles: {
-          fillColor: [255, 255, 255],
-        },
-        margin: { left: margin, right: margin },
-        tableWidth: "auto",
-      });
-
-      y = (doc as any).lastAutoTable.finalY + 5;
-
-      // Order Total
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.text(
-        `Order Total: ${formatPrice(order.totalPrice)}`,
-        pageWidth - margin,
-        y,
-        { align: "right" }
-      );
-      y += 10;
-
-      // Separator line between orders
-      if (index < orders.length - 1) {
-        doc.setLineWidth(0.1);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 10;
-      }
+    autoTable(doc, {
+      head: [
+        [
+          "#",
+          "Order ID",
+          "Date & Time",
+          "Table",
+          "Status",
+          "Payment",
+          "Items",
+          "Total",
+        ],
+      ],
+      body: tableBody,
+      theme: "grid",
+      startY: margin,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        valign: "middle",
+      },
+      headStyles: {
+        fontStyle: "bold",
+        fillColor: [240, 240, 240],
+        textColor: 20,
+      },
+      columnStyles: {
+        0: { halign: "center", cellWidth: 6 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 18, halign: "center" },
+        4: { cellWidth: 20, halign: "center" },
+        5: { cellWidth: 20, halign: "center" },
+        6: { cellWidth: 40 },
+        7: { halign: "right", cellWidth: 25 },
+      },
+      margin: { left: margin, right: margin },
     });
   } else {
     doc.setFont("helvetica", "italic");
     doc.setFontSize(11);
-    doc.text("No orders found for the selected criteria.", margin, y);
+    doc.text("No orders found for the selected criteria.", margin, margin + 10);
   }
 
-  // --- Footer ---
+  // --- GLOBAL FOOTER ---
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFont("helvetica", "italic");
     doc.setFontSize(8);
-
-    // Centered page number
     doc.text(
       `Page ${i} of ${pageCount}`,
       pageWidth / 2,
-      doc.internal.pageSize.height - 10,
+      doc.internal.pageSize.height - 8,
       { align: "center" }
     );
 
     doc.setFontSize(7);
     doc.text(
-      "www.kazinayee.site | made by Nayeem Soft",
+      "www.kazinayeem.site | made by NayeemSoft",
       margin,
-      doc.internal.pageSize.height - 10
+      doc.internal.pageSize.height - 8
     );
   }
 
-  // --- Save PDF ---
-  const fileName = `cafe-sync-sales-report-${new Date()
-    .toISOString()
-    .slice(0, 10)}.pdf`;
-  doc.save(fileName);
+  doc.save(
+    `cafe-sync-sales-report-${new Date().toISOString().slice(0, 10)}.pdf`
+  );
 };

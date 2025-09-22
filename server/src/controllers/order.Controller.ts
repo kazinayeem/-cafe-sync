@@ -67,33 +67,27 @@ export const getOrders = async (req: Request, res: Response) => {
       if (endDate) query.createdAt.$lte = new Date(endDate as string);
     }
 
+    // 🔎 If searching by customOrderID
+    if (orderId) {
+      query.customOrderID = {
+        $regex: new RegExp(orderId as string, "i"),
+      };
+    }
+
     const orders = await Order.find(query)
       .populate("table")
       .populate({
         path: "items.product",
         select: "-imageUrl",
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
 
-    let filteredOrders = orders;
-    if (orderId) {
-      const searchTerm = (orderId as string).toLowerCase();
-      filteredOrders = orders.filter((order) => {
-        const idStr =
-          order._id instanceof Types.ObjectId
-            ? order._id.toString()
-            : String(order._id);
-        return idStr.toLowerCase().startsWith(searchTerm);
-      });
-    }
-    const total = filteredOrders.length;
-    const paginatedOrders = filteredOrders.slice(
-      (Number(page) - 1) * Number(limit),
-      Number(page) * Number(limit)
-    );
+    const total = await Order.countDocuments(query);
 
     return res.json({
-      data: paginatedOrders,
+      data: orders,
       pagination: {
         total,
         page: Number(page),

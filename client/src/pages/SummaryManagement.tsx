@@ -26,13 +26,14 @@ interface OrderItem {
 
 interface Order {
   _id: string;
-  table?: { tableNumber: string };
+  table?: { name: string };
   customerName?: string;
   status: string;
   totalPrice: number;
   paymentMethod: string;
   createdAt: string;
   items: OrderItem[];
+  customOrderID?: string;
 }
 
 interface StatusBreakdownItem {
@@ -125,7 +126,6 @@ const SummaryManagement = () => {
   // --- Render ---
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Header & Export */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">📊 Sales Summary Management</h1>
         <Button
@@ -317,9 +317,7 @@ const SummaryManagement = () => {
                         className="border-b hover:bg-muted/50"
                       >
                         <td className="p-2">{i + 1}</td>
-                        <td className="p-2">
-                          {order.table?.tableNumber || "-"}
-                        </td>
+                        <td className="p-2">{order.table?.name || "-"}</td>
                         <td className="p-2">
                           <Badge variant={getStatusVariant(order.status)}>
                             {order.status}

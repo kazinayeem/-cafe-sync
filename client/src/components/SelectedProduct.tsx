@@ -71,6 +71,7 @@ const ProductCard = ({ product, disabled = false }: ProductCardProps) => {
         {/* Product image */}
         <div className="w-full h-32 sm:h-36 md:h-40 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
           <img
+            loading="lazy"
             src={product?.imageUrl ?? "/Loading_icon.gif"}
             alt={product?.name ?? "product"}
             className="w-full h-full object-cover"

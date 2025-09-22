@@ -10,6 +10,7 @@ export interface IOrderItem {
 }
 
 export interface IOrder extends Document {
+  customOrderID: string;
   items: IOrderItem[];
   totalPrice: number;
   status: "pending" | "preparing" | "served" | "cancelled";
@@ -28,6 +29,7 @@ const orderItemSchema = new Schema<IOrderItem>({
 
 const orderSchema = new Schema<IOrder>(
   {
+    customOrderID: { type: String, unique: true },
     items: [orderItemSchema],
     totalPrice: { type: Number, required: true },
     status: {
@@ -44,5 +46,31 @@ const orderSchema = new Schema<IOrder>(
   },
   { timestamps: true }
 );
+
+// Auto-generate customOrderID
+orderSchema.pre("save", async function (next) {
+  if (!this.customOrderID) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+
+    const datePrefix = `ORD-${year}-${day}-${month}`;
+
+    // Find last order of the same day
+    const lastOrder = await Order.findOne({
+      customOrderID: { $regex: `^${datePrefix}` },
+    }).sort({ createdAt: -1 });
+
+    let nextNumber = 1;
+    if (lastOrder && lastOrder.customOrderID) {
+      const parts = lastOrder.customOrderID.split("-");
+      const lastNumber = parseInt(parts[4]);
+      nextNumber = lastNumber + 1;
+    }
+    this.customOrderID = `${datePrefix}-${nextNumber}`;
+  }
+  next();
+});
 
 export const Order = model<IOrder>("Order", orderSchema);

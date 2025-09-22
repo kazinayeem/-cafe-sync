@@ -64,6 +64,7 @@ export interface Order {
   paymentMethod: string;
   table?: Table | null;
   createdAt: string;
+  customOrderID? : string
 }
 
 export interface OrdersResponse {

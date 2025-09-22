@@ -83,9 +83,6 @@ export const getOrderReport = async (req: Request, res: Response) => {
 export const getSalesLast7Days = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
-
-    console.log("-------LOG_______", startDate, endDate);
-
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
