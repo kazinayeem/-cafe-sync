@@ -144,23 +144,30 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-0.5 mt-1">
-              {operationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <Link
-                      to={item.url}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                        isActive(item.url)
-                          ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
-                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                      }`}
-                    >
-                      <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {operationItems
+                .filter((item) => {
+                  if (role === "barista") {
+                    return item.url === "/dashboard/kitchen" || item.url === "/dashboard/orders";
+                  }
+                  return true;
+                })
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                      <Link
+                        to={item.url}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                          isActive(item.url)
+                            ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                        }`}
+                      >
+                        <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -196,43 +203,14 @@ export function AppSidebar() {
         )}
 
         {/* Customers */}
-        <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
-            CRM & Loyalty
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5 mt-1">
-              {customerItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <Link
-                      to={item.url}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                        isActive(item.url)
-                          ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
-                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                      }`}
-                    >
-                      <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Business & Shifts */}
-        <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
-            Management
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5 mt-1">
-              {businessItems
-                .filter((item) => isAdminOrManager || item.url === "/dashboard/shifts")
-                .map((item) => (
+        {(isAdminOrManager || role === "cashier") && (
+          <SidebarGroup className="p-0">
+            <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
+              CRM & Loyalty
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-0.5 mt-1">
+                {customerItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <Link
@@ -249,9 +227,46 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Business & Shifts */}
+        {(isAdminOrManager || role === "cashier") && (
+          <SidebarGroup className="p-0">
+            <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
+              Management
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-0.5 mt-1">
+                {businessItems
+                  .filter((item) => {
+                    if (role === "cashier") return item.url === "/dashboard/shifts";
+                    if (role === "manager") return item.url !== "/dashboard/staff";
+                    return true;
+                  })
+                  .map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                        <Link
+                          to={item.url}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                            isActive(item.url)
+                              ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                          }`}
+                        >
+                          <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Administration */}
         <SidebarGroup className="p-0">
