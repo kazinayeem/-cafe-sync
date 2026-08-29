@@ -8,7 +8,7 @@ export const getBaseApiUrl = (): string => {
   );
 };
 
-export const createCustomBaseQuery = (path: string) => {
+export const createCustomBaseQuery = (path: string = "") => {
   return fetchBaseQuery({
     baseUrl: `${getBaseApiUrl()}${path}`,
     prepareHeaders: (headers) => {
@@ -20,3 +20,5 @@ export const createCustomBaseQuery = (path: string) => {
     },
   });
 };
+
+export const baseQueryWithAuth = createCustomBaseQuery("");

@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Coffee, Upload, Check } from "lucide-react";
+import { Coffee, Check } from "lucide-react";
 
 interface ProductFormDialogProps {
   isFormDialogOpen: boolean;

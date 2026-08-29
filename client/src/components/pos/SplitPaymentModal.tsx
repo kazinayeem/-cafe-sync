@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Banknote, CreditCard, Smartphone, Star, Plus, Trash2, CheckCircle2 } from "lucide-react";
-import { PaymentRecordPayload } from "@/services/orderApi";
+import type { PaymentRecordPayload } from "@/services/orderApi";
 
 interface SplitPaymentModalProps {
   isOpen: boolean;

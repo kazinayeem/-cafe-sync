@@ -9,8 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Product } from "@/services/productApi";
-import { SelectedModifier } from "@/store/cartSlice";
+import type { Product } from "@/services/productApi";
+import type { SelectedModifier } from "@/store/cartSlice";
 import { Plus, Minus, Check, Coffee } from "lucide-react";
 
 interface ModifierModalProps {
@@ -84,14 +84,21 @@ export const ModifierModal: React.FC<ModifierModalProps> = ({
         );
       }
 
+      const newMod: SelectedModifier = {
+        groupId: groupName,
+        groupName,
+        optionName,
+        price,
+      };
+
       if (!isMulti) {
         // Single selection group (e.g. Milk choice)
         const filtered = prev.filter((m) => m.groupName !== groupName);
-        return [...filtered, { groupName, optionName, price }];
+        return [...filtered, newMod];
       }
 
       // Multi selection group (e.g. Extra shots, Syrups)
-      return [...prev, { groupName, optionName, price }];
+      return [...prev, newMod];
     });
   };
 
@@ -257,7 +264,7 @@ export const ModifierModal: React.FC<ModifierModalProps> = ({
                         </div>
                         {opt.price > 0 && (
                           <span className="font-tabular font-bold text-amber-600 dark:text-amber-400 shrink-0 ml-1">
-                            +৳{opt.price}
+                            +৳${opt.price}
                           </span>
                         )}
                       </button>

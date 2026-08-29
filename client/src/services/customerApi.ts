@@ -54,7 +54,7 @@ export const customerApi = createApi({
     }),
 
     getCustomerById: builder.query<{ success: boolean; data: Customer }, string>({
-      query: (id) => `/api/customers/${id}`,
+      query: (id: string) => `/api/customers/${id}`,
       providesTags: (_res, _err, id) => [{ type: "Customer", id }],
     }),
 
@@ -62,7 +62,7 @@ export const customerApi = createApi({
       { success: boolean; data: Customer },
       Partial<Customer>
     >({
-      query: (body) => ({
+      query: (body: Partial<Customer>) => ({
         url: "/api/customers",
         method: "POST",
         body,
@@ -74,7 +74,7 @@ export const customerApi = createApi({
       { success: boolean; data: Customer },
       { id: string; data: Partial<Customer> }
     >({
-      query: ({ id, data }) => ({
+      query: ({ id, data }: { id: string; data: Partial<Customer> }) => ({
         url: `/api/customers/${id}`,
         method: "PUT",
         body: data,
@@ -82,11 +82,19 @@ export const customerApi = createApi({
       invalidatesTags: (_r, _e, { id }) => [{ type: "Customer", id }, "Customer"],
     }),
 
+    deleteCustomer: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (id: string) => ({
+        url: `/api/customers/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Customer"],
+    }),
+
     adjustLoyaltyPoints: builder.mutation<
       { success: boolean; data: Customer },
       { id: string; points: number; reason: string }
     >({
-      query: ({ id, points, reason }) => ({
+      query: ({ id, points, reason }: { id: string; points: number; reason: string }) => ({
         url: `/api/customers/${id}/loyalty`,
         method: "POST",
         body: { points, reason },
@@ -102,7 +110,7 @@ export const customerApi = createApi({
       { success: boolean; data: LoyaltyTransaction[] },
       string
     >({
-      query: (id) => `/api/customers/${id}/loyalty-ledger`,
+      query: (id: string) => `/api/customers/${id}/loyalty-ledger`,
       providesTags: ["Loyalty"],
     }),
   }),
@@ -113,6 +121,7 @@ export const {
   useGetCustomerByIdQuery,
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
+  useDeleteCustomerMutation,
   useAdjustLoyaltyPointsMutation,
   useGetLoyaltyLedgerQuery,
 } = customerApi;

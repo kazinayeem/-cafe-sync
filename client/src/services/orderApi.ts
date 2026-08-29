@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { createCustomBaseQuery } from "./apiConfig";
 
 export interface SelectedModifierPayload {
+  groupId?: string;
   groupName: string;
   optionName: string;
   price: number;
@@ -71,18 +72,15 @@ export interface Order {
   taxAmount: number;
   serviceChargeRate?: number;
   serviceChargeAmount?: number;
-  amountPaid: number;
-  changeDue?: number;
   status: "pending" | "confirmed" | "preparing" | "ready" | "served" | "completed" | "cancelled";
-  paymentStatus: "unpaid" | "paid" | "partial" | "refunded" | "partially_refunded";
+  paymentStatus?: "unpaid" | "paid" | "partial" | "refunded" | "partially_refunded";
   paymentMethod: string;
-  payments: PaymentRecordPayload[];
-  refunds?: { amount: number; reason: string; date: string }[];
-  table?: { _id: string; name: string; seats?: number; section?: string };
+  payments?: PaymentRecordPayload[];
+  table?: { _id: string; name: string };
   orderNote?: string;
-  cashier?: { _id: string; name: string; role: string };
+  cashier?: { _id: string; name: string; email: string };
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string;
 }
 
 export interface SalesSummaryResponse {
@@ -90,8 +88,7 @@ export interface SalesSummaryResponse {
     totalOrders: number;
     totalSales: number;
   };
-  statusBreakdown: { _id: string; count: number; sales: number }[];
-  orders: Order[];
+  statusBreakdown: { _id: string; count: number }[];
   allData: Record<string, Order[]>;
 }
 
@@ -101,16 +98,17 @@ export const orderApi = createApi({
   tagTypes: ["Orders", "Summary", "Chart"],
   endpoints: (builder) => ({
     createOrder: builder.mutation<{ success: boolean; data: Order }, CreateOrderPayload>({
-      query: (order) => ({
+      query: (body) => ({
         url: "/",
         method: "POST",
-        body: order,
+        body,
       }),
       invalidatesTags: ["Orders", "Summary", "Chart"],
     }),
 
     getOrders: builder.query<
       {
+        success: boolean;
         data: Order[];
         pagination: {
           total: number;
@@ -144,6 +142,11 @@ export const orderApi = createApi({
         const qs = queryParams.toString();
         return qs ? `${url}?${qs}` : url;
       },
+      providesTags: ["Orders"],
+    }),
+
+    getKdsOrders: builder.query<{ success: boolean; data: Order[] }, void>({
+      query: () => "/?limit=50",
       providesTags: ["Orders"],
     }),
 
@@ -219,6 +222,7 @@ export const orderApi = createApi({
 export const {
   useCreateOrderMutation,
   useGetOrdersQuery,
+  useGetKdsOrdersQuery,
   useGetOrderByIdQuery,
   useUpdateOrderMutation,
   useRefundOrderMutation,

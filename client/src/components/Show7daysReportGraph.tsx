@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,7 +9,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useGetSalesByDateRangeQuery } from "@/services/orderApi";
-import { TrendingUp, Calendar } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { Input } from "./ui/input";
 
 export default function Last7DaysSalesPage() {
