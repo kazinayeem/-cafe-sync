@@ -1,172 +1,257 @@
-# ☕ Cafe POS System
-
-|                  **Application Cover**                  |     
-| :-----------------------------------------------------: | 
-| ![Main application cover image](screenshorts/cover.png) |     
-
-## 🎥 Video Preview
-<a href="https://youtu.be/JgM4OJIKdkY" target="_blank"> <img src="https://img.youtube.com/vi/JgM4OJIKdkY/0.jpg" alt="Video Preview" width="560"/> </a>
-<iframe width="560" height="315" 
-src="https://www.youtube.com/embed/JgM4OJIKdkY?si=slyvMMwA5vpYaFwc&amp;controls=0" 
-title="YouTube video player" frameborder="0" 
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-</iframe>
-
-A modern **Point of Sale (POS) system** for cafés, built with the **MERN stack** and **TypeScript**. This application is designed to streamline cafe operations, offering features like **real-time order management**, detailed dashboard reports, and role-based access to ensure a smooth workflow for all staff.
-
----
-
-## ✨ Features
-
-- **Real-Time Order Management**: Baristas and cashiers see new orders and status updates instantly, improving communication and service speed.
-- **Role-Based Access**: The system differentiates between roles (Admin, Barista, Cashier), granting specific permissions to each user type.
-- **Menu & Inventory Management**: Admins can easily add, edit, and delete menu items, categories, and subcategories. They can also manage product availability.
-- **Customizable Menu**: Menu items can be organized into categories and subcategories (e.g., Coffee, Tea, Snacks) with support for different sizes and prices.
-- **Table & Order Status**: Track the real-time status of tables (occupied, available) and orders (pending, in progress, complete).
-- **Comprehensive Reports**: The admin dashboard provides a summary of key metrics, including daily and monthly sales, top-selling items, and staff performance.
-- **PDF Generation**: Generate printable sales summaries and order receipts for easy record-keeping and customer convenience.
-- **Payment & Discount Management**: Process payments using various methods (e.g., cash, card, mobile wallets) and apply discounts or coupons to orders.
-- **Customer Loyalty**: Create and manage customer profiles to track purchase history and offer rewards through a loyalty program.
-- **Search & Filtering**: Quickly find orders or products using a search bar and filter reports by date.
-- **Staff Management**: Admins can add new staff members and assign roles. They can also activate or deactivate staff accounts as needed.
-- **Intuitive UI**: A clean, responsive user interface makes it easy for cashiers to take orders and for staff to navigate the system.
-- **Printer Support**: Support for printing kitchen tickets and customer receipts.
-
----
-
-## 👥 Roles
-
-The application supports three distinct user roles, each with specific permissions to handle their responsibilities efficiently.
-
-### Admin (Owner / Super Admin)
-
-- **User Management**: Add, edit, and manage all staff accounts, assigning them specific roles (Barista, Cashier).
-- **Menu Control**: Add, edit, and delete menu items, categories, and subcategories. Manage product availability.
-- **Operations Oversight**: View real-time order status and table occupancy.
-- **Analytics & Reports**: Access detailed reports on daily/monthly sales, product performance, and staff metrics.
-
-### Barista
-
-- **Order Fulfillment**: View new orders in real time.
-- **Status Updates**: Update the status of assigned orders as they are prepared.
-- **Menu Suggestions**: Can suggest new menu items for admin approval.
-
-### Cashier
-
-- **Order Creation**: Create new orders, assign them to a table or as a takeaway.
-- **Customer Service**: Add items to the order, process payments, and apply discounts.
-- **Receipts**: Print order receipts for customers.
-
----
-
-## 🏗️ Tech Stack
-
-This project is built using a modern, scalable technology stack.
-
-- **Frontend**: **React**, **TypeScript**, **Redux** (for state management), **Vite** (for a fast development environment), **Tailwind CSS** (for styling), and **Lucide React** (for icons).
-- **Backend**: **Node.js**, **Express.js**, **TypeScript**.
-- **Database**: **MongoDB** (using **Mongoose** for object data modeling).
-- **Real-time Communication**: **Socket.io** (for instant updates on orders and tables).
-- **Authentication**: **JWT (JSON Web Tokens)**.
-
----
-
-## 🚀 Installation
-
-Follow these steps to set up the project locally.
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB (local or cloud-based)
-
-### Backend Setup
-
-1.  Clone the repository:
-        `bash
-    git clone [https://github.com/your-username/cafe-pos.git](https://github.com/your-username/cafe-pos.git)
-    cd cafe-pos/backend
-    `
-2.  Install dependencies:
-        `bash
-    npm install
-    `
-3.  Create a `.env` file in the `backend` directory and add your environment variables:
-        `    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret_key
-    PORT=5000
-   `
-4.  Run the server:
-        `bash
-    npm run dev
-    `
-
-### Frontend Setup
-
-1.  Navigate to the frontend directory:
-        `bash
-    cd ../frontend
-    `
-2.  Install dependencies:
-        `bash
-    npm install
-    `
-3.  Run the client:
-        `bash
-    npm run dev
-    `
-
-The application should now be running on `http://localhost:5173` (or the port specified in your Vite config).
-
----
-
-### 📄 Sample Receipt
+# ☕ Cafe Sync — Production-Grade Cafe POS & Smart QR Ecosystem
 
 <div align="center">
-  <a href="screenshorts/demo-print.pdf" target="_blank">
-    <img src="https://img.shields.io/badge/View%20Sample%20Receipt-red?style=for-the-badge&logo=adobe-acrobat-reader&logoColor=white" alt="View Sample Receipt" />
+  <img src="screenshorts/cover.png" alt="Cafe Sync Cover Banner" width="100%" />
+
+  <p align="center">
+    <strong>A modern, enterprise-ready Cafe Point of Sale (POS), Smart Table QR Ordering, Dedicated Kitchen Display System (KDS), and Real-Time Customer Display ecosystem.</strong>
+  </p>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/Stack-MERN%20%2B%20TypeScript-blue?style=for-the-badge&logo=react" alt="Tech Stack" />
+    <img src="https://img.shields.io/badge/Realtime-Socket.io-black?style=for-the-badge&logo=socket.io" alt="Realtime" />
+    <img src="https://img.shields.io/badge/Styling-Tailwind%20CSS-38bdf8?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="License" />
+  </p>
+</div>
+
+---
+
+## 🎥 Video Preview
+
+<div align="center">
+  <a href="https://youtu.be/JgM4OJIKdkY" target="_blank">
+    <img src="https://img.youtube.com/vi/JgM4OJIKdkY/0.jpg" alt="Video Preview" width="600" />
   </a>
 </div>
+
+---
+
+## 🌟 What is Cafe Sync?
+
+**Cafe Sync** is a full-featured Point of Sale (POS) and operations platform built specifically for high-speed specialty cafes, coffee shops, and restaurants. 
+
+It unifies the **cashier register**, **kitchen/barista queue**, **customer mobile ordering**, **in-cafe TV status displays**, **inventory management**, and **CRM loyalty rewards** into a cohesive, zero-latency system powered by WebSockets.
+
+---
+
+## ⚡ System Architecture & Automated Workflow
+
+```mermaid
+graph TD
+    subgraph "1. Ordering Channels"
+        A[📱 Table QR Scan] -->|Secure Token| B[Mobile Web Menu]
+        B -->|Place Order| C[API Gateway]
+        D[💻 Cashier Register POS] -->|Walk-in / Dine-in| C
+    end
+
+    subgraph "2. Real-Time Processing"
+        C -->|Socket.io 'newOrder'| E[👨‍🍳 Kitchen Display System - KDS]
+        C -->|Deduct Stock| F[(MongoDB Database)]
+        C -->|Log Cash/Tenders| G[Cashier Shift Drawer]
+    end
+
+    subgraph "3. Instant Live Synchronization"
+        E -->|Status: Preparing| H[📺 Cafe TV Display /display]
+        E -->|Status: Ready| H
+        E -->|WebSocket Update| I[📲 Customer Mobile Tracker /track/:id]
+        I -->|Vibrate & Chime| J[Customer Pickup]
+    end
+```
+
+---
+
+## ✨ Core Features & Modules
+
+### 1. ☕ High-Efficiency POS Register
+* **Product Modifiers & Sizes**: Support for single-selection (e.g. Milk choice, Sweetness level) and multi-selection (e.g. Extra espresso shots, Flavored syrups, Whipped cream) with real-time price calculations.
+* **Per-Item Kitchen Notes**: Cashiers can append special instructions (e.g., *"Extra hot"*, *"Less ice"*).
+* **Multi-Tender Split Payments**: Settle single tickets across multiple tenders simultaneously (Cash + Card + bKash + Nagad + Loyalty Points).
+* **Customer CRM & Loyalty Attachment**: Quickly attach or register guests at checkout to award points.
+* **Thermal Receipt Printing**: Styled PDF & thermal receipts with tax, discounts, and store details.
+
+### 2. 📲 Smart Table QR Ordering (`/order/:qrToken`)
+* **Secure Table Token System**: Every table features a unique, tamper-proof cryptographic token (`qrToken`).
+* **Mobile-First Customer Web App**: Guests scan their table QR code with their phone camera to browse the menu, customize drinks, and submit orders without app downloads or login friction.
+* **Concurrent Table Ordering**: Multiple guests at the same table can order independently under the same table identifier.
+* **Guest Cart Caching**: LocalStorage persistence prevents cart loss on accidental reloads or connection drops.
+
+### 3. ⚡ Live Real-Time Customer Order Tracking (`/track/:orderId`)
+* **Live Status Progression**: Real-time 5-stage vertical timeline: `Order Received` → `Confirmed` → `Preparing` → `Ready for Pickup` → `Completed`.
+* **Zero-Refresh WebSocket Sync**: Screen updates automatically when baristas advance tickets on the KDS.
+* **Arrival Celebration**: Plays a sound alert and vibrates mobile devices when orders are **Ready**.
+
+### 4. 📺 Cafe Customer TV Status Display (`/display`)
+* **Large Monitor / TV Optimization**: High-contrast, dark-mode board with large readable typography designed for viewing across the cafe.
+* **Dual Prominent Boards**:
+  * **NOW PREPARING**: Active queue in progress with table identifiers.
+  * **READY FOR PICKUP**: Pulsating glowing emerald badges for orders ready for collection.
+  * **RECENTLY COMPLETED**: Bottom ticker showing tickets completed in the past 10 minutes.
+* **Integrated Controls**: Fullscreen mode toggle and audio chime notification on ready status.
+
+### 5. 👨‍🍳 Dedicated Kitchen Display System (KDS) (`/kitchen`)
+* **Live Kanban Lanes**: `New Ticket` (Pending) → `In Preparation` (Preparing) → `Ready to Serve` (Ready).
+* **Elapsed Timers & Overdue Warnings**: Tracks preparation minutes with urgency alerts (yellow > 10m, red > 15m).
+* **Ticket Source Badges**: Clearly distinguishes **`📱 QR ORDER`** tickets from cashier walk-in orders.
+
+### 6. 👥 Customer CRM & Loyalty Program
+* **Customer Profiles**: Tracks lifetime spend, visit count, phone numbers, emails, and customer preferences.
+* **Loyalty Points System**: Earn points automatically from purchases and redeem them at checkout for discounts.
+* **Audit Ledger**: Complete transaction history with manager override tools.
+
+### 7. 📦 Real Inventory & Stock Management
+* **Automated Stock Deduction**: Deducts ingredient and item stock quantities upon sales.
+* **Movement Audit Logs**: Records stock-in, stock-out, damage, spoilage, and adjustments.
+* **Low Stock & Out-of-Stock Alerts**: Visual threshold warnings across the POS register and inventory dashboard.
+
+### 8. 💰 Cashier Shift & Cash Drawer Balancing
+* **Opening Float Entry**: Cashiers record physical cash at shift start.
+* **Cash Drawer Tracking**: Records Cash Drops (safe transfers), Cash In (add float), and Cash Out (petty cash).
+* **End-of-Shift Balancing**: Compares expected drawer cash against counted cash, highlighting discrepancies.
+
+### 9. 🪑 Floor Plan, Tables & Reservations
+* **Sectioned Floor Plan**: Manage tables across `Main Hall`, `Terrace`, `Rooftop`, and `VIP Lounge`.
+* **Table QR Management**: Single QR download (PNG), link copying, and **Bulk Printable QR Sheets**.
+* **Table Reservations**: Bookings with guest count, date/time, customer contact, and status lifecycle.
+
+### 10. 📊 Reports & Financial Analytics
+* **Sales Summary**: Gross sales, net revenue, total tickets, and Average Order Value (AOV).
+* **Date Range Filters**: Presets for *Today*, *Yesterday*, *Last 7 Days*, *This Month*, and custom ranges.
+* **7-Day Trend Charts**: Revenue and order volume trend charts powered by Recharts.
+* **PDF Sales Report Export**: Download formatted sales audit summaries.
+
+---
+
+## 👥 Role & Permissions Matrix
+
+| Role | POS Register | Kitchen KDS | Floor Plan & QR | Inventory | CRM & Loyalty | Shifts & Drawer | Reports | Staff & Settings |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Admin / Owner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Manager** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Cashier** | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Barista** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Waiter** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+> **Security Note:** All sensitive endpoints strictly enforce JWT authentication and database-level permission middleware (`checkPermission`).
+
+---
+
+## 🏗️ Technology Stack
+
+* **Frontend**: React 19, TypeScript, Redux Toolkit, RTK Query, Vite, Tailwind CSS v4, Lucide React, Recharts, `qrcode.react`, jsPDF.
+* **Backend**: Node.js, Express.js, TypeScript.
+* **Database**: MongoDB (Mongoose ODM).
+* **Real-time Engine**: Socket.io (bidirectional WebSocket coordination).
+* **Authentication**: JWT (JSON Web Tokens) with role-based access control.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* Node.js (v18 or higher)
+* npm or yarn
+* MongoDB instance (local or MongoDB Atlas)
+
+### 1. Backend Setup
+```bash
+cd server
+npm install
+```
+
+Create a `.env` file in the `server` directory:
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/cafe-sync
+JWT_SECRET=your_super_secret_jwt_key
+CLIENT_URL=http://localhost:5173
+```
+
+Start the backend server:
+```bash
+npm run dev
+```
+
+### 2. Frontend Setup
+```bash
+cd ../client
+npm install
+```
+
+Create a `.env` file in the `client` directory:
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Start the Vite development server:
+```bash
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+---
+
+## 🗺️ Key Application Routes
+
+| Route | Purpose | Audience |
+| :--- | :--- | :--- |
+| `/` | Landing Page & Portal Launcher | General |
+| `/login` | Staff Authentication | Staff |
+| `/order/:qrToken` | **Smart Table QR Mobile Ordering** | Customers |
+| `/track/:orderId` | **Live Customer Order Tracking** | Customers |
+| `/display` | **Cafe TV / Monitor Order Status Display** | Customers / In-store |
+| `/menu` | Public Digital QR Menu | Customers |
+| `/kitchen` | **Dedicated Kitchen Display System (KDS)** | Kitchen / Baristas |
+| `/dashboard` | Main POS Terminal & Register | Cashiers / Staff |
+| `/dashboard/tables` | Table Management & QR Code Generator | Managers / Admins |
+| `/dashboard/orders` | Orders Explorer, Drawer & Refunds | Managers / Cashiers |
+| `/dashboard/customers` | Customer CRM & Loyalty Ledger | Managers / Admins |
+| `/dashboard/inventory` | Real Stock Levels & Movement Logs | Managers / Admins |
+| `/dashboard/shifts` | Cashier Shift & Cash Drawer Balancing | Cashiers / Managers |
+| `/dashboard/reports` | Sales Analytics & PDF Export | Admins / Owners |
+| `/dashboard/settings` | Business Profile, Taxes, RBAC Matrix | Admins |
+
+---
+
 ## 📸 Screenshots
 
-A visual walkthrough of the Cafe POS System's key features and user interface.
+| **Dashboard & Operational KPIs** | **POS Register & Ticket Cart** |
+| :---: | :---: |
+| ![Dashboard](screenshorts/image1.png) | ![POS Register](screenshorts/image4.png) |
 
-|               **Dashboard & Sales Overview**               |                       **Real-Time Orders**                        |
-| :--------------------------------------------------------: | :---------------------------------------------------------------: |
-| ![Dashboard showing sales charts](screenshorts/image1.png) | ![Live order tracking view for baristas](screenshorts/image2.png) |
+| **Kitchen Display System (KDS)** | **Table Management & Floor Plan** |
+| :---: | :---: |
+| ![KDS](screenshorts/image2.png) | ![Table Management](screenshorts/image3.png) |
 
-|                    **Table Management**                     |                        **Order Creation**                         |
-| :---------------------------------------------------------: | :---------------------------------------------------------------: |
-| ![Table status and occupancy view](screenshorts/image3.png) | ![Cashier's interface for taking orders](screenshorts/image4.png) |
+| **Catalog & Product Modifiers** | **Category Setup** |
+| :---: | :---: |
+| ![Product Management](screenshorts/image5.png) | ![Categories](screenshorts/image6.png) |
 
-|                         **Menu Management**                          |                         **Category Setup**                          |
-| :------------------------------------------------------------------: | :-----------------------------------------------------------------: |
-| ![Admin view for adding/editing menu items](screenshorts/image5.png) | ![Admin interface for managing categories](screenshorts/image6.png) |
+| **Staff Directory & Permissions** | **Financial Reports & Analytics** |
+| :---: | :---: |
+| ![Staff Management](screenshorts/image7.png) | ![Reports](screenshorts/image8.png) |
 
-|                        **Staff Management**                        |                       **Reports & Analytics**                        |
-| :----------------------------------------------------------------: | :------------------------------------------------------------------: |
-| ![Admin view for managing staff accounts](screenshorts/image7.png) | ![Detailed sales reports with date filters](screenshorts/image8.png) |
+| **Search & Filtering Engine** | **Role-Based Access Control** |
+| :---: | :---: |
+| ![Search](screenshorts/image9.png) | ![Staff Roles](screenshorts/image10.png) |
 
-|                      **Search Functionality**                      |                           **Staff Permissions View**                           |
-| :----------------------------------------------------------------: | :----------------------------------------------------------------------------: |
-| ![Searching for specific items or orders](screenshorts/image9.png) | ![Admin's view of a staff member's details and role](screenshorts/image10.png) |
+| **Real Inventory & Stock Toggles** | **Order Details Drawer & Split Tenders** |
+| :---: | :---: |
+| ![Inventory Availability](screenshorts/image11.png) | ![Order Details](screenshorts/image12.png) |
 
-|                  **Product Availability Toggles**                  |                         **Detailed Order View**                         |
-| :----------------------------------------------------------------: | :---------------------------------------------------------------------: |
-| ![Admin toggling an item's availability](screenshorts/image11.png) | ![A detailed view of a single customer order](screenshorts/image12.png) |
+| **Order Confirmation & Status** | **PDF Thermal Receipt Generation** |
+| :---: | :---: |
+| ![Order Confirmation](screenshorts/image13.png) | ![Receipt](screenshorts/image14.png) |
 
-|                     **Order Confirmation**                     |                   **PDF Receipt Generation**                    |
-| :------------------------------------------------------------: | :-------------------------------------------------------------: |
-| ![Screen showing order confirmation](screenshorts/image13.png) | ![Example of a generated PDF receipt](screenshorts/image14.png) |
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you find a bug or have a feature request, please open an issue. For major changes, please fork the repository and create a pull request.
+Contributions, issues, and feature requests are welcome! Feel free to open a ticket or submit a pull request.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
