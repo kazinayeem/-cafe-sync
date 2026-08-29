@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useGetPublicMenuQuery } from "@/services/publicMenuApi";
-import { PremiumCoffeeHero } from "@/components/coffee/PremiumCoffeeHero";
 import { BanglaCoffeeQuotes } from "@/components/coffee/BanglaCoffeeQuotes";
 import { CoffeeCultureLifestyle } from "@/components/coffee/CoffeeCultureLifestyle";
 import {
@@ -438,9 +437,22 @@ export function App() {
               </div>
             </div>
 
-            {/* Right Column: Realistic Coffee Visual with Craft Micro-Interaction */}
+            {/* Right Column: Romantic Cafe Hero Photograph */}
             <div className="lg:col-span-6 flex items-center justify-center relative">
-              <PremiumCoffeeHero />
+              <div className="relative w-full max-w-lg lg:max-w-none group">
+                {/* Subtle Warm Glow Backdrop */}
+                <div className="absolute -inset-2 bg-gradient-to-tr from-[#EAD4BB]/60 via-[#F3DECA]/40 to-[#E0C7AA]/50 dark:from-[#3A1E0E]/40 dark:via-[#261309]/30 dark:to-[#4A2612]/30 rounded-[32px] sm:rounded-[40px] blur-2xl -z-10 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
+
+                {/* Hero Image Container */}
+                <div className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-[#3C2415]/15 dark:shadow-black/50 border border-[#E9DAC8]/90 dark:border-[#3A2417] bg-[#EFE4D6] dark:bg-[#1A1009] transition-all duration-500 hover:scale-[1.015]">
+                  <img
+                    src="/heroimage.png"
+                    alt="বর্নোক্যাফেতে কফি উপভোগরত এক জুটি"
+                    className="w-full h-80 sm:h-[440px] lg:h-[480px] xl:h-[520px] object-cover object-center"
+                    loading="eager"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
