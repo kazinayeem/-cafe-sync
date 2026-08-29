@@ -19,6 +19,10 @@ import {
   X,
   CreditCard,
   Edit3,
+  CheckCircle2,
+  Clock,
+  User,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,8 +197,8 @@ export const OrderList: React.FC = () => {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       <PageHeader
-        title="Orders & Sales History"
-        subtitle="Live order lifecycle statuses, split payment details, customer linkage, and refund processing"
+        title="Orders & Sales"
+        subtitle="Manage orders, payments, refunds, and customer history."
       />
 
       {/* Multi-Filter Bar */}
@@ -204,7 +208,7 @@ export const OrderList: React.FC = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search Order ID..."
+              placeholder="Search Order ID / Token..."
               value={searchOrderId}
               onChange={(e) => setSearchOrderId(e.target.value)}
               className="pl-9 h-9 rounded-xl text-xs font-semibold"
@@ -249,48 +253,49 @@ export const OrderList: React.FC = () => {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="h-9 rounded-xl text-xs font-semibold"
+              className="h-9 rounded-xl text-xs"
+              placeholder="Start"
             />
-            <span className="text-muted-foreground text-xs font-bold">to</span>
+            <span className="text-muted-foreground text-xs font-bold">-</span>
             <Input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="h-9 rounded-xl text-xs font-semibold"
+              className="h-9 rounded-xl text-xs"
+              placeholder="End"
             />
           </div>
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Orders View */}
       <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border/80 uppercase font-bold text-muted-foreground tracking-wider">
+            <thead className="bg-muted/50 border-b border-border/80 font-bold uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="py-3.5 px-4">Order ID</th>
-                <th className="py-3.5 px-4">Type / Table</th>
-                <th className="py-3.5 px-4">Customer</th>
-                <th className="py-3.5 px-4">Prep Status</th>
-                <th className="py-3.5 px-4">Payment</th>
-                <th className="py-3.5 px-4">Total Amount</th>
-                <th className="py-3.5 px-4">Date & Time</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">Order #</th>
+                <th className="py-3 px-4">Type / Table</th>
+                <th className="py-3 px-4">Customer</th>
+                <th className="py-3 px-4">Prep Status</th>
+                <th className="py-3 px-4">Payment</th>
+                <th className="py-3 px-4">Total</th>
+                <th className="py-3 px-4">Date & Time</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
-                Array(5)
-                  .fill(0)
-                  .map((_, idx) => (
-                    <tr key={idx} className="animate-pulse">
-                      <td colSpan={8} className="py-4 px-4 bg-muted/20" />
-                    </tr>
-                  ))
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                    Loading orders...
+                  </td>
+                </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                    No orders matching search criteria.
+                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                    No orders matching your criteria.
                   </td>
                 </tr>
               ) : (
@@ -428,6 +433,93 @@ export const OrderList: React.FC = () => {
           </table>
         </div>
 
+        {/* Mobile / Tablet Order Cards View */}
+        <div className="md:hidden divide-y divide-border/60">
+          {isLoading ? (
+            <div className="py-12 text-center text-muted-foreground text-xs">
+              Loading orders...
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground text-xs">
+              No orders matching your criteria.
+            </div>
+          ) : (
+            orders.map((order) => {
+              const orderNumber = order.orderToken
+                ? `#${order.orderToken}`
+                : `#${order.customOrderID?.slice(-6) || "0000"}`;
+              const tableName =
+                order.orderType === "takeaway"
+                  ? "Takeaway 🛍️"
+                  : (order.table as any)?.name || "Dine-In 🍽️";
+              const customerName =
+                order.customer?.name || order.guestName || "Walk-in Guest";
+
+              return (
+                <div
+                  key={order._id}
+                  onClick={() => setSelectedOrder(order)}
+                  className="p-4 space-y-3 hover:bg-accent/40 active:bg-accent/60 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-base text-foreground">
+                          {orderNumber}
+                        </span>
+                        {order.source === "qr" ? (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300">
+                            QR
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-600">
+                            POS
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-semibold mt-0.5">
+                        {tableName} • {customerName}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-base font-black font-tabular text-amber-600 dark:text-amber-400">
+                        ৳{order.totalPrice}
+                      </span>
+                      <p className="text-[10px] text-muted-foreground font-medium">
+                        {new Date(order.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <StatusBadge status={order.status} type="order" />
+                      <StatusBadge status={order.paymentStatus || "paid"} type="payment" />
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedOrder(order);
+                      }}
+                      className="h-7 px-2.5 rounded-lg text-xs font-bold text-amber-600"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
         {/* Pagination Controls */}
         {pagination && pagination.totalPages > 1 && (
           <div className="p-3 border-t border-border/80 flex items-center justify-between text-xs font-semibold">
@@ -460,7 +552,7 @@ export const OrderList: React.FC = () => {
         )}
       </div>
 
-      {/* Order Details Drawer */}
+      {/* Order Details Drawer / Modal */}
       <Drawer
         open={Boolean(selectedOrder)}
         onOpenChange={(open) => !open && setSelectedOrder(null)}
@@ -472,7 +564,7 @@ export const OrderList: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <DrawerTitle className="text-xl font-black text-foreground">
-                      Order #{selectedOrder.customOrderID || selectedOrder._id.slice(-6)}
+                      Order #{selectedOrder.orderToken || selectedOrder.customOrderID || selectedOrder._id.slice(-6)}
                     </DrawerTitle>
                     <StatusBadge status={selectedOrder.status} type="order" />
                     <StatusBadge
@@ -504,8 +596,55 @@ export const OrderList: React.FC = () => {
               </DrawerHeader>
 
               <div className="flex-1 overflow-y-auto py-4 space-y-5">
+                {/* Live Preparation Timeline */}
+                <div className="p-4 rounded-2xl bg-accent/40 border border-border/80 space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-amber-500" />
+                    Order Lifecycle Timeline
+                  </h4>
+
+                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-black">
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        ["pending", "preparing", "ready", "served"].includes(selectedOrder.status)
+                          ? "bg-emerald-500 text-white border-emerald-600"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      ✓ Placed
+                    </div>
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        ["preparing", "ready", "served"].includes(selectedOrder.status)
+                          ? "bg-amber-500 text-white border-amber-600 animate-pulse"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      ● Preparing
+                    </div>
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        ["ready", "served"].includes(selectedOrder.status)
+                          ? "bg-emerald-500 text-white border-emerald-600"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      ○ Ready
+                    </div>
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        selectedOrder.status === "served"
+                          ? "bg-slate-700 text-white border-slate-800"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      ○ Completed
+                    </div>
+                  </div>
+                </div>
+
                 {/* Status Quick Advancement Toolbar */}
-                <div className="p-3.5 rounded-2xl bg-accent/40 border border-border/80 flex items-center justify-between flex-wrap gap-2">
+                <div className="p-3.5 rounded-2xl bg-card border border-border/80 flex items-center justify-between flex-wrap gap-2">
                   <span className="text-xs font-bold text-muted-foreground">
                     Update Prep Status:
                   </span>

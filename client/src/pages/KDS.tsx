@@ -14,14 +14,46 @@ import {
   Volume2,
   VolumeX,
   User,
+  Wifi,
+  WifiOff,
+  BellRing,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const KDS_STATUSES = [
-  { key: "pending", label: "New Ticket", color: "border-blue-500/40 bg-blue-500/5 text-blue-600" },
-  { key: "preparing", label: "In Preparation", color: "border-amber-500/40 bg-amber-500/5 text-amber-600" },
-  { key: "ready", label: "Ready to Serve", color: "border-emerald-500/40 bg-emerald-500/5 text-emerald-600" },
-  { key: "served", label: "Completed / Served", color: "border-slate-500/40 bg-slate-500/5 text-slate-500" },
+  {
+    key: "pending",
+    label: "New Ticket",
+    headerColor: "bg-blue-500/15 border-blue-500/30 text-blue-400",
+    badgeColor: "bg-blue-500 text-slate-950",
+    actionLabel: "Start Preparing",
+    actionColor: "bg-amber-600 hover:bg-amber-500 text-white",
+  },
+  {
+    key: "preparing",
+    label: "In Preparation",
+    headerColor: "bg-amber-500/15 border-amber-500/30 text-amber-400",
+    badgeColor: "bg-amber-500 text-slate-950",
+    actionLabel: "Mark Ready",
+    actionColor: "bg-emerald-600 hover:bg-emerald-500 text-white",
+  },
+  {
+    key: "ready",
+    label: "Ready to Serve",
+    headerColor: "bg-emerald-500/15 border-emerald-500/30 text-emerald-400",
+    badgeColor: "bg-emerald-500 text-slate-950",
+    actionLabel: "Complete & Serve",
+    actionColor: "bg-slate-700 hover:bg-slate-600 text-white",
+  },
+  {
+    key: "served",
+    label: "Completed / Served",
+    headerColor: "bg-slate-800/80 border-slate-700 text-slate-400",
+    badgeColor: "bg-slate-700 text-slate-200",
+    actionLabel: "",
+    actionColor: "",
+  },
 ];
 
 interface KDSProps {
@@ -38,6 +70,8 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [mobileLaneFilter, setMobileLaneFilter] = useState<string>("all");
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -50,13 +84,13 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.6);
     } catch {
@@ -65,18 +99,29 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
   };
 
   useEffect(() => {
-    socket.on("newOrder", () => {
+    const onConnect = () => setIsConnected(true);
+    const onDisconnect = () => setIsConnected(false);
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    const onNewOrder = () => {
       refetch();
       playChime();
-    });
+    };
 
-    socket.on("orderStatusUpdated", () => {
+    const onStatusUpdate = () => {
       refetch();
-    });
+    };
+
+    socket.on("newOrder", onNewOrder);
+    socket.on("orderStatusUpdated", onStatusUpdate);
 
     return () => {
-      socket.off("newOrder");
-      socket.off("orderStatusUpdated");
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("newOrder", onNewOrder);
+      socket.off("orderStatusUpdated", onStatusUpdate);
     };
   }, [refetch, soundEnabled]);
 
@@ -85,8 +130,10 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
       document.documentElement.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
     } else {
-      document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+        setIsFullscreen(false);
+      }
     }
   };
 
@@ -110,33 +157,58 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
 
   const getElapsedMinutes = (dateStr: string) => {
     const elapsedMs = currentTime.getTime() - new Date(dateStr).getTime();
-    return Math.floor(elapsedMs / 60000);
+    return Math.max(0, Math.floor(elapsedMs / 60000));
   };
 
+  const filteredStatuses =
+    mobileLaneFilter === "all"
+      ? KDS_STATUSES
+      : KDS_STATUSES.filter((s) => s.key === mobileLaneFilter);
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 flex flex-col gap-5 select-none font-sans">
-      {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-5 lg:p-6 flex flex-col gap-4 select-none font-sans">
+      {/* Top Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-inner">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20">
             <ChefHat className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
                 Kitchen Display System (KDS)
               </h1>
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
+
+              {/* Connection Status Badge */}
+              <div
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                  isConnected
+                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                    : "bg-amber-500/15 text-amber-400 border-amber-500/30 animate-pulse"
+                }`}
+              >
+                {isConnected ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Live Sync
+                  </>
+                ) : (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Reconnecting...
+                  </>
+                )}
+              </div>
             </div>
             <p className="text-xs text-slate-400 font-medium">
-              Live Barista & Kitchen Order Execution
+              Live Barista & Kitchen Order Execution Queue
             </p>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2.5">
-          <div className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400">
+        {/* Action Controls & Digital Clock */}
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400">
             <Clock className="h-3.5 w-3.5 inline-block mr-1.5 text-slate-400" />
             {currentTime.toLocaleTimeString()}
           </div>
@@ -145,7 +217,8 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
             size="sm"
             variant="outline"
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="h-9 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="h-9 w-9 p-0 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
+            title={soundEnabled ? "Mute Chime" : "Enable Chime"}
           >
             {soundEnabled ? (
               <Volume2 className="h-4 w-4 text-emerald-400" />
@@ -158,7 +231,8 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
             size="sm"
             variant="outline"
             onClick={toggleFullscreen}
-            className="h-9 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="h-9 w-9 p-0 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
+            title="Toggle Fullscreen"
           >
             {isFullscreen ? (
               <Minimize2 className="h-4 w-4" />
@@ -169,35 +243,78 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
         </div>
       </div>
 
-      {/* 4-Column Board */}
+      {/* Mobile/Tablet Lane Filter Tabs */}
+      <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        <button
+          onClick={() => setMobileLaneFilter("all")}
+          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${
+            mobileLaneFilter === "all"
+              ? "bg-amber-500 text-slate-950"
+              : "bg-slate-900 text-slate-400 border border-slate-800"
+          }`}
+        >
+          All Queues ({allOrders.length})
+        </button>
+
+        {KDS_STATUSES.map((st) => {
+          const count = allOrders.filter((o) => o.status === st.key).length;
+          const isSelected = mobileLaneFilter === st.key;
+
+          return (
+            <button
+              key={st.key}
+              onClick={() => setMobileLaneFilter(st.key)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
+                isSelected
+                  ? "bg-amber-500 text-slate-950"
+                  : "bg-slate-900 text-slate-400 border border-slate-800"
+              }`}
+            >
+              <span>{st.label}</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950/40">
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Main 4-Column Board */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-1 items-start">
-        {KDS_STATUSES.map(({ key, label, color }) => {
+        {filteredStatuses.map((statusConfig) => {
+          const { key, label, headerColor, badgeColor, actionLabel, actionColor } = statusConfig;
           const columnOrders = allOrders.filter((o) => o.status === key);
 
           return (
             <div
               key={key}
-              className="flex flex-col rounded-3xl bg-slate-900/60 border border-slate-800/80 overflow-hidden min-h-[75vh]"
+              className="flex flex-col rounded-3xl bg-slate-900/60 border border-slate-800 overflow-hidden min-h-[75vh]"
             >
               {/* Column Header */}
               <div
-                className={`p-3.5 border-b border-slate-800/80 flex items-center justify-between ${color}`}
+                className={`p-3.5 border-b flex items-center justify-between ${headerColor}`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black uppercase tracking-wider">
-                    {label}
-                  </span>
-                </div>
-                <span className="flex h-6 min-w-6 px-1.5 items-center justify-center rounded-full bg-slate-950 font-mono font-bold text-xs">
+                <span className="text-xs font-black uppercase tracking-wider">
+                  {label}
+                </span>
+                <span
+                  className={`flex h-6 min-w-6 px-2 items-center justify-center rounded-full font-mono font-black text-xs ${badgeColor}`}
+                >
                   {columnOrders.length}
                 </span>
               </div>
 
               {/* Ticket Cards List */}
-              <div className="p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-200px)]">
+              <div className="p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-210px)]">
                 {columnOrders.length === 0 ? (
-                  <div className="py-12 text-center text-slate-600 text-xs font-medium">
-                    No orders in this queue
+                  <div className="py-16 text-center space-y-1.5 text-slate-500">
+                    <CheckCircle2 className="h-7 w-7 mx-auto opacity-30 text-emerald-500" />
+                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
+                      Queue Clear
+                    </p>
+                    <p className="text-[11px] text-slate-600 font-medium">
+                      No orders in this queue right now.
+                    </p>
                   </div>
                 ) : (
                   columnOrders.map((order) => {
@@ -205,23 +322,34 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                     const isOverdue = elapsed >= 10 && key !== "served";
                     const isUrgent = elapsed >= 15 && key !== "served";
 
+                    const orderNumber = order.orderToken
+                      ? `#${order.orderToken}`
+                      : `#${order.customOrderID || order._id.slice(-4)}`;
+
+                    const tableName =
+                      order.orderType === "takeaway"
+                        ? "Takeaway 🛍️"
+                        : order.table
+                        ? `Table: ${(order.table as any).name}`
+                        : "Dine-In 🍽️";
+
                     return (
                       <div
                         key={order._id}
                         className={`rounded-2xl p-4 border transition-all duration-200 shadow-md ${
                           isUrgent
-                            ? "bg-rose-950/20 border-rose-600/70"
+                            ? "bg-rose-950/20 border-rose-600/80"
                             : isOverdue
-                            ? "bg-amber-950/20 border-amber-600/60"
+                            ? "bg-amber-950/20 border-amber-600/70"
                             : "bg-slate-900/90 border-slate-800 hover:border-slate-700"
                         }`}
                       >
-                        {/* Header: Order ID, Type/Table & Elapsed Timer */}
-                        <div className="flex items-start justify-between gap-2 border-b border-slate-800/80 pb-2.5 mb-2.5">
+                        {/* Header: Token, Source, Table & Elapsed Timer */}
+                        <div className="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-black text-lg text-white">
-                                #{order.orderToken || order.customOrderID?.slice(-4)}
+                              <span className="font-mono font-black text-2xl text-white tracking-tight">
+                                {orderNumber}
                               </span>
                               {order.source === "qr" ? (
                                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40">
@@ -233,14 +361,9 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                                 </span>
                               )}
                             </div>
+
                             <div className="text-xs text-slate-300 font-bold flex items-center gap-1 mt-1">
-                              <span>
-                                {order.orderType === "takeaway"
-                                  ? "Takeaway 🛍️"
-                                  : order.table
-                                  ? `Table: ${(order.table as any).name}`
-                                  : "Dine-In 🍽️"}
-                              </span>
+                              <span>{tableName}</span>
                               {order.guestName && (
                                 <span className="text-slate-400 font-normal">
                                   • {order.guestName}
@@ -264,9 +387,9 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                           </div>
                         </div>
 
-                        {/* Customer & Server Info */}
+                        {/* Customer Info */}
                         {order.customer && (
-                          <p className="text-[11px] text-amber-400/90 font-semibold mb-2 flex items-center gap-1">
+                          <p className="text-[11px] text-amber-400 font-semibold mb-2 flex items-center gap-1">
                             <User className="h-3 w-3" />
                             {order.customer.name}
                           </p>
@@ -277,12 +400,12 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                           {order.items.map((item, idx) => (
                             <div
                               key={idx}
-                              className="p-2 rounded-xl bg-slate-950/50 border border-slate-800/60 text-xs"
+                              className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <span className="font-extrabold text-slate-100 leading-snug">
                                   <span className="text-amber-400 mr-1.5 font-black text-sm">
-                                    {item.quantity}x
+                                    {item.quantity}×
                                   </span>
                                   {item.name || (item.product as any)?.name || "Item"}
                                 </span>
@@ -306,7 +429,7 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                                   </div>
                                 )}
 
-                              {/* Item Note */}
+                              {/* Item Kitchen Note */}
                               {item.itemNote && (
                                 <p className="text-[11px] text-amber-300 font-bold italic mt-1 bg-amber-950/40 p-1 rounded">
                                   Note: "{item.itemNote}"
@@ -324,25 +447,15 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                           </div>
                         )}
 
-                        {/* Progress Status Button */}
-                        {key !== "served" && (
-                          <div className="mt-3 pt-2 border-t border-slate-800/80">
+                        {/* Progress Status Action Button */}
+                        {key !== "served" && actionLabel && (
+                          <div className="mt-3 pt-2 border-t border-slate-800">
                             <Button
                               onClick={() => handleAdvanceStatus(order._id, order.status)}
-                              className={`w-full h-10 rounded-xl font-black text-xs shadow-md transition-all active:scale-98 ${
-                                key === "pending"
-                                  ? "bg-blue-600 hover:bg-blue-500 text-white"
-                                  : key === "preparing"
-                                  ? "bg-emerald-600 hover:bg-emerald-500 text-white"
-                                  : "bg-amber-600 hover:bg-amber-500 text-white"
-                              }`}
+                              className={`w-full h-11 rounded-xl font-black text-xs shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 ${actionColor}`}
                             >
-                              <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                              {key === "pending"
-                                ? "Start Preparing"
-                                : key === "preparing"
-                                ? "Mark as Ready"
-                                : "Mark as Served"}
+                              <CheckCircle2 className="h-4 w-4" />
+                              {actionLabel}
                             </Button>
                           </div>
                         )}

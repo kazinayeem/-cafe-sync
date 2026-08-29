@@ -149,13 +149,13 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <Link
                       to={item.url}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                         isActive(item.url)
-                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold border-l-4 border-amber-500 shadow-xs"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                       }`}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
+                      <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -178,13 +178,13 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <Link
                         to={item.url}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                           isActive(item.url)
-                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold border-l-4 border-amber-500 shadow-xs"
-                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                            ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                         }`}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -207,13 +207,13 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <Link
                       to={item.url}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                         isActive(item.url)
-                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold border-l-4 border-amber-500 shadow-xs"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                       }`}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
+                      <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -237,13 +237,13 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <Link
                         to={item.url}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                           isActive(item.url)
-                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold border-l-4 border-amber-500 shadow-xs"
-                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                            ? "bg-amber-500/15 text-amber-900 dark:text-amber-200 font-black shadow-xs"
+                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                         }`}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <item.icon className={`h-4 w-4 shrink-0 ${isActive(item.url) ? "text-amber-600 dark:text-amber-400" : ""}`} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

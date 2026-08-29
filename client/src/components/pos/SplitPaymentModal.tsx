@@ -18,6 +18,7 @@ interface SplitPaymentModalProps {
   totalDue: number;
   customerLoyaltyPoints?: number;
   loyaltyRedeemRate?: number;
+  isSubmitting?: boolean;
   onComplete: (data: {
     payments: PaymentRecordPayload[];
     paymentMethod: "cash" | "card" | "online" | "bkash" | "nagad" | "split";
@@ -31,6 +32,7 @@ export const SplitPaymentModal: React.FC<SplitPaymentModalProps> = ({
   totalDue,
   customerLoyaltyPoints = 0,
   loyaltyRedeemRate = 0.5,
+  isSubmitting = false,
   onComplete,
 }) => {
   const [payments, setPayments] = useState<PaymentRecordPayload[]>([]);
@@ -395,11 +397,20 @@ export const SplitPaymentModal: React.FC<SplitPaymentModalProps> = ({
 
           <Button
             onClick={handleFinalSubmit}
-            disabled={totalPaid < totalDue}
+            disabled={totalPaid < totalDue || isSubmitting}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 rounded-xl shadow-lg flex items-center gap-2"
           >
-            <CheckCircle2 className="h-4 w-4" />
-            Complete & Pay ৳{totalDue}
+            {isSubmitting ? (
+              <>
+                <span className="h-4 w-4 rounded-full border-2 border-current border-r-transparent animate-spin" />
+                Submitting Order...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                Complete & Pay ৳{totalDue}
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

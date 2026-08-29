@@ -163,7 +163,7 @@ export const CustomerOrderPage: React.FC = () => {
     guestPhone: string;
     orderNote: string;
   }) => {
-    if (!qrToken || cartItems.length === 0) return;
+    if (!qrToken || cartItems.length === 0 || isSubmitting) return;
 
     try {
       const payload = {

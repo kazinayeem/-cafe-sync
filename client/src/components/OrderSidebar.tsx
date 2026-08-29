@@ -25,6 +25,7 @@ import { DiscountDialog } from "./SetDiscount";
 import { printReceipt } from "@/utils/printReceipt";
 import { CustomerSelectModal } from "./pos/CustomerSelectModal";
 import { SplitPaymentModal } from "./pos/SplitPaymentModal";
+import { OrderSuccessDialog } from "./pos/OrderSuccessDialog";
 import {
   User,
   Star,
@@ -61,6 +62,9 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<any | null>(null);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const tables = tablesData?.tables || [];
   const settings = settingsData?.data;
@@ -90,18 +94,12 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
     paymentMethod: any;
     loyaltyPointsUsed: number;
   }) => {
+    if (isSubmitting || isLoading || items.length === 0) return;
+
+    setIsSubmitting(true);
+    const itemsToPrint = [...items];
+
     try {
-      Swal.fire({
-        title: "Submitting Order...",
-        text: "Please wait while we record and broadcast the order",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      const itemsToPrint = [...items];
-
       const payload: any = {
         items: items.map((i) => ({
           productId: i.product._id,
@@ -130,23 +128,22 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
       };
 
       const res = await createOrder(payload).unwrap();
-      Swal.close();
 
-      Swal.fire({
-        icon: "success",
-        title: "Order Placed Successfully!",
-        text: `Order #${res.data?.customOrderID || "Complete"}`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
+      // Close payment modal
+      setIsPaymentModalOpen(false);
 
-      // Clear cart
+      // Save created order & open confirmation dialog
+      const orderData = res.data;
+      setCreatedOrder(orderData);
+      setIsSuccessDialogOpen(true);
+
+      // Clear cart ONLY upon confirmed success
       dispatch(clearCart());
 
       // Print thermal receipt if print enabled
       if (settings) {
         printReceipt(
-          res.data,
+          orderData,
           itemsToPrint,
           discountPercent,
           tables,
@@ -163,12 +160,39 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
         );
       }
     } catch (err: any) {
-      Swal.close();
+      setIsPaymentModalOpen(false);
       Swal.fire({
         icon: "error",
-        title: "Failed to place order",
-        text: err?.data?.message || "Something went wrong. Please try again.",
+        title: "Couldn't place order",
+        text:
+          err?.data?.message ||
+          err?.message ||
+          "Something went wrong while submitting the order. Your cart items are preserved. Please try again.",
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePrintCurrentReceipt = () => {
+    if (!createdOrder) return;
+    if (settings) {
+      printReceipt(
+        createdOrder,
+        createdOrder.items || [],
+        createdOrder.discountPercent || 0,
+        tables,
+        createdOrder.table?._id || createdOrder.table,
+        createdOrder.totalPrice,
+        {
+          businessName: settings.businessName || "Cafe Sync",
+          address: settings.address || "",
+          phone: settings.phone || "",
+          website: settings.website || "",
+          receiptFooter: settings.receiptFooter || "",
+          taxRate: settings.taxRate || 0,
+        }
+      );
     }
   };
 
@@ -500,7 +524,19 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
         totalDue={finalTotal}
         customerLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
         loyaltyRedeemRate={loyaltyRedeemRate}
+        isSubmitting={isSubmitting}
         onComplete={handleCheckoutComplete}
+      />
+
+      {/* Order Success Confirmation Dialog */}
+      <OrderSuccessDialog
+        isOpen={isSuccessDialogOpen}
+        onClose={() => {
+          setIsSuccessDialogOpen(false);
+          setCreatedOrder(null);
+        }}
+        order={createdOrder}
+        onPrintReceipt={handlePrintCurrentReceipt}
       />
     </>
   );
