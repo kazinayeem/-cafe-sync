@@ -1,19 +1,65 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Sparkles, Flame, Droplets, Heart } from "lucide-react";
+
+interface CoffeeCraftTab {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+  notes: string;
+}
+
+const COFFEE_CRAFT_TABS: CoffeeCraftTab[] = [
+  {
+    id: "brewing",
+    label: "ব্রু করা",
+    icon: Flame,
+    title: "ধীর রোস্টিং ও পারফেক্ট এক্সট্রাকশন",
+    desc: "৯৩°C নিয়ন্ত্রিত তাপমাত্রায় তাজা অ্যারাবিকা বিন থেকে এক্সট্রাক্ট করা নিখুঁত ফ্লেভার।",
+    notes: "অন-ডিমান্ড গ্রাইন্ড · ৯ বার প্রেসার",
+  },
+  {
+    id: "espresso",
+    label: "এসপ্রেসো",
+    icon: Sparkles,
+    title: "ঘন সোনালী ক্রেমার সমৃদ্ধ শট",
+    desc: "প্রতিটি শটে থাকে মিষ্টি ক্যারামেল সুবাস ও গাঢ় চকলেট ফ্লেভারের সুন্দর মেলবন্ধন।",
+    notes: "ডাবল রিস্ট্রেত্তো · ৩০ সেকেন্ড এক্সট্রাক্ট",
+  },
+  {
+    id: "milk",
+    label: "মিল্ক কফি",
+    icon: Droplets,
+    title: "সিল্কি মাইক্রোফোম স্টিমড মিল্ক",
+    desc: "৬৫°C তাপমাত্রায় স্টিম করা মসৃণ দুধ যা কফির মিষ্টতাকে দ্বিগুণ করে তোলে।",
+    notes: "হোল মিল্ক / ওট মিল্ক অপশন",
+  },
+  {
+    id: "latteart",
+    label: "লাতে আর্ট",
+    icon: Heart,
+    title: "বারিস্তার হাতের ভালোবাসার ছোঁয়া",
+    desc: "প্রতিটি কাপে নিখুঁত টিউলিপ ও হার্ট প্যাটার্নের মিষ্টি শিল্পকর্ম।",
+    notes: "১০০% হ্যান্ডক্রাফটেড প্রেজেন্টেশন",
+  },
+];
 
 export const PremiumCoffeeHero: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [activeTab, setActiveTab] = useState("brewing");
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Subtle Mouse Parallax on Desktop (2-4px max for subtle luxury feel)
+  // Subtle Mouse Parallax on Desktop (2-3px max for understated luxury feel)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || window.innerWidth < 768) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: x * 4, y: -y * 4 });
+    setTilt({ x: x * 3.5, y: -y * 3.5 });
   };
 
   const handleMouseLeave = () => {
@@ -22,13 +68,13 @@ export const PremiumCoffeeHero: React.FC = () => {
   };
 
   useEffect(() => {
-    // Ensure video plays smoothly once mounted
     if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay policy fallback
-      });
+      videoRef.current.play().catch(() => {});
     }
   }, []);
+
+  const activeCraft =
+    COFFEE_CRAFT_TABS.find((t) => t.id === activeTab) || COFFEE_CRAFT_TABS[0];
 
   return (
     <div
@@ -36,72 +82,59 @@ export const PremiumCoffeeHero: React.FC = () => {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full max-w-[500px] lg:max-w-[540px] aspect-square flex flex-col items-center justify-center p-2 sm:p-4 select-none"
+      className="relative w-full max-w-[480px] lg:max-w-[520px] flex flex-col items-center justify-center p-2 sm:p-4 select-none"
     >
-      {/* Ambient Warm Coffee Atmosphere Glow */}
-      <div className="absolute inset-4 rounded-full bg-gradient-to-tr from-amber-600/15 via-amber-500/20 to-orange-400/10 blur-3xl -z-10 pointer-events-none" />
+      {/* Ambient Warm Coffee Glow */}
+      <div className="absolute inset-4 rounded-full bg-gradient-to-tr from-amber-600/15 via-amber-500/15 to-orange-400/10 blur-3xl -z-10 pointer-events-none" />
 
-      {/* Decorative Roasted Coffee Beans (3 Subtle Accents) */}
+      {/* Decorative Roasted Coffee Beans (Subtle Accents) */}
       {/* Bean 1: Upper Left */}
       <div
-        className="absolute top-6 left-6 sm:left-8 transition-transform duration-500 ease-out pointer-events-none z-10 hidden sm:block"
+        className="absolute top-4 left-4 sm:left-6 transition-transform duration-500 ease-out pointer-events-none z-10 hidden sm:block"
         style={{
-          transform: `translate(${tilt.x * -0.8}px, ${tilt.y * -0.8}px)`,
+          transform: `translate(${tilt.x * -0.7}px, ${tilt.y * -0.7}px)`,
         }}
       >
-        <div className="animate-bean-drift-1 w-6 h-4.5 rounded-[44%] bg-gradient-to-br from-[#4a2f1d] via-[#2f1b0e] to-[#1a0e07] shadow-md border-t border-amber-800/40 rotate-[18deg] flex items-center justify-center opacity-85">
-          <div className="w-[1.2px] h-3 bg-[#110803] rounded-full rotate-6" />
+        <div className="w-5.5 h-4 rounded-[44%] bg-gradient-to-br from-[#4a2f1d] via-[#2f1b0e] to-[#1a0e07] shadow-md border-t border-amber-800/40 rotate-[18deg] flex items-center justify-center opacity-85">
+          <div className="w-[1px] h-2.6 bg-[#110803] rounded-full rotate-6" />
         </div>
       </div>
 
       {/* Bean 2: Upper Right */}
       <div
-        className="absolute top-10 right-6 sm:right-10 transition-transform duration-500 ease-out pointer-events-none z-10 hidden sm:block"
+        className="absolute top-6 right-4 sm:right-6 transition-transform duration-500 ease-out pointer-events-none z-10 hidden sm:block"
         style={{
           transform: `translate(${tilt.x * 0.7}px, ${tilt.y * 0.7}px)`,
         }}
       >
-        <div className="animate-bean-drift-2 w-5.5 h-4 rounded-[42%] bg-gradient-to-br from-[#543420] via-[#351d10] to-[#1c0f08] shadow-md border-t border-amber-700/40 -rotate-[28deg] flex items-center justify-center opacity-80">
-          <div className="w-[1.2px] h-2.8 bg-[#110803] rounded-full -rotate-3" />
+        <div className="w-5 h-3.8 rounded-[42%] bg-gradient-to-br from-[#543420] via-[#351d10] to-[#1c0f08] shadow-md border-t border-amber-700/40 -rotate-[28deg] flex items-center justify-center opacity-80">
+          <div className="w-[1px] h-2.4 bg-[#110803] rounded-full -rotate-3" />
         </div>
       </div>
 
-      {/* Bean 3: Lower Left */}
+      {/* Central Realistic Coffee Visual Container */}
       <div
-        className="absolute bottom-12 left-8 sm:left-12 transition-transform duration-500 ease-out pointer-events-none z-10 hidden sm:block"
-        style={{
-          transform: `translate(${tilt.x * 1.1}px, ${tilt.y * 1.1}px)`,
-        }}
-      >
-        <div className="animate-bean-drift-3 w-5 h-3.5 rounded-[40%] bg-gradient-to-br from-[#3e2415] to-[#1b0d06] shadow-md border-t border-amber-900/40 rotate-[40deg] flex items-center justify-center opacity-75">
-          <div className="w-[1px] h-2.4 bg-[#0d0603] rounded-full" />
-        </div>
-      </div>
-
-      {/* Central Realistic Coffee Visual Container with 3D Tilt & Soft Feathered Border */}
-      <div
-        className="relative w-full max-w-[420px] aspect-square flex items-center justify-center transition-all duration-300 ease-out"
+        className="relative w-full max-w-[380px] sm:max-w-[400px] aspect-square flex items-center justify-center transition-all duration-300 ease-out"
         style={{
           transform: `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) scale(${
-            isHovered ? 1.02 : 1
+            isHovered ? 1.015 : 1
           })`,
         }}
       >
-        {/* Soft Saucer Shadow & Contact Ambient Halo */}
-        <div className="absolute -bottom-2 w-[85%] h-12 rounded-full bg-amber-950/20 dark:bg-black/40 blur-xl -z-10" />
+        {/* Soft Saucer Shadow */}
+        <div className="absolute -bottom-2 w-[85%] h-10 rounded-full bg-amber-950/20 dark:bg-black/40 blur-xl -z-10" />
 
-        {/* Ceramic Rim Frame & Seamless Visual Mask */}
-        <div className="relative w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#fcf9f5] via-[#ede2d4] to-[#caa78b] dark:from-[#35271d] dark:via-[#261a12] dark:to-[#170f0a] shadow-[0_20px_45px_rgba(45,22,10,0.22)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] border-t border-white/80 dark:border-white/10 flex items-center justify-center overflow-hidden group">
-          {/* Inner Well / Liquid Container */}
+        {/* Ceramic Rim Frame */}
+        <div className="relative w-full h-full rounded-full p-2.5 sm:p-3 bg-gradient-to-b from-[#fcf9f5] via-[#ede2d4] to-[#caa78b] dark:from-[#35271d] dark:via-[#261a12] dark:to-[#170f0a] shadow-[0_16px_36px_rgba(45,22,10,0.18)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] border-t border-white/80 dark:border-white/10 flex items-center justify-center overflow-hidden">
+          {/* Inner Liquid Container */}
           <div className="relative w-full h-full rounded-full overflow-hidden bg-[#1f1008] shadow-[inset_0_8px_20px_rgba(0,0,0,0.85)] flex items-center justify-center">
-            {/* Fallback & Loading Shimmer Placeholder (Zero Layout Shift) */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gradient-to-br from-[#2a160c] via-[#3d2012] to-[#1a0c06] flex items-center justify-center animate-pulse">
-                <div className="w-12 h-12 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
+                <div className="w-10 h-10 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
               </div>
             )}
 
-            {/* High-Quality Realistic Coffee Video / GIF Animation */}
+            {/* Realistic Coffee Animation Video / GIF Fallback */}
             <video
               ref={videoRef}
               autoPlay
@@ -115,7 +148,6 @@ export const PremiumCoffeeHero: React.FC = () => {
               }`}
             >
               <source src="/images/coffee-latte.mp4" type="video/mp4" />
-              {/* Native GIF Fallback for legacy environments */}
               <img
                 src="/images/coffee-latte.gif"
                 alt="Fresh Barista Specialty Coffee Latte Art Pour"
@@ -124,19 +156,54 @@ export const PremiumCoffeeHero: React.FC = () => {
               />
             </video>
 
-            {/* Subtle Specular Porcelain Arc Reflection */}
+            {/* Specular Porcelain Arc Reflection */}
             <div className="absolute top-2 left-6 right-6 h-8 rounded-t-full bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
 
-            {/* Subtle Golden Crema Radial Vignette Ring */}
+            {/* Crema Ring */}
             <div className="absolute inset-0 rounded-full border border-amber-500/20 shadow-[inset_0_0_18px_rgba(20,10,5,0.6)] pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Refined Single Contextual Line */}
-      <p className="text-[11px] sm:text-xs text-muted-foreground/80 font-medium tracking-wide mt-3 text-center">
-        Freshly pulled espresso · Silky microfoam · Handcrafted with care
-      </p>
+      {/* Interactive Micro-Story Tabs */}
+      <div className="w-full max-w-[420px] mt-4 space-y-2">
+        <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#EFE4D6]/70 dark:bg-[#1E130B]/80 border border-[#DFCBB5] dark:border-[#382417] backdrop-blur-xs">
+          {COFFEE_CRAFT_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-1.5 px-2 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1 ${
+                  isActive
+                    ? "bg-[#C86D3B] text-white shadow-xs"
+                    : "text-[#5D422E] dark:text-[#C5B4A2] hover:text-[#22150C] dark:hover:text-white"
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Detail Card with Smooth Fade */}
+        <div className="p-3 rounded-2xl bg-[#FAF6F0]/90 dark:bg-[#1A1009]/90 border border-[#E9DAC8] dark:border-[#382417] shadow-2xs text-left transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bangla-serif font-black text-xs text-[#22150C] dark:text-[#FAF4ED]">
+              {activeCraft.title}
+            </h4>
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              {activeCraft.notes}
+            </span>
+          </div>
+          <p className="text-[11px] text-[#6E4F39] dark:text-[#BDB0A2] mt-1 leading-snug font-normal">
+            {activeCraft.desc}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
