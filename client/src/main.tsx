@@ -31,6 +31,7 @@ import QRMenu from "./pages/QRMenu";
 import CustomerOrderPage from "./pages/CustomerOrderPage";
 import CustomerOrderTracking from "./pages/CustomerOrderTracking";
 import CustomerDisplayScreen from "./pages/CustomerDisplayScreen";
+import FindMyCoffee from "./pages/FindMyCoffee";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -44,6 +45,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/about" element={<About />} />
             <Route path="/menu" element={<QRMenu />} />
             <Route path="/qr-menu" element={<QRMenu />} />
+            <Route path="/find-my-coffee" element={<FindMyCoffee />} />
+            <Route path="/my-coffee" element={<FindMyCoffee />} />
 
             {/* Smart QR Ordering & Tracking (Public for customers at tables) */}
             <Route path="/order/:qrToken" element={<CustomerOrderPage />} />

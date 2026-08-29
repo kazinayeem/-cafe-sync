@@ -210,13 +210,20 @@ export function App() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-[#634832] dark:text-[#D8C7B5]">
+          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-[#634832] dark:text-[#D8C7B5]">
             <a
               href="#menu"
               className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors"
             >
               মেনু
             </a>
+            <button
+              onClick={() => navigate("/find-my-coffee")}
+              className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors flex items-center gap-1 font-bold text-[#C86D3B]"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#C86D3B]" />
+              <span>কফি খুঁজুন</span>
+            </button>
             <a
               href="#story"
               className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors"
@@ -297,6 +304,15 @@ export function App() {
               >
                 ☕ মেনু দেখুন
               </a>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/find-my-coffee");
+                }}
+                className="p-2.5 rounded-xl text-left font-bold text-[#C86D3B] hover:bg-[#F2E8DC] dark:hover:bg-[#20150E] flex items-center gap-2"
+              >
+                ✨ আমার কফি খুঁজুন
+              </button>
               <a
                 href="#story"
                 onClick={() => setMobileMenuOpen(false)}
@@ -546,15 +562,26 @@ export function App() {
 
         {/* View Full Menu CTA Button */}
         <div className="text-center pt-4">
-          <Button
-            onClick={() => navigate("/menu")}
-            className="h-12 px-8 rounded-2xl bg-[#3C2415] hover:bg-[#28160B] dark:bg-[#FAF4ED] dark:hover:bg-white dark:text-[#120B06] text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 mx-auto"
-          >
-            <span>
-              সম্পূর্ণ মেনু দেখুন ({products.length || 18}+ আইটেম)
-            </span>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button
+              onClick={() => navigate("/menu")}
+              className="h-12 px-8 rounded-2xl bg-[#3C2415] hover:bg-[#28160B] dark:bg-[#FAF4ED] dark:hover:bg-white dark:text-[#120B06] text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+            >
+              <span>
+                সম্পূর্ণ মেনু দেখুন ({products.length || 18}+ আইটেম)
+              </span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              onClick={() => navigate("/find-my-coffee")}
+              variant="outline"
+              className="h-12 px-7 rounded-2xl border-[#C86D3B] text-[#C86D3B] hover:bg-[#C86D3B] hover:text-white font-bold text-xs shadow-xs transition-all flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>আপনার কফি খুঁজে নিন (কুইজ)</span>
+            </Button>
+          </div>
         </div>
       </section>
 
