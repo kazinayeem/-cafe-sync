@@ -1,265 +1,188 @@
-import React, { useState, useRef } from "react";
-import { Coffee, Sparkles, Droplets, Heart } from "lucide-react";
-
-type BrewStage = "all" | "espresso" | "pour" | "latte-art" | "steam";
+import React, { useState, useEffect, useRef } from "react";
 
 export const InteractiveCoffeeHero: React.FC = () => {
-  const [activeStage, setActiveStage] = useState<BrewStage>("all");
-  const [isHovered, setIsHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isInView, setIsInView] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Subtle Mouse Parallax
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Intersection Observer to pause/play animation when in viewport
+  useEffect(() => {
     if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Subtle Parallax on Desktop (2-4px max for Apple-level subtlety)
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || window.innerWidth < 768) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: x * 14, y: -y * 14 });
+    setTilt({ x: x * 6, y: -y * 6 });
   };
 
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0 });
-    setIsHovered(false);
   };
 
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full max-w-[540px] aspect-square flex flex-col items-center justify-center p-4 select-none touch-pan-y"
+      className={`relative w-full max-w-[480px] aspect-square flex flex-col items-center justify-center p-2 sm:p-4 select-none ${
+        isInView ? "" : "paused"
+      }`}
     >
-      {/* Background Soft Glow */}
-      <div className="absolute inset-4 rounded-full bg-gradient-to-tr from-amber-500/10 via-amber-400/20 to-orange-400/10 blur-3xl -z-10 pointer-events-none" />
+      {/* Ambient Warm Coffee Atmosphere Glow */}
+      <div className="absolute inset-6 rounded-full bg-gradient-to-tr from-amber-600/10 via-amber-500/15 to-orange-400/8 blur-3xl -z-10 pointer-events-none" />
 
-      {/* Floating Coffee Beans (Parallax & Gentle Floating) */}
+      {/* 3 Deliberately Positioned, Slowly Drifting Coffee Beans */}
+      {/* Bean 1: Upper Left */}
       <div
-        className="absolute top-8 left-6 transition-transform duration-300 ease-out pointer-events-none"
+        className="absolute top-10 left-6 sm:left-8 transition-transform duration-500 ease-out pointer-events-none z-10"
         style={{
-          transform: `translate(${tilt.x * -1.8}px, ${tilt.y * -1.8}px)`,
+          transform: `translate(${tilt.x * -0.8}px, ${tilt.y * -0.8}px)`,
         }}
       >
-        <div className="animate-float-1 w-7 h-5 rounded-[40%] bg-gradient-to-br from-[#4a2e1b] via-[#2e1a0e] to-[#1a0f08] shadow-md border-t border-amber-800/40 rotate-12 relative flex items-center justify-center">
-          <div className="w-[1.5px] h-3.5 bg-[#120a05] rounded-full rotate-6 shadow-inner" />
+        <div className="animate-bean-drift-1 w-6 h-4.5 rounded-[44%] bg-gradient-to-br from-[#4a2f1d] via-[#2f1b0e] to-[#1a0e07] shadow-sm border-t border-amber-800/30 rotate-[18deg] flex items-center justify-center opacity-85">
+          <div className="w-[1.2px] h-3 bg-[#110803] rounded-full rotate-6" />
         </div>
       </div>
 
+      {/* Bean 2: Upper Right */}
       <div
-        className="absolute bottom-16 left-10 transition-transform duration-300 ease-out pointer-events-none"
+        className="absolute top-14 right-6 sm:right-10 transition-transform duration-500 ease-out pointer-events-none z-10"
         style={{
-          transform: `translate(${tilt.x * 2.2}px, ${tilt.y * 2.2}px)`,
+          transform: `translate(${tilt.x * 0.7}px, ${tilt.y * 0.7}px)`,
         }}
       >
-        <div className="animate-float-2 w-6 h-4 rounded-[40%] bg-gradient-to-br from-[#5a3821] via-[#3a2012] to-[#1f1109] shadow-md border-t border-amber-700/40 -rotate-45 relative flex items-center justify-center">
-          <div className="w-[1.5px] h-3 bg-[#120a05] rounded-full rotate-3" />
+        <div className="animate-bean-drift-2 w-5.5 h-4 rounded-[42%] bg-gradient-to-br from-[#543420] via-[#351d10] to-[#1c0f08] shadow-sm border-t border-amber-700/30 -rotate-[28deg] flex items-center justify-center opacity-80">
+          <div className="w-[1.2px] h-2.8 bg-[#110803] rounded-full -rotate-3" />
         </div>
       </div>
 
+      {/* Bean 3: Lower Left */}
       <div
-        className="absolute top-16 right-8 transition-transform duration-300 ease-out pointer-events-none"
+        className="absolute bottom-16 left-8 sm:left-12 transition-transform duration-500 ease-out pointer-events-none z-10"
         style={{
-          transform: `translate(${tilt.x * 1.5}px, ${tilt.y * 1.5}px)`,
+          transform: `translate(${tilt.x * 1.1}px, ${tilt.y * 1.1}px)`,
         }}
       >
-        <div className="animate-float-3 w-8 h-5.5 rounded-[42%] bg-gradient-to-br from-[#4a2e1b] via-[#2d190d] to-[#140b06] shadow-md border-t border-amber-800/50 rotate-[35deg] relative flex items-center justify-center">
-          <div className="w-[1.8px] h-4 bg-[#0d0704] rounded-full -rotate-6" />
+        <div className="animate-bean-drift-3 w-5 h-3.5 rounded-[40%] bg-gradient-to-br from-[#3e2415] to-[#1b0d06] shadow-sm border-t border-amber-900/30 rotate-[40deg] flex items-center justify-center opacity-75">
+          <div className="w-[1px] h-2.4 bg-[#0d0603] rounded-full" />
         </div>
       </div>
 
+      {/* Main Ceramic Cup & Saucer Container */}
       <div
-        className="absolute bottom-12 right-12 transition-transform duration-300 ease-out pointer-events-none"
+        className="relative w-full max-w-[380px] aspect-square flex items-center justify-center transition-transform duration-300 ease-out"
         style={{
-          transform: `translate(${tilt.x * -2.4}px, ${tilt.y * -2.4}px)`,
+          transform: `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
         }}
       >
-        <div className="animate-float-1 w-5 h-3.5 rounded-[40%] bg-gradient-to-br from-[#3e2415] to-[#1c0f08] shadow-sm -rotate-12 relative flex items-center justify-center">
-          <div className="w-[1.2px] h-2.5 bg-[#0d0704] rounded-full" />
-        </div>
-      </div>
-
-      {/* Main Coffee Cup Stage Container with 3D Tilt */}
-      <div
-        className="relative w-full max-w-[420px] aspect-square flex items-center justify-center transition-transform duration-200 ease-out"
-        style={{
-          transform: `perspective(900px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) scale(${
-            isHovered ? 1.02 : 1
-          })`,
-        }}
-      >
-        {/* Steam Trails Rising Above the Cup */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-36 flex items-end justify-center pointer-events-none z-30">
-          {/* Steam 1 */}
-          <div className="absolute left-[38%] bottom-4 w-5 h-24 animate-steam-1">
-            <svg viewBox="0 0 24 90" className="w-full h-full stroke-amber-200/50 fill-none stroke-[2.5] stroke-linecap-round">
-              <path d="M12 90 C 4 65, 20 45, 10 20 C 6 8, 14 2, 12 0" />
+        {/* Natural Wispy Steam Trails */}
+        <div className="absolute -top-12 sm:-top-16 left-1/2 -translate-x-1/2 w-44 h-32 flex items-end justify-center pointer-events-none z-30">
+          {/* Steam Trail 1 (Left Curve) */}
+          <div className="absolute left-[36%] bottom-3 w-5 h-24 animate-natural-steam-1">
+            <svg viewBox="0 0 20 80" className="w-full h-full stroke-[#fdf6eb]/35 fill-none stroke-[2] stroke-linecap-round">
+              <path d="M 10 80 C 4 58, 16 42, 8 20 C 5 10, 12 3, 10 0" />
             </svg>
           </div>
 
-          {/* Steam 2 */}
-          <div className="absolute left-[48%] bottom-2 w-6 h-28 animate-steam-2">
-            <svg viewBox="0 0 24 100" className="w-full h-full stroke-amber-100/60 fill-none stroke-[3] stroke-linecap-round">
-              <path d="M10 100 C 18 75, 4 50, 14 25 C 18 10, 8 3, 12 0" />
+          {/* Steam Trail 2 (Center Rising Stream) */}
+          <div className="absolute left-[48%] bottom-2 w-6 h-28 animate-natural-steam-2">
+            <svg viewBox="0 0 20 90" className="w-full h-full stroke-[#fbf2e3]/45 fill-none stroke-[2.2] stroke-linecap-round">
+              <path d="M 8 90 C 15 68, 4 46, 12 24 C 15 11, 7 3, 10 0" />
             </svg>
           </div>
 
-          {/* Steam 3 */}
-          <div className="absolute left-[58%] bottom-5 w-5 h-22 animate-steam-3">
-            <svg viewBox="0 0 24 85" className="w-full h-full stroke-amber-200/50 fill-none stroke-[2.5] stroke-linecap-round">
-              <path d="M14 85 C 6 60, 18 40, 8 18 C 5 6, 12 1, 10 0" />
-            </svg>
-          </div>
-
-          {/* Steam 4 */}
-          <div className="absolute left-[44%] bottom-6 w-7 h-32 animate-steam-4">
-            <svg viewBox="0 0 24 110" className="w-full h-full stroke-amber-50/40 fill-none stroke-[2] stroke-linecap-round">
-              <path d="M8 110 C 16 80, 2 55, 14 28 C 17 12, 10 4, 12 0" />
+          {/* Steam Trail 3 (Right Curve) */}
+          <div className="absolute left-[60%] bottom-4 w-5 h-22 animate-natural-steam-3">
+            <svg viewBox="0 0 20 75" className="w-full h-full stroke-[#fdf6eb]/35 fill-none stroke-[1.8] stroke-linecap-round">
+              <path d="M 12 75 C 5 54, 15 38, 7 16 C 4 7, 10 1, 8 0" />
             </svg>
           </div>
         </div>
 
-        {/* Milk Stream Pouring from Spout */}
-        {(activeStage === "all" || activeStage === "pour" || activeStage === "latte-art") && (
-          <div className="absolute -top-12 left-[50%] -translate-x-1/2 w-8 h-36 z-20 pointer-events-none flex flex-col items-center">
-            {/* Silky Milk Stream */}
-            <div className="w-2.5 h-full rounded-full bg-gradient-to-b from-[#fffefc] via-[#fbf7f0] to-[#f4ebe0] shadow-[0_0_12px_rgba(255,255,255,0.8)] animate-milk-flow" />
-          </div>
-        )}
+        {/* Silky Milk Stream Pouring from Above */}
+        <div className="absolute -top-14 left-[50%] -translate-x-1/2 w-4 h-32 z-20 pointer-events-none flex flex-col items-center animate-coffee-milk">
+          <svg viewBox="0 0 16 110" className="w-full h-full drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]">
+            <path
+              d="M 8 0 Q 6 35, 8 65 Q 10 90, 8 110"
+              className="stroke-[#fffcf7] fill-none stroke-[3] stroke-linecap-round"
+            />
+          </svg>
+        </div>
 
         {/* Saucer (Base Plate) */}
-        <div className="absolute bottom-6 w-[88%] h-[32%] rounded-[50%] bg-gradient-to-b from-[#f5ede3] via-[#e2d5c5] to-[#c8b7a2] dark:from-[#2e2620] dark:via-[#221b16] dark:to-[#17120e] shadow-[0_24px_48px_rgba(40,20,10,0.22)] border-t border-white/60 dark:border-white/10 flex items-center justify-center">
-          {/* Inner Saucer Rim */}
-          <div className="w-[84%] h-[74%] rounded-[50%] bg-gradient-to-b from-[#e8dcce] to-[#d6c4b0] dark:from-[#221b16] dark:to-[#1a1410] border-t border-black/5 dark:border-black/30 shadow-inner" />
+        <div className="absolute bottom-6 w-[86%] h-[30%] rounded-[50%] bg-gradient-to-b from-[#f7f2ea] via-[#e5d9ca] to-[#cbbbb0] dark:from-[#2a221d] dark:via-[#1e1713] dark:to-[#140f0c] shadow-[0_24px_42px_rgba(35,18,8,0.16)] dark:shadow-[0_24px_42px_rgba(0,0,0,0.6)] border-t border-white/70 dark:border-white/10 flex items-center justify-center">
+          {/* Inner Saucer Inset */}
+          <div className="w-[82%] h-[72%] rounded-[50%] bg-gradient-to-b from-[#ebdfd1] to-[#d8c7b5] dark:from-[#201914] dark:to-[#17110d] border-t border-black/5 dark:border-black/40 shadow-inner" />
         </div>
 
         {/* Ceramic Coffee Cup Body */}
-        <div className="relative w-[72%] h-[68%] -mt-6 rounded-[50%] bg-gradient-to-b from-[#fbf8f4] via-[#eedecf] to-[#caa98a] dark:from-[#3a2d24] dark:via-[#2a1f18] dark:to-[#1a130f] p-4 shadow-[0_16px_36px_rgba(45,25,12,0.32)] border-t-2 border-white/80 dark:border-white/15 flex items-center justify-center group/cup">
+        <div className="relative w-[70%] h-[66%] -mt-5 rounded-[50%] bg-gradient-to-b from-[#fcfaf7] via-[#eee3d5] to-[#c9ab8f] dark:from-[#35281f] dark:via-[#251b14] dark:to-[#18110c] p-3.5 sm:p-4 shadow-[0_16px_32px_rgba(40,20,10,0.24)] border-t-2 border-white/90 dark:border-white/15 flex items-center justify-center">
           {/* Cup Handle (Right Side) */}
-          <div className="absolute -right-7 top-[32%] w-12 h-20 rounded-r-3xl border-8 border-l-0 border-[#eedecf] dark:border-[#2a1f18] shadow-md -z-10 rotate-6" />
+          <div className="absolute -right-6.5 top-[32%] w-10 sm:w-11 h-18 sm:h-20 rounded-r-3xl border-6 sm:border-7 border-l-0 border-[#eee3d5] dark:border-[#251b14] shadow-md -z-10 rotate-6" />
 
-          {/* Cup Interior / Espresso Crema Liquid Reservoir */}
-          <div className="relative w-full h-full rounded-[50%] bg-gradient-to-br from-[#28150c] via-[#482816] to-[#6d3c1e] p-3 overflow-hidden shadow-[inset_0_12px_24px_rgba(0,0,0,0.85)] border border-[#1a0d07] flex items-center justify-center">
-            {/* Golden Crema Rim Texture */}
-            <div className="absolute inset-1 rounded-[50%] border-2 border-amber-600/30 opacity-70" />
+          {/* Deep Espresso Reservoir / Crema Surface */}
+          <div className="relative w-full h-full rounded-[50%] bg-gradient-to-br from-[#1b0a04] via-[#33170a] to-[#542812] p-2 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.9)] border border-[#160803] flex items-center justify-center">
+            {/* Subtle Golden Crema Margin */}
+            <div className="absolute inset-0.5 rounded-[50%] border border-amber-600/25 pointer-events-none" />
 
-            {/* Ripple Wave 1 */}
-            {(activeStage === "all" || activeStage === "pour" || isHovered) && (
-              <div className="absolute w-20 h-20 rounded-full border border-amber-200/60 animate-ripple-1 pointer-events-none" />
-            )}
+            {/* Delicate Surface Fluid Ripples */}
+            <div className="absolute w-18 h-18 rounded-full border border-amber-100/40 animate-coffee-ripple-1 pointer-events-none" />
+            <div className="absolute w-18 h-18 rounded-full border border-[#fffcf7]/35 animate-coffee-ripple-2 pointer-events-none" />
 
-            {/* Ripple Wave 2 */}
-            {(activeStage === "all" || activeStage === "pour" || isHovered) && (
-              <div className="absolute w-20 h-20 rounded-full border border-white/50 animate-ripple-2 pointer-events-none" />
-            )}
+            {/* Latte Art Bloom: Elegant Handcrafted Rosette / Heart */}
+            <div className="relative z-10 flex items-center justify-center animate-coffee-latte">
+              <svg
+                viewBox="0 0 100 100"
+                className="w-22 sm:w-26 h-22 sm:h-26 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+              >
+                {/* Outer Microfoam Swirl */}
+                <path
+                  d="M 50 22 C 34 32, 22 48, 30 64 C 36 76, 50 82, 50 82 C 50 82, 64 76, 70 64 C 78 48, 66 32, 50 22 Z"
+                  className="fill-[#fffef9] opacity-95"
+                />
+                {/* Caramel Crema Separation Layer */}
+                <path
+                  d="M 50 25 Q 39 44 38 61 Q 50 73 50 76 Q 50 73 62 61 Q 61 44 50 25 Z"
+                  className="fill-[#d4995b] opacity-80"
+                />
+                {/* Inner Heart Layer */}
+                <path
+                  d="M 50 34 C 43 40, 36 50, 40 59 C 43 66, 50 71, 50 71 C 50 71, 57 66, 60 59 C 64 50, 57 40, 50 34 Z"
+                  className="fill-[#fffdfa] opacity-95"
+                />
+                {/* Center Drawn Crema Spire */}
+                <path
+                  d="M 50 18 L 50 82"
+                  className="stroke-[#964f1d] stroke-[1.8] stroke-linecap-round opacity-85"
+                />
+                {/* Microfoam Highlights */}
+                <circle cx="50" cy="24" r="3" className="fill-[#fffdfa]" />
+                <circle cx="45" cy="38" r="1.6" className="fill-[#fffdfa]" />
+                <circle cx="55" cy="38" r="1.6" className="fill-[#fffdfa]" />
+              </svg>
+            </div>
 
-            {/* Latte Art: Handcrafted Golden Heart / Rosette */}
-            {(activeStage === "all" || activeStage === "latte-art" || activeStage === "steam") && (
-              <div className="relative z-10 flex items-center justify-center animate-latte-art">
-                <svg
-                  viewBox="0 0 100 100"
-                  className="w-24 sm:w-28 h-24 sm:h-28 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
-                >
-                  {/* Outer milk swirl circle */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    className="stroke-[#f8ede2]/40 fill-none stroke-[2] stroke-dasharray-[4,2]"
-                  />
-                  {/* Rosette Leaf Layers */}
-                  <path
-                    d="M 50 20 C 35 30, 20 45, 28 62 C 34 74, 50 82, 50 82 C 50 82, 66 74, 72 62 C 80 45, 65 30, 50 20 Z"
-                    className="fill-[#fffdf9] opacity-95"
-                  />
-                  {/* Crema Separation Lines */}
-                  <path
-                    d="M 50 22 Q 38 42 36 60 Q 50 74 50 78 Q 50 74 64 60 Q 62 42 50 22 Z"
-                    className="fill-[#e9be8a] opacity-80"
-                  />
-                  {/* Inner Heart Layer */}
-                  <path
-                    d="M 50 32 C 42 38, 34 48, 38 58 C 42 66, 50 72, 50 72 C 50 72, 58 66, 62 58 C 66 48, 58 38, 50 32 Z"
-                    className="fill-[#fffefc] opacity-95"
-                  />
-                  {/* Center Heart Spire */}
-                  <path
-                    d="M 50 16 L 50 84"
-                    className="stroke-[#a65d28] stroke-[2] stroke-linecap-round opacity-90"
-                  />
-                  {/* Microfoam Highlights */}
-                  <circle cx="50" cy="22" r="3.5" className="fill-[#fffdf9]" />
-                  <circle cx="44" cy="38" r="2" className="fill-[#fffdf9]" />
-                  <circle cx="56" cy="38" r="2" className="fill-[#fffdf9]" />
-                </svg>
-              </div>
-            )}
-
-            {/* Specular Light Arc Reflection */}
-            <div className="absolute top-2 left-6 right-6 h-6 rounded-t-[50%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+            {/* Specular Glaze Arc Reflection */}
+            <div className="absolute top-1.5 left-5 right-5 h-5 rounded-t-[50%] bg-gradient-to-b from-white/18 to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Interactive Brew Stage Control Bar */}
-      <div className="mt-2 flex items-center gap-1.5 p-1.5 rounded-2xl bg-card/80 dark:bg-card/40 backdrop-blur-md border border-border/80 shadow-lg text-xs z-20">
-        <button
-          type="button"
-          onClick={() => setActiveStage("all")}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-black text-[11px] transition-all ${
-            activeStage === "all"
-              ? "bg-amber-600 text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Sparkles className="h-3 w-3" />
-          Auto Brew
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveStage("espresso")}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-[11px] transition-all ${
-            activeStage === "espresso"
-              ? "bg-amber-600 text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Coffee className="h-3 w-3" />
-          Espresso
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveStage("pour")}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-[11px] transition-all ${
-            activeStage === "pour"
-              ? "bg-amber-600 text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Droplets className="h-3 w-3" />
-          Milk Pour
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveStage("latte-art")}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-[11px] transition-all ${
-            activeStage === "latte-art"
-              ? "bg-amber-600 text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Heart className="h-3 w-3" />
-          Latte Art
-        </button>
-      </div>
-
-      {/* Flavor Profile Micro-Pill */}
-      <p className="text-[10px] text-muted-foreground font-semibold mt-2.5 flex items-center gap-1.5">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-        Freshly pulled Arabica shot • Silky Oat Microfoam • 65°C Perfect Temp
+      {/* Refined Single Contextual Line */}
+      <p className="text-[11px] sm:text-xs text-muted-foreground/80 font-medium tracking-wide mt-3 text-center">
+        Freshly pulled espresso · Silky microfoam · Handcrafted with care
       </p>
     </div>
   );
