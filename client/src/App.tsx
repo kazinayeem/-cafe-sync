@@ -386,34 +386,34 @@ export function App() {
       {/* ========================================================================= */}
       {/* 2. HERO SECTION */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 border-b border-[#EDE1D1] dark:border-[#332317]">
-        {/* Subtle Ambient Atmosphere Elements */}
-        <div className="absolute top-12 left-1/4 w-96 h-96 rounded-full bg-[#EAD4BB]/35 dark:bg-[#2A180E]/35 blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] rounded-full bg-[#F3DECA]/45 dark:bg-[#381F12]/25 blur-3xl -z-10 pointer-events-none" />
+      <section className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-8 pb-12 lg:pb-20 border-b border-[#EDE1D1] dark:border-[#332317]">
+        {/* Subtle Ambient Warm Glow Backdrops */}
+        <div className="absolute top-8 left-1/4 w-96 h-96 rounded-full bg-[#EAD4BB]/30 dark:bg-[#2A180E]/30 blur-3xl -z-10 pointer-events-none" />
+        <div className="absolute bottom-6 right-10 w-[450px] h-[450px] rounded-full bg-[#F3DECA]/40 dark:bg-[#381F12]/20 blur-3xl -z-10 pointer-events-none" />
 
-        {/* Slow Floating Ambient Coffee Bean Particles */}
-        <div className="absolute top-20 left-10 text-xl opacity-15 pointer-events-none animate-bean-drift-1 select-none">
+        {/* Slow Ambient Floating Elements in Low Opacity */}
+        <div className="absolute top-16 left-8 text-lg opacity-10 pointer-events-none animate-bean-drift-1 select-none">
           ☕
         </div>
-        <div className="absolute bottom-24 left-1/3 text-lg opacity-15 pointer-events-none animate-bean-drift-2 select-none">
+        <div className="absolute bottom-20 left-1/3 text-base opacity-10 pointer-events-none animate-bean-drift-2 select-none">
           🌿
         </div>
-        <div className="absolute top-32 right-12 text-xl opacity-15 pointer-events-none animate-bean-drift-3 select-none">
+        <div className="absolute top-24 right-10 text-lg opacity-10 pointer-events-none animate-bean-drift-3 select-none">
           ☕
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             {/* Left Column: Hero Editorial Copy & Direct CTAs */}
-            <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
+            <div className="lg:col-span-6 space-y-5 text-center lg:text-left">
               {/* Eyebrow Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFE3D3] dark:bg-[#261810] border border-[#DFCBB5] dark:border-[#422B1D] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#E8925A] shadow-2xs">
-                <Sparkles className="h-3.5 w-3.5 text-[#C86D3B]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] border border-[#DFCBB5] dark:border-[#422B1D] text-[11px] font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#E8925A] shadow-2xs">
+                <Sparkles className="h-3 w-3 text-[#C86D3B]" />
                 <span>BORNOCAFE · SPECIALTY COFFEE</span>
               </div>
 
               {/* Display Headline in Noto Serif Bengali */}
-              <h1 className="font-bangla-serif font-black text-4xl sm:text-5xl lg:text-6xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.18]">
+              <h1 className="font-bangla-serif font-black text-3xl sm:text-5xl lg:text-[52px] xl:text-6xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.14]">
                 এক কাপ কফি, <br />
                 <span className="text-[#C86D3B] dark:text-[#E8925A]">
                   একটু আপন সময়।
@@ -421,18 +421,18 @@ export function App() {
               </h1>
 
               {/* Supporting Natural Bangla Copy */}
-              <p className="text-base sm:text-lg text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-sm sm:text-base lg:text-[17px] text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-[520px] mx-auto lg:mx-0 leading-relaxed">
                 তাজা কফি, সুন্দর কিছু গল্প, আর আপনার জন্য একটু নিজের সময়।
               </p>
 
               {/* Primary & Secondary Action CTAs */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
+              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                 <Button
                   onClick={() => {
                     const el = document.getElementById("menu");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="w-full sm:w-auto h-13 px-8 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-sm shadow-xl shadow-[#C86D3B]/25 hover:shadow-2xl hover:shadow-[#C86D3B]/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-sm shadow-md shadow-[#C86D3B]/25 hover:shadow-xl hover:shadow-[#C86D3B]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Coffee className="h-4 w-4" />
                   মেনু দেখুন
@@ -441,7 +441,7 @@ export function App() {
                 <Button
                   onClick={() => navigate("/menu")}
                   variant="outline"
-                  className="w-full sm:w-auto h-13 px-7 rounded-2xl border-[#D8C7B5] dark:border-[#422F22] bg-[#F7F0E6]/80 dark:bg-[#1E130B]/80 hover:bg-[#EFE4D6] dark:hover:bg-[#2C1C11] text-[#3A2213] dark:text-[#F3E7DC] font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-7 rounded-2xl border border-[#D8C7B5] dark:border-[#422F22] bg-[#FAF6F0]/80 dark:bg-[#1E130B]/80 hover:bg-[#F2E8DC] dark:hover:bg-[#281810] text-[#3A2213] dark:text-[#F3E7DC] font-bold text-sm hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <QrCode className="h-4 w-4 text-[#C86D3B]" />
                   টেবিল থেকে অর্ডার
@@ -454,28 +454,28 @@ export function App() {
               </div>
 
               {/* Barista Shift Status */}
-              <div className="pt-1 flex items-center justify-center lg:justify-start gap-3 text-xs font-semibold text-[#8C6446] dark:text-[#AA9380]">
-                <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <div className="pt-1 flex items-center justify-center lg:justify-start gap-2.5 text-xs font-medium text-[#8C6446] dark:text-[#AA9380]">
+                <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  বারিস্তা কাউন্টার খোলা ({business.openingTime} – {business.closingTime})
+                  বারিস্টা কাউন্টার খোলা · আজ {business.openingTime} — {business.closingTime}
                 </span>
                 <span>•</span>
-                <span className="text-muted-foreground/80">মিরপুর ও উত্তরা</span>
+                <span className="text-muted-foreground/75">মিরপুর ও উত্তরা শাখা</span>
               </div>
             </div>
 
             {/* Right Column: Romantic Cafe Hero Photograph */}
             <div className="lg:col-span-6 flex items-center justify-center relative">
               <div className="relative w-full max-w-lg lg:max-w-none group">
-                {/* Subtle Warm Glow Backdrop */}
-                <div className="absolute -inset-2 bg-gradient-to-tr from-[#EAD4BB]/60 via-[#F3DECA]/40 to-[#E0C7AA]/50 dark:from-[#3A1E0E]/40 dark:via-[#261309]/30 dark:to-[#4A2612]/30 rounded-[32px] sm:rounded-[40px] blur-2xl -z-10 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
+                {/* Layered Warm Depth Glow Backdrop */}
+                <div className="absolute -inset-3 bg-gradient-to-tr from-[#EAD4BB]/60 via-[#F3DECA]/40 to-[#E0C7AA]/50 dark:from-[#3A1E0E]/40 dark:via-[#261309]/30 dark:to-[#4A2612]/30 rounded-[36px] sm:rounded-[44px] blur-2xl -z-10 group-hover:scale-105 transition-all duration-700 pointer-events-none" />
 
                 {/* Hero Image Container with Gentle Breathing Animation */}
-                <div className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-[#3C2415]/15 dark:shadow-black/50 border border-[#E9DAC8]/90 dark:border-[#3A2417] bg-[#EFE4D6] dark:bg-[#1A1009] transition-all duration-500 hover:scale-[1.015] animate-hero-breathe">
+                <div className="relative rounded-[26px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-[#3C2415]/12 dark:shadow-black/60 border border-[#EDE1D1]/90 dark:border-[#3A2417] bg-[#EFE4D6] dark:bg-[#1A1009] transition-all duration-700 hover:scale-[1.015] animate-hero-breathe">
                   <img
                     src="/heroimage.png"
                     alt="বর্নোক্যাফেতে কফি উপভোগরত এক জুটি"
-                    className="w-full h-80 sm:h-[440px] lg:h-[480px] xl:h-[520px] object-cover object-center"
+                    className="w-full h-80 sm:h-[430px] lg:h-[480px] xl:h-[510px] object-cover object-center"
                     loading="eager"
                   />
                 </div>

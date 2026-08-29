@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react";
 
 interface BanglaQuote {
   text: string;
@@ -56,12 +55,7 @@ export const BanglaCoffeeQuotes: React.FC = () => {
   const currentQuote = BANGLA_QUOTES[currentIndex];
 
   return (
-    <div className="relative inline-flex items-center gap-3 py-2 px-3.5 sm:px-4 rounded-2xl bg-[#F7F0E6]/90 dark:bg-[#1E130B]/90 border border-[#EDE1D1] dark:border-[#332317] shadow-2xs backdrop-blur-xs max-w-lg transition-all duration-300">
-      {/* Decorative Warm Accent Icon */}
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
-        <Sparkles className="h-3.5 w-3.5" />
-      </div>
-
+    <div className="relative inline-flex items-start gap-2.5 py-2 px-3 sm:px-3.5 rounded-xl bg-[#FAF6F0]/75 dark:bg-[#1A1009]/75 border border-[#EADCCB]/70 dark:border-[#382417]/70 border-l-2 border-l-[#C86D3B] shadow-2xs backdrop-blur-xs max-w-md transition-all duration-300">
       {/* Rotating Bangla Poetic Line */}
       <div className="flex flex-col min-w-0 text-left">
         <div
@@ -71,18 +65,18 @@ export const BanglaCoffeeQuotes: React.FC = () => {
               : "opacity-100 translate-y-0 scale-100"
           }`}
         >
-          <p className="font-['Noto_Serif_Bengali','Hind_Siliguri',serif] text-xs sm:text-[13px] font-semibold text-[#422919] dark:text-[#EFE2D3] tracking-wide leading-relaxed">
-            "{currentQuote.text}"
+          <p className="font-bangla-serif text-xs sm:text-[13px] font-medium text-[#3A2213] dark:text-[#EFE2D3] leading-relaxed italic">
+            “{currentQuote.text}”
           </p>
         </div>
 
         {/* Small Cafe Signature */}
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[10px] font-bold text-amber-700/80 dark:text-amber-400/80 uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[9px] font-bold text-[#8C5D3D] dark:text-[#D4A373] uppercase tracking-wider">
             — BornoCafe
           </span>
-          <span className="text-[9px] text-muted-foreground/60">•</span>
-          <span className="text-[10px] font-medium text-muted-foreground/75 font-['Hind_Siliguri',sans-serif]">
+          <span className="text-[8px] text-muted-foreground/50">•</span>
+          <span className="text-[9px] font-normal text-[#8C6446]/80 dark:text-[#A89684]">
             {currentQuote.tag}
           </span>
         </div>
