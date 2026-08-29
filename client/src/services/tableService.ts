@@ -11,6 +11,7 @@ export interface Table {
   posX: number;
   posY: number;
   status: "free" | "occupied" | "reserved" | "cleaning";
+  qrToken?: string;
   activeOrder?: any;
   createdAt?: string;
   updatedAt?: string;
@@ -48,6 +49,17 @@ export const tableApi = createApi({
         body,
       }),
       invalidatesTags: ["Tables", "TableStats"],
+    }),
+
+    regenerateTableQr: builder.mutation<
+      { success: boolean; table: Table; message: string },
+      string
+    >({
+      query: (id) => ({
+        url: `/${id}/regenerate-qr`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Tables"],
     }),
 
     updateTable: builder.mutation<
@@ -96,6 +108,7 @@ export const {
   useGetTablesQuery,
   useAddTableMutation,
   useUpdateTableStatusMutation,
+  useRegenerateTableQrMutation,
   useUpdateTableMutation,
   useUpdateTableLayoutMutation,
   useDeleteTableMutation,

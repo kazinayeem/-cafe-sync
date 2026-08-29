@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose";
+import crypto from "crypto";
 
 export interface ITable extends Document {
   name: string;
@@ -8,6 +9,7 @@ export interface ITable extends Document {
   posX: number;
   posY: number;
   status: "free" | "occupied" | "reserved" | "cleaning";
+  qrToken: string;
   activeOrder?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -30,9 +32,22 @@ const tableSchema = new Schema<ITable>(
       enum: ["free", "occupied", "reserved", "cleaning"],
       default: "free",
     },
+    qrToken: {
+      type: String,
+      unique: true,
+      index: true,
+      default: () => `tbl_${crypto.randomBytes(6).toString("hex")}`,
+    },
     activeOrder: { type: Schema.Types.ObjectId, ref: "Order" },
   },
   { timestamps: true }
 );
+
+tableSchema.pre("save", function (next) {
+  if (!this.qrToken) {
+    this.qrToken = `tbl_${crypto.randomBytes(6).toString("hex")}`;
+  }
+  next();
+});
 
 export const Table = model<ITable>("Table", tableSchema);

@@ -300,9 +300,25 @@ export const OrderList: React.FC = () => {
                     onClick={() => setSelectedOrder(order)}
                     className="hover:bg-accent/40 cursor-pointer transition-colors"
                   >
-                    {/* Order ID */}
-                    <td className="py-3.5 px-4 font-black text-foreground">
-                      #{order.customOrderID || order._id.slice(-6)}
+                    {/* Order ID & Source */}
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-foreground">
+                          #{order.orderToken ? `${order.orderToken}` : order.customOrderID?.slice(-6)}
+                        </span>
+                        {order.source === "qr" ? (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                            QR
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            POS
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground font-mono">
+                        {order.customOrderID}
+                      </p>
                     </td>
 
                     {/* Type / Table */}
@@ -326,6 +342,10 @@ export const OrderList: React.FC = () => {
                       {order.customer ? (
                         <span className="font-bold text-foreground">
                           {order.customer.name}
+                        </span>
+                      ) : order.guestName ? (
+                        <span className="font-bold text-foreground">
+                          {order.guestName}
                         </span>
                       ) : (
                         "Walk-in Guest"

@@ -28,6 +28,9 @@ import ShiftManagement from "./pages/ShiftManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import KitchenDisplaySystem from "./pages/KDS";
 import QRMenu from "./pages/QRMenu";
+import CustomerOrderPage from "./pages/CustomerOrderPage";
+import CustomerOrderTracking from "./pages/CustomerOrderTracking";
+import CustomerDisplayScreen from "./pages/CustomerDisplayScreen";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -41,6 +44,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/about" element={<About />} />
             <Route path="/menu" element={<QRMenu />} />
             <Route path="/qr-menu" element={<QRMenu />} />
+
+            {/* Smart QR Ordering & Tracking (Public for customers at tables) */}
+            <Route path="/order/:qrToken" element={<CustomerOrderPage />} />
+            <Route path="/track/:orderId" element={<CustomerOrderTracking />} />
+
+            {/* Public TV / Monitor Order Status Display */}
+            <Route path="/display" element={<CustomerDisplayScreen />} />
 
             {/* Standalone KDS Screen */}
             <Route

@@ -219,17 +219,33 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                         {/* Header: Order ID, Type/Table & Elapsed Timer */}
                         <div className="flex items-start justify-between gap-2 border-b border-slate-800/80 pb-2.5 mb-2.5">
                           <div>
-                            <span className="font-mono font-black text-base text-white">
-                              #{order.customOrderID || order._id.slice(-4)}
-                            </span>
-                            <div className="text-xs text-slate-400 font-bold flex items-center gap-1 mt-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-black text-lg text-white">
+                                #{order.orderToken || order.customOrderID?.slice(-4)}
+                              </span>
+                              {order.source === "qr" ? (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                                  📱 QR Order
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400">
+                                  POS
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-300 font-bold flex items-center gap-1 mt-1">
                               <span>
                                 {order.orderType === "takeaway"
                                   ? "Takeaway 🛍️"
                                   : order.table
-                                  ? (order.table as any).name
+                                  ? `Table: ${(order.table as any).name}`
                                   : "Dine-In 🍽️"}
                               </span>
+                              {order.guestName && (
+                                <span className="text-slate-400 font-normal">
+                                  • {order.guestName}
+                                </span>
+                              )}
                             </div>
                           </div>
 

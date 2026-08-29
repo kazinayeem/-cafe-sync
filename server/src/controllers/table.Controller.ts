@@ -3,6 +3,7 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { Table } from "../models/Table";
 import { io } from "../index";
 import { broadcastStats } from "../utils/broadcastStats";
+import crypto from "crypto";
 
 // Get all tables
 export const getAllTables = async (req: AuthRequest, res: Response) => {
@@ -13,6 +14,15 @@ export const getAllTables = async (req: AuthRequest, res: Response) => {
         populate: { path: "items.product customer" },
       })
       .sort({ section: 1, name: 1 });
+
+    // Ensure all tables have a qrToken
+    for (const table of tables) {
+      if (!table.qrToken) {
+        table.qrToken = `tbl_${crypto.randomBytes(6).toString("hex")}`;
+        await table.save();
+      }
+    }
+
     res.json({ success: true, tables });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -36,11 +46,31 @@ export const createTable = async (req: AuthRequest, res: Response) => {
       posX: Number(posX) || 0,
       posY: Number(posY) || 0,
       status: "free",
+      qrToken: `tbl_${crypto.randomBytes(6).toString("hex")}`,
     });
 
     io.emit("tableAdded", table);
     await broadcastStats();
     res.status(201).json({ success: true, table });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Regenerate QR Token for table
+export const regenerateTableQr = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const newToken = `tbl_${crypto.randomBytes(6).toString("hex")}`;
+    const table = await Table.findByIdAndUpdate(
+      id,
+      { qrToken: newToken },
+      { new: true }
+    );
+    if (!table) {
+      return res.status(404).json({ success: false, message: "Table not found" });
+    }
+    res.json({ success: true, table, message: "Table QR token regenerated successfully" });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -50,6 +50,10 @@ export interface UpdateOrderPayload {
 export interface Order {
   _id: string;
   customOrderID: string;
+  orderToken?: string;
+  source?: "pos" | "qr" | "online";
+  guestName?: string;
+  guestPhone?: string;
   customer?: { _id: string; name: string; phone: string; email?: string; loyaltyPoints?: number };
   orderType: "dine_in" | "takeaway" | "delivery";
   items: {

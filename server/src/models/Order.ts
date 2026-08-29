@@ -36,6 +36,10 @@ export interface IRefundRecord {
 
 export interface IOrder extends Document {
   customOrderID: string;
+  orderToken: string;
+  source: "pos" | "qr" | "online";
+  guestName?: string;
+  guestPhone?: string;
   customer?: Types.ObjectId | ICustomer;
   orderType: "dine_in" | "takeaway" | "delivery";
   items: IOrderItem[];
@@ -65,7 +69,7 @@ export interface IOrder extends Document {
     | "partial"
     | "refunded"
     | "partially_refunded";
-  paymentMethod: "cash" | "card" | "online" | "bkash" | "nagod" | "split";
+  paymentMethod: "cash" | "card" | "online" | "bkash" | "nagod" | "nagad" | "split";
   payments: IPaymentRecord[];
   refunds: IRefundRecord[];
   table?: Types.ObjectId | ITable;
@@ -123,6 +127,15 @@ const refundRecordSchema = new Schema<IRefundRecord>(
 const orderSchema = new Schema<IOrder>(
   {
     customOrderID: { type: String, unique: true, index: true },
+    orderToken: { type: String, index: true },
+    source: {
+      type: String,
+      enum: ["pos", "qr", "online"],
+      default: "pos",
+      index: true,
+    },
+    guestName: { type: String },
+    guestPhone: { type: String },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", index: true },
     orderType: {
       type: String,
@@ -177,16 +190,15 @@ const orderSchema = new Schema<IOrder>(
   { timestamps: true }
 );
 
-// Auto-generate customOrderID
+// Auto-generate customOrderID and customer-friendly orderToken
 orderSchema.pre("save", async function (next) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+
   if (!this.customOrderID) {
-    const now = new Date();
-    const year = now.getFullYear();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-
     const datePrefix = `ORD-${year}-${day}-${month}`;
-
     const lastOrder = await Order.findOne({
       customOrderID: { $regex: `^${datePrefix}` },
     }).sort({ createdAt: -1 });
@@ -201,6 +213,23 @@ orderSchema.pre("save", async function (next) {
     }
     this.customOrderID = `${datePrefix}-${nextNumber}`;
   }
+
+  if (!this.orderToken) {
+    // Generate daily token like A101, A102...
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const todayCount = await Order.countDocuments({
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    const tokenNum = 100 + ((todayCount % 900) + 1);
+    const letterIndex = Math.floor(todayCount / 900) % 26;
+    const letter = String.fromCharCode(65 + letterIndex); // A, B, C...
+
+    this.orderToken = `${letter}${tokenNum}`;
+  }
+
   next();
 });
 
