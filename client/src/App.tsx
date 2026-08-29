@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useGetPublicMenuQuery } from "@/services/publicMenuApi";
-import { InteractiveCoffeeHero } from "@/components/coffee/InteractiveCoffeeHero";
+import { PremiumCoffeeHero } from "@/components/coffee/PremiumCoffeeHero";
 import {
   Coffee,
   QrCode,
@@ -379,9 +379,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Column: Interactive Coffee Pouring & Cup Animation */}
+            {/* Right Column: Realistic Coffee Pouring Visual */}
             <div className="lg:col-span-6 flex items-center justify-center relative">
-              <InteractiveCoffeeHero />
+              <PremiumCoffeeHero />
             </div>
           </div>
         </div>
