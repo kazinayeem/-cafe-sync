@@ -19,9 +19,7 @@ import {
   X,
   CreditCard,
   Edit3,
-  CheckCircle2,
   Clock,
-  User,
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

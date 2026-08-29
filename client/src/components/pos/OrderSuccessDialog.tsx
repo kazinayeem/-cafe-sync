@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
   Printer,
-  Coffee,
   Clock,
   ArrowRight,
   Plus,

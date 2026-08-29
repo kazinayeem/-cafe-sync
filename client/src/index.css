@@ -150,16 +150,87 @@
     transform: translateY(0) scaleX(1);
     opacity: 0;
   }
-  30% {
-    opacity: 0.7;
+  25% {
+    opacity: 0.75;
   }
   60% {
-    transform: translateY(-22px) scaleX(1.3) translateX(2px);
-    opacity: 0.4;
+    transform: translateY(-28px) scaleX(1.3) translateX(3px);
+    opacity: 0.45;
   }
   100% {
-    transform: translateY(-44px) scaleX(1.7) translateX(-3px);
+    transform: translateY(-56px) scaleX(1.8) translateX(-4px);
     opacity: 0;
+  }
+}
+
+@keyframes milk-flow {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  15% {
+    transform: scaleY(1);
+    opacity: 0.95;
+  }
+  85% {
+    transform: scaleY(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple-ring {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes latte-bloom {
+  0% {
+    transform: scale(0.4) rotate(-5deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.92;
+  }
+}
+
+@keyframes float-bean-1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(8deg);
+  }
+}
+
+@keyframes float-bean-2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(-12deg);
+  }
+}
+
+@keyframes float-bean-3 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(15deg);
   }
 }
 
@@ -172,12 +243,47 @@
 .animate-steam-3 {
   animation: steam-rise 4.2s infinite ease-out 1.6s;
 }
+.animate-steam-4 {
+  animation: steam-rise 3.5s infinite ease-out 2.2s;
+}
+.animate-milk-flow {
+  animation: milk-flow 4.5s infinite ease-in-out;
+  transform-origin: top center;
+}
+.animate-ripple-1 {
+  animation: ripple-ring 2.4s infinite ease-out;
+  transform-origin: center;
+}
+.animate-ripple-2 {
+  animation: ripple-ring 2.4s infinite ease-out 1.2s;
+  transform-origin: center;
+}
+.animate-latte-art {
+  animation: latte-bloom 5s infinite ease-out;
+  transform-origin: center;
+}
+.animate-float-1 {
+  animation: float-bean-1 6s infinite ease-in-out;
+}
+.animate-float-2 {
+  animation: float-bean-2 7.5s infinite ease-in-out;
+}
+.animate-float-3 {
+  animation: float-bean-3 5.5s infinite ease-in-out;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-steam-1,
   .animate-steam-2,
-  .animate-steam-3 {
-    animation: none;
-    opacity: 0.4;
+  .animate-steam-3,
+  .animate-steam-4,
+  .animate-milk-flow,
+  .animate-ripple-1,
+  .animate-ripple-2,
+  .animate-latte-art,
+  .animate-float-1,
+  .animate-float-2,
+  .animate-float-3 {
+    animation: none !important;
   }
 }

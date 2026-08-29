@@ -14,10 +14,6 @@ import {
   Volume2,
   VolumeX,
   User,
-  Wifi,
-  WifiOff,
-  BellRing,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
