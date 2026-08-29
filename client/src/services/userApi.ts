@@ -1,22 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createCustomBaseQuery } from "./apiConfig";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: baseUrl + "/api/users",
-    prepareHeaders: (headers, { getState }) => {
-      const token =
-        (getState() as any).auth?.token || localStorage.getItem("token");
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: createCustomBaseQuery("/api/users"),
   endpoints: (builder) => ({
-    // ✅ Login User
     loginUser: builder.mutation<
       { token: string; user: any },
       { email: string; password: string }

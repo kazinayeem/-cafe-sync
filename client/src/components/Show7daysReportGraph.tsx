@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,9 +9,10 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useGetSalesByDateRangeQuery } from "@/services/orderApi";
+import { TrendingUp, Calendar } from "lucide-react";
+import { Input } from "./ui/input";
 
 export default function Last7DaysSalesPage() {
-  // Default: last 7 days
   const [startDate, setStartDate] = useState(
     new Date(new Date().setDate(new Date().getDate() - 6))
       .toISOString()
@@ -19,85 +20,89 @@ export default function Last7DaysSalesPage() {
   );
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
 
-  const { data, isLoading, isError, refetch } = useGetSalesByDateRangeQuery({
+  const { data, isLoading } = useGetSalesByDateRangeQuery({
     startDate: new Date(`${startDate}T00:00:00+06:00`).toISOString(),
     endDate: new Date(`${endDate}T23:59:59+06:00`).toISOString(),
   });
 
-  const chartData: { date: string; totalSales: number }[] = data?.data || [];
-
-  // Refetch if date range changes
-  useEffect(() => {
-    refetch();
-  }, [startDate, endDate, refetch]);
-
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-gray-500 dark:text-gray-400">Loading chart...</p>
-      </div>
-    );
-
-  if (isError)
-    return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-red-500">Failed to load chart data.</p>
-      </div>
-    );
+  const chartData: { date: string; totalSales: number; totalOrders?: number }[] =
+    data?.data || [];
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md rounded p-4 space-y-4 w-full overflow-x-hidden">
-      {/* Date Range Picker */}
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="text-gray-700 dark:text-gray-200">From:</label>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="border px-2 py-1 rounded dark:bg-gray-700 dark:text-gray-200"
-        />
-        <label className="text-gray-700 dark:text-gray-200">To:</label>
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="border px-2 py-1 rounded dark:bg-gray-700 dark:text-gray-200"
-        />
-        <button
-          onClick={() => refetch()}
-          className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-        >
-          Update
-        </button>
+    <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <h3 className="font-extrabold text-base text-foreground">
+            Revenue Trend Overview
+          </h3>
+        </div>
+
+        {/* Date Selector */}
+        <div className="flex items-center gap-2 text-xs">
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="h-8 rounded-lg text-xs"
+          />
+          <span className="text-muted-foreground font-bold">to</span>
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="h-8 rounded-lg text-xs"
+          />
+        </div>
       </div>
 
-      {/* Chart */}
-      {chartData.length > 0 ? (
-        <div className="w-full">
-          <ResponsiveContainer
-            width="100%"
-            height={Math.min(400, chartData.length * 50)}
-          >
+      {isLoading ? (
+        <div className="h-64 flex items-center justify-center text-xs text-muted-foreground animate-pulse">
+          Loading revenue graph...
+        </div>
+      ) : chartData.length > 0 ? (
+        <div className="w-full h-72 pt-2">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
-              <XAxis dataKey="date" stroke="#000" />
-              <YAxis tickFormatter={(value) => `৳${value}`} stroke="#000" />
-              <Tooltip formatter={(value: number) => `৳${value.toFixed(2)}`} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="currentColor"
+                className="text-border/40"
+              />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 11, fill: "currentColor" }}
+                className="text-muted-foreground"
+              />
+              <YAxis
+                tick={{ fontSize: 11, fill: "currentColor" }}
+                className="text-muted-foreground"
+                tickFormatter={(val) => `৳${val}`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--color-card)",
+                  borderColor: "var(--color-border)",
+                  borderRadius: "0.75rem",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+                formatter={(value: any) => [`৳${Number(value).toFixed(2)}`, "Sales"]}
+              />
               <Bar
                 dataKey="totalSales"
-                fill="#6366f1"
-                barSize={Math.max(20, Math.min(40, 400 / chartData.length))}
-                radius={[5, 5, 0, 0]}
+                fill="#d97706"
+                radius={[6, 6, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
       ) : (
-        <p className="text-center text-gray-500 dark:text-gray-400">
-          No sales data available.
+        <p className="text-center text-xs text-muted-foreground py-12">
+          No sales recorded for this date range.
         </p>
       )}
     </div>

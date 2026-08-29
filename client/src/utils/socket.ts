@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { getBaseApiUrl } from "../services/apiConfig";
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
-export const socket = io(apiUrl, {
+export const socket = io(getBaseApiUrl(), {
   withCredentials: true,
+  transports: ["websocket", "polling"],
 });

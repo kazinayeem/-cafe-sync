@@ -5,7 +5,11 @@ import type { AppDispatch, RootState } from "./store";
 import { login, logout } from "./store/userSlice";
 import { isTokenExpired } from "./utils/token";
 
-export default function ProtectedRoute() {
+interface ProtectedRouteProps {
+  children?: React.ReactNode;
+}
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { token } = useSelector((state: RootState) => state.user);
 
@@ -14,12 +18,16 @@ export default function ProtectedRoute() {
       const storedToken = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
       if (storedToken && storedUser && !isTokenExpired(storedToken)) {
-        dispatch(
-          login({
-            token: storedToken,
-            ...(JSON.parse(storedUser) || {}),
-          })
-        );
+        try {
+          dispatch(
+            login({
+              token: storedToken,
+              ...(JSON.parse(storedUser) || {}),
+            })
+          );
+        } catch {
+          dispatch(logout());
+        }
       } else {
         dispatch(logout());
         localStorage.removeItem("token");
@@ -35,5 +43,5 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 }

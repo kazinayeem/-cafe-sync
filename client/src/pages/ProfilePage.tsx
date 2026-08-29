@@ -1,117 +1,133 @@
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/services/userApi";
-import toast from "react-hot-toast";
+import { User, Mail, Lock, Shield, Save, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/PageHeader";
+import Swal from "sweetalert2";
 
-const ProfilePage: React.FC = () => {
-  const { data, isLoading, error, refetch } = useGetUserProfileQuery();
-  const [updateProfile, { isLoading: isUpdating }] =
-    useUpdateUserProfileMutation();
+export const ProfilePage: React.FC = () => {
+  const { data, isLoading, refetch } = useGetUserProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // prefill once user data is fetched
-  React.useEffect(() => {
+  useEffect(() => {
     if (data?.user) {
-      setForm({ name: data.user.name, email: data.user.email, password: "" });
+      setName(data.user.name || "");
+      setEmail(data.user.email || "");
     }
   }, [data]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateProfile(form).unwrap();
-      toast.success("Profile updated successfully ✅");
+      await updateProfile({
+        name,
+        email,
+        password: password ? password : undefined,
+      }).unwrap();
+
+      setPassword("");
       refetch();
-      setForm((prev) => ({ ...prev, password: "" })); // clear password
+      Swal.fire({
+        icon: "success",
+        title: "Profile Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to update profile ❌");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.data?.message || "Failed to update profile",
+      });
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader className="animate-spin w-6 h-6" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 mt-6">
-        Failed to load profile.
-      </div>
-    );
-  }
-
-  if (!data?.user) {
-    return (
-      <div className="text-center text-gray-500 mt-6">
-        No profile data found.
-      </div>
-    );
-  }
-
   return (
-    <div className="flex justify-center mt-10 px-4">
-      <Card className="w-full max-w-md shadow-lg rounded-2xl">
-        <CardContent className="p-6 space-y-4">
-          <h2 className="text-2xl font-bold text-center mb-4">
-            👤 Edit Profile
-          </h2>
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6">
+      <PageHeader
+        title="Staff Profile & Security"
+        subtitle="Manage your personal account credentials and security password"
+      />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="font-semibold">Name</label>
-              <Input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Your name"
-              />
-            </div>
-            <div>
-              <label className="font-semibold">Email</label>
-              <Input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Your email"
-              />
-            </div>
-            <div>
-              <label className="font-semibold">New Password</label>
-              <Input
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Leave blank to keep current password"
-              />
-            </div>
+      <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-xs space-y-6">
+        {/* User Card */}
+        <div className="flex items-center gap-4 border-b border-border/80 pb-6">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-black text-xl">
+            {name ? name.slice(0, 2).toUpperCase() : "CS"}
+          </div>
+          <div>
+            <h3 className="text-xl font-extrabold text-foreground">{name || "Staff Member"}</h3>
+            <p className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+              <span>{email}</span>
+              <span className="capitalize font-bold text-amber-600 dark:text-amber-400">
+                • {data?.user?.role || "Cashier"}
+              </span>
+            </p>
+          </div>
+        </div>
 
-            <Button type="submit" className="w-full" disabled={isUpdating}>
-              {isUpdating ? "Updating..." : "Save Changes"}
+        {/* Edit Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Full Name *
+            </Label>
+            <Input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              className="rounded-xl mt-1 font-semibold"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Email Address *
+            </Label>
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your.email@cafesync.com"
+              className="rounded-xl mt-1 font-semibold"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              New Password (Leave blank to keep current)
+            </Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="rounded-xl mt-1"
+            />
+          </div>
+
+          <div className="pt-3">
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-3 rounded-xl shadow-md"
+            >
+              {isUpdating ? "Saving Changes..." : "Update Profile"}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

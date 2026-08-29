@@ -1,23 +1,22 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface UserState {
-  isLoggedIn: boolean;
-  name: string;
-  email: string;
-  role: "admin" | "staff" | "customer" | "";
-  token: string;
+export interface UserState {
+  name: string | null;
+  email: string | null;
+  role: "admin" | "manager" | "cashier" | "barista" | "staff" | "customer" | null;
+  token: string | null;
+  permissions: string[];
 }
 
 const initialState: UserState = {
-  isLoggedIn: false,
-  name: "",
-  email: "",
-  role: "",
-  token: "",
+  name: null,
+  email: null,
+  role: null,
+  token: null,
+  permissions: [],
 };
 
-export const userSlice = createSlice({
+const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
@@ -26,27 +25,29 @@ export const userSlice = createSlice({
       action: PayloadAction<{
         name: string;
         email: string;
-        role: UserState["role"];
+        role: "admin" | "manager" | "cashier" | "barista" | "staff" | "customer";
         token: string;
+        permissions?: string[];
       }>
     ) => {
-      state.isLoggedIn = true;
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.role = action.payload.role;
       state.token = action.payload.token;
+      state.permissions = action.payload.permissions || [];
     },
     logout: (state) => {
-      state.isLoggedIn = false;
-      state.name = "";
-      state.email = "";
-      state.role = "";
-      state.token = "";
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      state.name = null;
+      state.email = null;
+      state.role = null;
+      state.token = null;
+      state.permissions = [];
+    },
+    updatePermissions: (state, action: PayloadAction<string[]>) => {
+      state.permissions = action.payload;
     },
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, updatePermissions } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Utensils } from "lucide-react";
 
 type Category = {
   _id: string;
@@ -14,27 +15,28 @@ type CategoriesProps = {
   catLoading: boolean;
 };
 
-const Categories = ({
+const Categories: React.FC<CategoriesProps> = ({
   categories,
   activeCategory,
   setActiveCategory,
   catLoading,
-}: CategoriesProps) => {
+}) => {
   return (
-    <div className="w-full mb-6">
+    <div className="w-full mb-4">
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 px-2 pb-2 flex-wrap sm:flex-nowrap">
-          <Button
-            className={`h-9 sm:h-10 px-4 sm:px-5 rounded-full font-medium flex-shrink-0 text-sm transition-colors duration-200
-          ${
-            activeCategory === null
-              ? "bg-black text-white dark:bg-black"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-          }`}
+        <div className="flex gap-2 pb-1.5 flex-nowrap items-center">
+          <button
+            type="button"
             onClick={() => setActiveCategory(null)}
+            className={`h-9 px-4 rounded-xl font-bold flex items-center gap-2 flex-shrink-0 text-xs transition-all ${
+              activeCategory === null
+                ? "bg-amber-500 text-white shadow-sm ring-2 ring-amber-500/20"
+                : "bg-card border border-border/80 text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
-            All
-          </Button>
+            <Utensils className="h-3.5 w-3.5" />
+            <span>All Items</span>
+          </button>
 
           {catLoading
             ? Array(5)
@@ -42,25 +44,41 @@ const Categories = ({
                 .map((_, i) => (
                   <div
                     key={i}
-                    className="h-9 sm:h-10 w-20 sm:w-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"
+                    className="h-9 w-24 rounded-xl bg-muted animate-pulse flex-shrink-0"
                   />
                 ))
-            : categories.map((cat) => (
-                <Button
-                  key={cat._id}
-                  className={`h-9 sm:h-10 px-4 sm:px-5 rounded-full font-medium flex-shrink-0 text-sm transition-colors duration-200
-                ${
-                  activeCategory === cat._id
-                    ? "bg-black text-white dark:bg-black"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                }`}
-                  onClick={() => setActiveCategory(cat._id)}
-                >
-                  {cat?.name || "N/A"}
-                </Button>
-              ))}
+            : categories.map((cat) => {
+                const isActive = activeCategory === cat._id;
+                const count = cat.items?.length;
+
+                return (
+                  <button
+                    key={cat._id}
+                    type="button"
+                    onClick={() => setActiveCategory(cat._id)}
+                    className={`h-9 px-4 rounded-xl font-bold flex items-center gap-2 flex-shrink-0 text-xs transition-all ${
+                      isActive
+                        ? "bg-amber-500 text-white shadow-sm ring-2 ring-amber-500/20"
+                        : "bg-card border border-border/80 text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                    {count !== undefined && count > 0 && (
+                      <span
+                        className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                          isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
         </div>
-        <ScrollBar orientation="horizontal" className="hidden md:flex" />
+        <ScrollBar orientation="horizontal" className="hidden sm:flex" />
       </ScrollArea>
     </div>
   );

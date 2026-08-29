@@ -10,43 +10,70 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { ThemeProvider } from "./components/theme-provider";
 import Dashboard from "./dashboard/Dashboard";
-import DashboardHome from "./dashboard/DashboardHome";
+import MainPage from "./pages/MainPage";
 import ProtectedRoute from "./ProtectedRoute";
 import TableManager from "./components/TableManager";
 import { Toaster } from "react-hot-toast";
 import StaffManagement from "./dashboard/staff/StaffManagement";
 import CategoryManagement from "./dashboard/category/CategoryManagement";
 import ProductManagement from "./dashboard/product/ProductManagement";
-import OrdersList from "./pages/OrderList";
+import OrderList from "./pages/OrderList";
 import ProfilePage from "./pages/ProfilePage";
 import SummaryManagement from "./pages/SummaryManagement";
-import { SettingManagement } from "./pages/SettingManagement";
-import MainNavbar from "./components/MainNavbar";
+import SettingManagement from "./pages/SettingManagement";
+import CustomerManagement from "./pages/CustomerManagement";
+import InventoryManagement from "./pages/InventoryManagement";
+import ModifierManagement from "./pages/ModifierManagement";
+import ShiftManagement from "./pages/ShiftManagement";
+import ReservationManagement from "./pages/ReservationManagement";
+import KitchenDisplaySystem from "./pages/KDS";
+import QRMenu from "./pages/QRMenu";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Provider store={store}>
         <BrowserRouter>
-        <MainNavbar/>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<App />} />
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<About />} />
+            <Route path="/menu" element={<QRMenu />} />
+            <Route path="/qr-menu" element={<QRMenu />} />
+
+            {/* Standalone KDS Screen */}
+            <Route
+              path="/kitchen"
+              element={
+                <ProtectedRoute>
+                  <KitchenDisplaySystem isStandalone />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected POS & Operations Dashboard */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />}>
-                <Route index element={<DashboardHome />} />
+                <Route index element={<MainPage />} />
+                <Route path="kitchen" element={<KitchenDisplaySystem />} />
+                <Route path="orders" element={<OrderList />} />
                 <Route path="tables" element={<TableManager />} />
-                <Route path="staff" element={<StaffManagement />} />
-                <Route path="categories" element={<CategoryManagement />} />
-                <Route path="orders" element={<OrdersList />} />
-                <Route path="profile" element={<ProfilePage />} />
+                <Route path="reservations" element={<ReservationManagement />} />
+                <Route path="customers" element={<CustomerManagement />} />
+                <Route path="inventory" element={<InventoryManagement />} />
+                <Route path="modifiers" element={<ModifierManagement />} />
+                <Route path="shifts" element={<ShiftManagement />} />
                 <Route path="menu" element={<ProductManagement />} />
+                <Route path="categories" element={<CategoryManagement />} />
                 <Route path="reports" element={<SummaryManagement />} />
+                <Route path="staff" element={<StaffManagement />} />
                 <Route path="settings" element={<SettingManagement />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster position="top-center" reverseOrder={false} />

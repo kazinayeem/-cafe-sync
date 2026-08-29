@@ -1,33 +1,31 @@
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BackgroundLines } from "@/components/ui/background-lines";
-import { cn } from "@/lib/utils";
-import type React from "react";
 import { login } from "@/store/userSlice";
 import type { AppDispatch } from "@/store";
 import axios from "axios";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
+import { Coffee, Shield, UserCheck, Lock, QrCode } from "lucide-react";
+import { getBaseApiUrl } from "@/services/apiConfig";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("12345");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
       setLoading(true);
       setError("");
 
-      const apiUrl =
-        import.meta.env.VITE_API_URL || "https://cafe-sync-mhnc.vercel.app";
-      const res = await axios.post(`${apiUrl}/api/users/login`, {
+      const res = await axios.post(`${getBaseApiUrl()}/api/users/login`, {
         email,
         password,
       });
@@ -38,6 +36,7 @@ export default function Login() {
           email: res.data.user.email,
           role: res.data.user.role,
           token: res.data.token,
+          permissions: res.data.user.permissions || [],
         })
       );
 
@@ -46,125 +45,130 @@ export default function Login() {
 
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(
+        err.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleLogin();
-  };
-
-  // Quick-fill buttons
-  const fillAdmin = () => {
-    setEmail("admin@gmail.com");
-    setPassword("12345");
-  };
-
-  const fillStaff = () => {
-    setEmail("kazinayeem@gmail.com");
-    setPassword("12345");
+  const fillCredentials = (userEmail: string, userPass: string) => {
+    setEmail(userEmail);
+    setPassword(userPass);
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4 sm:px-6">
-      <BackgroundLines children className="absolute inset-0 z-0" />
+    <div className="relative min-h-screen flex items-center justify-center bg-slate-950 px-4 py-8 select-none">
+      {/* Background Decor */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-700 rounded-full blur-3xl" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 sm:p-8 shadow-xl">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <img
-            src="/logo.png"
-            alt="Cafe Logo"
-            className="w-16 h-16 sm:w-20 sm:h-20 mb-2"
-          />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white text-center">
-            ☕ Cafe POS System
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-center mt-2 text-sm sm:text-base">
-            Login to manage orders, track sales & monitor your café performance
-          </p>
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/30 shadow-inner">
+            <Coffee className="h-7 w-7" />
+          </div>
+
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Cafe Sync POS
+            </h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Production Cafe Point-of-Sale & Kitchen System
+            </p>
+          </div>
         </div>
 
-        {/* Quick-fill buttons */}
-        <div className="flex justify-between gap-3 mb-6">
-          <Button
-            type="button"
-            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white text-sm sm:text-base"
-            onClick={fillAdmin}
-          >
-            Admin
-          </Button>
-          <Button
-            type="button"
-            className="flex-1 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white text-sm sm:text-base"
-            onClick={fillStaff}
-          >
-            Staff
-          </Button>
+        {/* Quick Demo Role Fillers */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center block">
+            Demo Credentials
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fillCredentials("admin@gmail.com", "12345")}
+              className="h-8 rounded-xl bg-slate-800/80 border-slate-700 hover:bg-slate-700 text-slate-200 text-xs font-bold"
+            >
+              <Shield className="h-3.5 w-3.5 mr-1 text-amber-400" />
+              Admin
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fillCredentials("kazinayeem@gmail.com", "12345")}
+              className="h-8 rounded-xl bg-slate-800/80 border-slate-700 hover:bg-slate-700 text-slate-200 text-xs font-bold"
+            >
+              <UserCheck className="h-3.5 w-3.5 mr-1 text-blue-400" />
+              Staff
+            </Button>
+          </div>
         </div>
 
         {/* Login Form */}
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {error && <p className="text-red-600 text-center text-sm">{error}</p>}
+        <form className="space-y-4" onSubmit={handleLogin}>
+          {error && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center">
+              {error}
+            </div>
+          )}
 
-          <LabelInputContainer>
-            <Label
-              htmlFor="email"
-              className="dark:text-gray-200 text-sm sm:text-base"
-            >
-              Email
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Staff Email Address
             </Label>
             <Input
-              id="email"
               type="email"
-              placeholder="Enter your email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
+              placeholder="staff@cafesync.com"
+              className="h-11 rounded-xl bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-500 font-medium"
             />
-          </LabelInputContainer>
+          </div>
 
-          <LabelInputContainer>
-            <Label
-              htmlFor="password"
-              className="dark:text-gray-200 text-sm sm:text-base"
-            >
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Password
             </Label>
             <Input
-              id="password"
               type="password"
-              placeholder="••••••••"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
+              placeholder="••••••••"
+              className="h-11 rounded-xl bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-500 font-medium"
             />
-          </LabelInputContainer>
+          </div>
 
           <Button
             type="submit"
-            className="mt-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm sm:text-base"
             disabled={loading}
+            className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm shadow-lg shadow-amber-500/20 active:scale-98 transition-all"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Authenticating..." : "Access Terminal"}
           </Button>
         </form>
+
+        {/* Public QR Menu Shortcut Link */}
+        <div className="pt-2 text-center border-t border-slate-800">
+          <Link
+            to="/menu"
+            className="inline-flex items-center gap-1.5 text-xs text-amber-400/80 hover:text-amber-300 font-semibold transition-colors"
+          >
+            <QrCode className="h-3.5 w-3.5" />
+            Open Customer Digital QR Menu →
+          </Link>
+        </div>
       </div>
     </div>
   );
 }
-
-const LabelInputContainer = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <div className={cn("flex flex-col space-y-2 w-full", className)}>
-    {children}
-  </div>
-);

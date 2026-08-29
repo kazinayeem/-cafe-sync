@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +10,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetCategoriesQuery } from "@/services/categoryApi";
+import { useGetModifierGroupsQuery } from "@/services/modifierApi";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "./ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Coffee, Upload, Check } from "lucide-react";
 
 interface ProductFormDialogProps {
   isFormDialogOpen: boolean;
@@ -37,168 +40,317 @@ export function ProductFormDialog({
   resetForm,
 }: ProductFormDialogProps) {
   const { data: categories } = useGetCategoriesQuery();
+  const { data: modifierGroupsResponse } = useGetModifierGroupsQuery();
+  const modifierGroups = modifierGroupsResponse?.data || [];
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      resetForm();
-    }
+    if (!open) resetForm();
     setIsFormDialogOpen(open);
   };
 
+  const handleToggleModifierGroup = (groupId: string) => {
+    const currentGroups = formData.modifierGroups || [];
+    if (currentGroups.includes(groupId)) {
+      setFormData({
+        ...formData,
+        modifierGroups: currentGroups.filter((id: string) => id !== groupId),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        modifierGroups: [...currentGroups, groupId],
+      });
+    }
+  };
+
   return (
-    <AlertDialog open={isFormDialogOpen} onOpenChange={handleOpenChange}>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" onClick={resetForm} className="mb-4">
-          Add Product
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="sm:max-w-lg dark:bg-gray-800 dark:text-white">
-        <Button
-          variant="ghost"
-          onClick={() => setIsFormDialogOpen(false)}
-          className="absolute top-2 right-2 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white p-1 rounded-full"
-        >
-          ✕
-        </Button>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {editId ? "Edit Product" : "Add Product"}
-          </AlertDialogTitle>
-        </AlertDialogHeader>
-        <div className="space-y-3 mt-4">
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            />
-          </div>
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(val) =>
-                setFormData({ ...formData, category: val })
-              }
-            >
-              <SelectTrigger
-                id="category"
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    <Dialog open={isFormDialogOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl border border-border/80 shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
+            <Coffee className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            {editId ? "Edit Menu Product" : "Add New Menu Item"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          {/* Name & Category */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Product Name *
+              </Label>
+              <Input
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Vanilla Iced Latte"
+                className="rounded-xl mt-1 font-semibold"
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Category *
+              </Label>
+              <Select
+                value={formData.category}
+                onValueChange={(val) => setFormData({ ...formData, category: val })}
               >
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                {categories?.map((cat: any) => (
-                  <SelectItem key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger className="rounded-xl mt-1 text-xs font-medium">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {categories?.map((cat: any) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          {/* Description */}
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Description (Optional)
+            </Label>
             <Input
-              id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              placeholder="e.g. Fresh espresso with velvety steamed milk & pure vanilla"
+              className="rounded-xl mt-1"
             />
           </div>
+
+          {/* Sizes & Pricing */}
           <div>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
+              Size Pricing (৳ BDT)
+            </Label>
+            <div className="grid grid-cols-3 gap-2.5">
+              <div>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Regular / Small
+                </span>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={formData.sizes.small}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sizes: { ...formData.sizes, small: Number(e.target.value) },
+                    })
+                  }
+                  className="rounded-xl mt-1 font-bold font-tabular"
+                />
+              </div>
+
+              <div>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Large
+                </span>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={formData.sizes.large}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sizes: { ...formData.sizes, large: Number(e.target.value) },
+                    })
+                  }
+                  className="rounded-xl mt-1 font-bold font-tabular"
+                />
+              </div>
+
+              <div>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Extra Large (XL)
+                </span>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={formData.sizes.extraLarge}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sizes: { ...formData.sizes, extraLarge: Number(e.target.value) },
+                    })
+                  }
+                  className="rounded-xl mt-1 font-bold font-tabular"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Inventory Tracking & Stock */}
+          <div className="p-3.5 rounded-2xl bg-accent/40 border border-border/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Inventory Stock Control
+              </span>
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
+                <input
+                  type="checkbox"
+                  checked={formData.trackInventory ?? true}
+                  onChange={(e) =>
+                    setFormData({ ...formData, trackInventory: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded text-amber-600"
+                />
+                <span>Track Stock Quantity</span>
+              </label>
+            </div>
+
+            {formData.trackInventory && (
+              <div className="grid grid-cols-3 gap-2.5 pt-1">
+                <div>
+                  <span className="text-[11px] text-muted-foreground font-semibold">
+                    Current Stock
+                  </span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={formData.stockQuantity ?? 100}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stockQuantity: Number(e.target.value),
+                      })
+                    }
+                    className="rounded-xl mt-1 font-bold font-tabular"
+                  />
+                </div>
+
+                <div>
+                  <span className="text-[11px] text-muted-foreground font-semibold">
+                    Low Stock Alert
+                  </span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={formData.minStockLevel ?? 10}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        minStockLevel: Number(e.target.value),
+                      })
+                    }
+                    className="rounded-xl mt-1 font-bold font-tabular"
+                  />
+                </div>
+
+                <div>
+                  <span className="text-[11px] text-muted-foreground font-semibold">
+                    Unit (pcs/cups)
+                  </span>
+                  <Input
+                    value={formData.unit || "pcs"}
+                    onChange={(e) =>
+                      setFormData({ ...formData, unit: e.target.value })
+                    }
+                    className="rounded-xl mt-1"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Modifier Groups Assignment */}
+          {modifierGroups.length > 0 && (
             <div>
-              <Label htmlFor="image">Product Image</Label>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">
+                Attached Modifier Groups
+              </Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {modifierGroups.map((g) => {
+                  const isSelected = (formData.modifierGroups || []).includes(g._id);
+
+                  return (
+                    <button
+                      key={g._id}
+                      type="button"
+                      onClick={() => handleToggleModifierGroup(g._id)}
+                      className={`flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold transition-all ${
+                        isSelected
+                          ? "border-amber-500 bg-amber-500/10 text-amber-900 dark:text-amber-100 shadow-xs"
+                          : "border-border hover:bg-accent text-foreground"
+                      }`}
+                    >
+                      <span className="truncate">{g.name}</span>
+                      {isSelected && (
+                        <Check className="h-3.5 w-3.5 text-amber-600 shrink-0 ml-1" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Image Upload */}
+          <div>
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
+              Product Image
+            </Label>
+            <div className="flex items-center gap-3">
               <Input
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  if (file.size > 1 * 1024 * 1024) {
-                    alert("File size must be less than 1MB");
+                  if (file.size > 2 * 1024 * 1024) {
+                    alert("File size must be less than 2MB");
                     return;
                   }
-
                   setFormData({
                     ...formData,
                     imageFile: file,
                     imageUrl: URL.createObjectURL(file),
                   });
                 }}
+                className="rounded-xl text-xs"
               />
-
               {formData.imageUrl && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Image Preview:
-                  </p>
+                <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden border border-border">
                   <img
                     src={formData.imageUrl}
-                    alt="Product Preview"
-                    className="w-full h-32 object-cover rounded-md mt-1"
+                    alt="Preview"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               )}
             </div>
           </div>
-          <div>
-            <Label>Sizes</Label>
-            <div className="flex gap-2">
-              <Input
-                type="number"
-                placeholder="Small"
-                value={formData.sizes.small}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sizes: { ...formData.sizes, small: Number(e.target.value) },
-                  })
-                }
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              />
-              <Input
-                type="number"
-                placeholder="Large"
-                value={formData.sizes.large}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sizes: { ...formData.sizes, large: Number(e.target.value) },
-                  })
-                }
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              />
-              <Input
-                type="number"
-                placeholder="XL"
-                value={formData.sizes.extraLarge}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sizes: {
-                      ...formData.sizes,
-                      extraLarge: Number(e.target.value),
-                    },
-                  })
-                }
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              />
-            </div>
-          </div>
-          <Button
-            className="w-full mt-2 dark:bg-blue-600 dark:hover:bg-blue-700"
-            onClick={handleSubmit}
-          >
-            {editId ? "Update" : "Create"}
-          </Button>
         </div>
-      </AlertDialogContent>
-    </AlertDialog>
+
+        <DialogFooter className="pt-3 gap-2 border-t border-border/80">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsFormDialogOpen(false)}
+            className="rounded-xl"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 rounded-xl shadow-md"
+          >
+            {editId ? "Update Product" : "Create Product"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
