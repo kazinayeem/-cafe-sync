@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useGetPublicMenuQuery } from "@/services/publicMenuApi";
 import { PremiumCoffeeHero } from "@/components/coffee/PremiumCoffeeHero";
+import { BanglaCoffeeQuotes } from "@/components/coffee/BanglaCoffeeQuotes";
 import {
   Coffee,
   QrCode,
@@ -363,8 +364,13 @@ export default function App() {
                 </Button>
               </div>
 
+              {/* Rotating Bangla Poetic Coffee Quote Accent */}
+              <div className="pt-1 flex justify-center lg:justify-start">
+                <BanglaCoffeeQuotes />
+              </div>
+
               {/* Staff POS Secondary Link & Shift Status */}
-              <div className="pt-2 flex items-center justify-center lg:justify-start gap-4 text-xs font-bold text-[#8C6446] dark:text-[#AA9380]">
+              <div className="pt-1 flex items-center justify-center lg:justify-start gap-4 text-xs font-bold text-[#8C6446] dark:text-[#AA9380]">
                 <button
                   onClick={() => navigate("/login")}
                   className="hover:text-[#C86D3B] underline underline-offset-4 decoration-amber-500/40 hover:decoration-[#C86D3B] transition-colors"
