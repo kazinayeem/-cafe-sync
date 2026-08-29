@@ -317,7 +317,7 @@ export const StaffManagement: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex@cafesync.com"
+                placeholder="alex@bornocafe.com"
                 className="rounded-xl mt-1"
               />
             </div>

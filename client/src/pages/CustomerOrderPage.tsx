@@ -80,7 +80,7 @@ export const CustomerOrderPage: React.FC = () => {
   }, []);
 
   const tableData = tableResponse?.data?.table;
-  const business = tableResponse?.data?.business || { name: "Cafe Sync" };
+  const business = tableResponse?.data?.business || { name: "BornoCafe" };
   const categories = tableResponse?.data?.categories || [];
   const products = tableResponse?.data?.products || [];
 
@@ -255,7 +255,7 @@ export const CustomerOrderPage: React.FC = () => {
             </div>
             <div className="min-w-0">
               <h1 className="text-base font-black text-foreground truncate leading-tight">
-                {business.name || "Cafe Sync"}
+                {business.name || "BornoCafe"}
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">

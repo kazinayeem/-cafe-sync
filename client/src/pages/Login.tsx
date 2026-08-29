@@ -76,10 +76,10 @@ export default function Login() {
 
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Cafe Sync POS
+              BornoCafe POS
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Production Cafe Point-of-Sale & Kitchen System
+              Specialty Coffee Point-of-Sale & Kitchen System
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="staff@cafesync.com"
+              placeholder="staff@bornocafe.com"
               className="h-11 rounded-xl bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-500 font-medium"
             />
           </div>

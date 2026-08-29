@@ -100,7 +100,7 @@ export const CustomerDisplayScreen: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Cafe Sync
+                BornoCafe
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 Live Order Display
@@ -298,7 +298,7 @@ export const CustomerDisplayScreen: React.FC = () => {
 
         <div className="text-slate-500 text-[11px] font-semibold flex items-center gap-2 shrink-0">
           <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          <span>Real-time Live Sync • Powered by Cafe Sync POS</span>
+          <span>Real-time Live Sync • Powered by BornoCafe POS</span>
         </div>
       </footer>
     </div>

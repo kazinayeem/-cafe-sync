@@ -16,10 +16,10 @@ export const QRMenu: React.FC = () => {
   const [search, setSearch] = useState("");
 
   const business = menuResponse?.data?.business || {
-    name: "Cafe Sync",
+    name: "BornoCafe",
     address: "Mirpur, Dhaka - 1206",
     phone: "012-345-6789",
-    website: "https://cafe-sync.vercel.app",
+    website: "https://bornocafe.vercel.app",
     currency: "BDT",
     openingTime: "09:00",
     closingTime: "23:00",
@@ -219,7 +219,7 @@ export const QRMenu: React.FC = () => {
         {/* Footer */}
         <div className="text-center py-8 text-xs text-slate-400 space-y-1 border-t border-slate-200 dark:border-slate-800">
           <p className="font-bold text-slate-600 dark:text-slate-400">
-            Powered by Cafe Sync POS
+            Powered by BornoCafe POS
           </p>
           <p>Please place your order at the counter with our barista.</p>
         </div>

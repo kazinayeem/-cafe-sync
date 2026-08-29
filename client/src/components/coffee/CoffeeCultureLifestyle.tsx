@@ -171,7 +171,7 @@ export const CoffeeCultureLifestyle: React.FC = () => {
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#E8925A] shadow-2xs">
             <Sparkles className="h-3.5 w-3.5 text-[#C86D3B]" />
-            <span>☕ CAFE SYNC · COFFEE & CULTURE</span>
+            <span>☕ BORNOCAFE · COFFEE & CULTURE</span>
           </div>
 
           <h2 className="font-bangla-serif font-black text-3xl sm:text-4xl lg:text-5xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.2]">

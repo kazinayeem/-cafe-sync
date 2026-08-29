@@ -36,7 +36,7 @@ export const CustomerOrderTracking: React.FC = () => {
   const [orderToken, setOrderToken] = useState<string>("");
 
   const order = trackData?.data?.order;
-  const business = trackData?.data?.business || { name: "Cafe Sync" };
+  const business = trackData?.data?.business || { name: "BornoCafe" };
 
   // Set initial status from query
   useEffect(() => {
@@ -142,7 +142,7 @@ export const CustomerOrderTracking: React.FC = () => {
               <Coffee className="h-4 w-4" />
             </div>
             <h1 className="text-sm font-black text-foreground truncate">
-              {business.name || "Cafe Sync"}
+              {business.name || "BornoCafe"}
             </h1>
           </div>
 

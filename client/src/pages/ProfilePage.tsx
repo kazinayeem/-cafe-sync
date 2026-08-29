@@ -98,7 +98,7 @@ export const ProfilePage: React.FC = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your.email@cafesync.com"
+              placeholder="your.email@bornocafe.com"
               className="rounded-xl mt-1 font-semibold"
             />
           </div>

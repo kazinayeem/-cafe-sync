@@ -14,12 +14,12 @@ export default function MainNavbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo + Brand */}
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="CafeSync Logo" className="w-20 h-20" />
+            <img src="/logo.png" alt="BornoCafe Logo" className="w-20 h-20" />
             <Link
               to="/"
               className="text-xl font-bold text-gray-800 dark:text-gray-100"
             >
-              CafeSync
+              BornoCafe
             </Link>
           </div>
 

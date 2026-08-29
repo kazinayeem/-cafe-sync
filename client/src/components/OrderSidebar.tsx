@@ -158,10 +158,10 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
     printReceipt(
       createdOrder,
       settings || {
-        businessName: "Cafe Sync",
+        businessName: "BornoCafe",
         address: "Specialty Coffee House",
         phone: "+880 1700-000000",
-        website: "https://cafe-sync.vercel.app",
+        website: "https://bornocafe.vercel.app",
         receiptFooter: "Thank you for your visit! Enjoy your coffee.",
         taxRate: taxRate || 0,
         serviceCharge: serviceChargeRate || 0,

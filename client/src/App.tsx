@@ -37,7 +37,7 @@ export function App() {
   const { data: menuData } = useGetPublicMenuQuery();
 
   const business = {
-    name: "Cafe Sync",
+    name: "BornoCafe",
     address: "সেক্টর ১১, উত্তরা, ঢাকা • মিরপুর ১২, ঢাকা",
     phone: "+৮৮০ ১৭১১-২২৩৩৪৪",
     openingTime: "০৮:০০ সকাল",
@@ -367,7 +367,7 @@ export function App() {
               {/* Eyebrow Pill */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFE3D3] dark:bg-[#261810] border border-[#DFCBB5] dark:border-[#422B1D] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#E8925A] shadow-2xs">
                 <Sparkles className="h-3.5 w-3.5 text-[#C86D3B]" />
-                <span>CAFE SYNC · SPECIALTY COFFEE</span>
+                <span>BORNOCAFE · SPECIALTY COFFEE</span>
               </div>
 
               {/* Display Headline in Noto Serif Bengali */}
@@ -380,8 +380,7 @@ export function App() {
 
               {/* Supporting Natural Bangla Copy */}
               <p className="text-base sm:text-lg text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                তাজা কফি, হাতে বানানো পানীয় আর আপনার টেবিল থেকেই সহজ অর্ডারের
-                অভিজ্ঞতা।
+                তাজা কফি, সুন্দর কিছু গল্প, আর আপনার জন্য একটু নিজের সময়।
               </p>
 
               {/* Primary & Secondary Action CTAs */}
@@ -923,7 +922,7 @@ export function App() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wider text-amber-300">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>ক্যাফে সিঙ্ক অভিজ্ঞতা</span>
+            <span>বর্নক্যাফে অভিজ্ঞতা</span>
           </div>
 
           <h2 className="font-bangla-serif font-black text-3xl sm:text-5xl text-[#FAF4ED] tracking-tight leading-[1.2]">
@@ -960,7 +959,7 @@ export function App() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 9. FOOTER */}
+      {/* 10. FOOTER */}
       {/* ========================================================================= */}
       <footer
         id="contact"
@@ -979,7 +978,7 @@ export function App() {
                 </span>
               </div>
               <p className="text-xs text-[#6E4F39] dark:text-[#A89684] leading-relaxed">
-                কফির সাথে ছোট্ট কিছু মুহূর্ত। স্পেশালিটি কফি রোস্টারি ও স্মার্ট ডাইনিং।
+                কফির সাথে ছোট্ট কিছু মুহূর্ত। স্পেশালিটি কফি রোস্টারি ও আধুনিক ক্যাফে অভিজ্ঞতা।
               </p>
             </div>
 

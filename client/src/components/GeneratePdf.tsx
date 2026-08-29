@@ -70,7 +70,7 @@ export const generatePDF = (
   // --- COVER PAGE (Professional Layout) ---
   doc.setFont("helvetica", "bold");
   doc.setFontSize(26);
-  doc.text("CAFE SYNC", pageWidth / 2, y, { align: "center" });
+  doc.text("BORNOCAFE", pageWidth / 2, y, { align: "center" });
   y += 12;
 
   doc.setFont("helvetica", "normal");

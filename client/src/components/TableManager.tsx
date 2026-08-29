@@ -556,7 +556,7 @@ export const TableManager: React.FC = () => {
             <div className="p-6 rounded-3xl border-2 border-dashed border-amber-500/40 bg-card inline-block mx-auto shadow-inner space-y-3">
               <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase text-amber-600 dark:text-amber-400">
                 <Coffee className="h-4 w-4" />
-                Cafe Sync
+                BornoCafe
               </div>
 
               <div className="bg-white p-3 rounded-2xl inline-block shadow-md">
@@ -673,7 +673,7 @@ export const TableManager: React.FC = () => {
               >
                 <div className="flex items-center justify-center gap-1 text-[11px] font-black uppercase text-amber-600">
                   <Coffee className="h-3.5 w-3.5" />
-                  Cafe Sync
+                  BornoCafe
                 </div>
 
                 <div className="bg-white p-2 rounded-xl border">

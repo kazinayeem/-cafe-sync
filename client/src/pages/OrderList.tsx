@@ -177,10 +177,10 @@ export const OrderList: React.FC = () => {
     printReceipt(
       order,
       settings || {
-        businessName: "Cafe Sync",
+        businessName: "BornoCafe",
         address: "Specialty Coffee House",
         phone: "+880 1700-000000",
-        website: "https://cafe-sync.vercel.app",
+        website: "https://bornocafe.vercel.app",
         receiptFooter: "Thank you for your visit! Enjoy your coffee.",
         taxRate: 0,
         currency: "BDT",
@@ -193,10 +193,10 @@ export const OrderList: React.FC = () => {
     downloadReceiptPDF(
       order,
       settings || {
-        businessName: "Cafe Sync",
+        businessName: "BornoCafe",
         address: "Specialty Coffee House",
         phone: "+880 1700-000000",
-        website: "https://cafe-sync.vercel.app",
+        website: "https://bornocafe.vercel.app",
         receiptFooter: "Thank you for your visit! Enjoy your coffee.",
         taxRate: 0,
         currency: "BDT",

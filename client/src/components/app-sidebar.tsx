@@ -46,7 +46,7 @@ export function AppSidebar() {
   const { data: settingsData } = useGetSettingsQuery({});
   const { data: shiftData } = useGetCurrentShiftQuery();
 
-  const businessName = settingsData?.data?.businessName || "Cafe Sync";
+  const businessName = settingsData?.data?.businessName || "BornoCafe";
   const isShiftOpen = Boolean(shiftData?.data && shiftData.data.status === "open");
 
   const handleLogout = () => {

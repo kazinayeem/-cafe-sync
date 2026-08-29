@@ -79,7 +79,7 @@ export const BanglaCoffeeQuotes: React.FC = () => {
         {/* Small Cafe Signature */}
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className="text-[10px] font-bold text-amber-700/80 dark:text-amber-400/80 uppercase tracking-wider">
-            — Cafe Sync
+            — BornoCafe
           </span>
           <span className="text-[9px] text-muted-foreground/60">•</span>
           <span className="text-[10px] font-medium text-muted-foreground/75 font-['Hind_Siliguri',sans-serif]">

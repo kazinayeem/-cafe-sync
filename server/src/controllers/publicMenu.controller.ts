@@ -22,7 +22,7 @@ export const getPublicMenu = async (req: Request, res: Response) => {
       success: true,
       data: {
         business: {
-          name: settings.businessName || "Cafe Sync",
+          name: settings.businessName || "BornoCafe",
           address: settings.address || "",
           phone: settings.phone || "",
           website: settings.website || "",
@@ -77,7 +77,7 @@ export const getTableByQrToken = async (req: Request, res: Response) => {
           qrToken: table.qrToken,
         },
         business: {
-          name: settings.businessName || "Cafe Sync",
+          name: settings.businessName || "BornoCafe",
           address: settings.address || "",
           phone: settings.phone || "",
           website: settings.website || "",
@@ -270,7 +270,7 @@ export const trackOrder = async (req: Request, res: Response) => {
       data: {
         order,
         business: {
-          name: settings.businessName || "Cafe Sync",
+          name: settings.businessName || "BornoCafe",
           phone: settings.phone || "",
           currency: settings.currency || "BDT",
         },

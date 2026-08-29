@@ -50,10 +50,10 @@ export const OrderSuccessDialog: React.FC<OrderSuccessDialogProps> = ({
   if (!order) return null;
 
   const receiptSettings = {
-    businessName: settings?.businessName || "Cafe Sync",
+    businessName: settings?.businessName || "BornoCafe",
     address: settings?.address || "Specialty Coffee House",
     phone: settings?.phone || "+880 1700-000000",
-    website: settings?.website || "https://cafe-sync.vercel.app",
+    website: settings?.website || "https://bornocafe.vercel.app",
     receiptFooter:
       settings?.receiptFooter ||
       "Thank you for your visit! Enjoy your coffee.",

@@ -149,10 +149,10 @@ export const extractReceiptData = (
     payments,
     status,
     currency,
-    businessName: settings.businessName || "Cafe Sync",
+    businessName: settings.businessName || "BornoCafe",
     address: settings.address || "Specialty Coffee House",
     phone: settings.phone || "+880 1700-000000",
-    website: settings.website || "https://cafe-sync.vercel.app",
+    website: settings.website || "https://bornocafe.vercel.app",
     receiptFooter:
       settings.receiptFooter ||
       "Thank you for your visit! Enjoy your coffee.",
@@ -469,7 +469,7 @@ export const generateReceiptHTML = (
   <div class="footer-msg">
     <p class="bold">${d.receiptFooter}</p>
     <p style="margin-top: 4px; color: #555;">${d.website}</p>
-    <p style="margin-top: 4px; font-size: 9px; color: #777;">Powered by Cafe Sync POS</p>
+    <p style="margin-top: 4px; font-size: 9px; color: #777;">Powered by BornoCafe POS</p>
   </div>
 </body>
 </html>

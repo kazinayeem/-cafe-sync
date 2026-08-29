@@ -32,12 +32,12 @@ export const SettingManagement: React.FC = () => {
     discountRate: 0,
     currency: "BDT",
     serviceCharge: 0,
-    businessName: "Cafe Sync",
+    businessName: "BornoCafe",
     address: "Mirpur, Dhaka - 1206",
     phone: "012-345-6789",
-    email: "contact@cafesync.com",
-    website: "https://cafe-sync.vercel.app",
-    receiptFooter: "Thank you for visiting Cafe Sync! Please come again.",
+    email: "contact@bornocafe.com",
+    website: "https://bornocafe.vercel.app",
+    receiptFooter: "Thank you for visiting BornoCafe! Please come again.",
     enableDiscountInput: true,
     enableTaxOverride: false,
     allowNegativeStock: false,
@@ -530,7 +530,7 @@ export const SettingManagement: React.FC = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, receiptFooter: e.target.value })
                 }
-                placeholder="Thank you for visiting Cafe Sync!"
+                placeholder="Thank you for visiting BornoCafe!"
                 className="rounded-xl mt-1 font-medium"
               />
             </div>

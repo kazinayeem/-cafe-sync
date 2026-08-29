@@ -55,16 +55,16 @@ const settingSchema = new Schema<BusinessSettingsDocument>(
     serviceCharge: { type: Number, default: 0 },
 
     // 🏢 Business Info
-    businessName: { type: String, required: true, default: "Cafe Sync" },
+    businessName: { type: String, required: true, default: "BornoCafe" },
     address: { type: String, required: true, default: "Mirpur, Dhaka - 1206" },
     phone: { type: String, required: true, default: "012-345-6789" },
-    email: { type: String, default: "contact@cafesync.com" },
-    website: { type: String, default: "https://cafe-sync.vercel.app" },
+    email: { type: String, default: "contact@bornocafe.com" },
+    website: { type: String, default: "https://bornocafe.vercel.app" },
 
     // 🖨️ Printing
     receiptFooter: {
       type: String,
-      default: "Thank you for visiting Cafe Sync! Please come again.",
+      default: "Thank you for visiting BornoCafe! Please come again.",
     },
     logoUrl: { type: String },
     showTableName: { type: Boolean, default: true },
@@ -104,12 +104,12 @@ export const defaultSettings: IBusinessSettings = {
   discountRate: 0,
   currency: "BDT",
   serviceCharge: 0,
-  businessName: "Cafe Sync",
+  businessName: "BornoCafe",
   address: "Mirpur, Dhaka - 1206",
   phone: "012-345-6789",
-  email: "contact@cafesync.com",
-  website: "https://cafe-sync.vercel.app",
-  receiptFooter: "Thank you for visiting Cafe Sync! Please come again.",
+  email: "contact@bornocafe.com",
+  website: "https://bornocafe.vercel.app",
+  receiptFooter: "Thank you for visiting BornoCafe! Please come again.",
   enableDiscountInput: true,
   enableTaxOverride: false,
   allowNegativeStock: false,
