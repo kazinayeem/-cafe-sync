@@ -140,10 +140,13 @@ export const SettingManagement: React.FC = () => {
 
   const allPermissions = [
     { key: "view_dashboard", label: "View Dashboard & Sales KPIs" },
+    { key: "view_orders", label: "View Orders & Sales History" },
     { key: "create_order", label: "Create Orders in POS" },
-    { key: "edit_order", label: "Edit / Update Orders" },
+    { key: "edit_order", label: "Edit / Update Order Details" },
+    { key: "update_order_status", label: "Update Kitchen Prep Status (KDS)" },
     { key: "cancel_order", label: "Cancel & Delete Orders" },
     { key: "refund_order", label: "Process Refunds" },
+    { key: "view_kds", label: "Access Kitchen Display (KDS)" },
     { key: "manage_products", label: "Manage Products & Categories" },
     { key: "manage_inventory", label: "Adjust Stock & Inventory" },
     { key: "manage_customers", label: "Manage Customers & Loyalty" },
@@ -153,7 +156,6 @@ export const SettingManagement: React.FC = () => {
     { key: "manage_tables", label: "Manage Table Floor Plan" },
     { key: "manage_shifts", label: "Open & Close Cashier Shifts" },
     { key: "manage_reservations", label: "Manage Reservations" },
-    { key: "view_kds", label: "Access Kitchen Display (KDS)" },
   ];
 
   const handleTogglePermission = (roleKey: string, permKey: string) => {

@@ -150,13 +150,25 @@ export const orderApi = createApi({
     }),
 
     getKdsOrders: builder.query<{ success: boolean; data: Order[] }, void>({
-      query: () => "/?limit=50",
+      query: () => "/kds",
       providesTags: ["Orders"],
     }),
 
     getOrderById: builder.query<{ success: boolean; data: Order }, string>({
       query: (id) => `/${id}`,
       providesTags: ["Orders"],
+    }),
+
+    updateOrderStatus: builder.mutation<
+      { success: boolean; data: Order },
+      { id: string; status: string }
+    >({
+      query: ({ id, status }) => ({
+        url: `/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Orders", "Summary", "Chart"],
     }),
 
     updateOrder: builder.mutation<
@@ -229,6 +241,7 @@ export const {
   useGetKdsOrdersQuery,
   useGetOrderByIdQuery,
   useUpdateOrderMutation,
+  useUpdateOrderStatusMutation,
   useRefundOrderMutation,
   useDeleteOrderMutation,
   useGetSalesSummaryQuery,

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import {
   useGetKdsOrdersQuery,
-  useUpdateOrderMutation,
+  useUpdateOrderStatusMutation,
 } from "@/services/orderApi";
 import type { Order } from "@/services/orderApi";
 import { socket } from "@/utils/socket";
@@ -14,6 +15,7 @@ import {
   Volume2,
   VolumeX,
   User,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -57,11 +59,12 @@ interface KDSProps {
 }
 
 export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
-  const { data: kdsResponse, refetch } = useGetKdsOrdersQuery(
+  const navigate = useNavigate();
+  const { data: kdsResponse, error: kdsError, refetch } = useGetKdsOrdersQuery(
     undefined,
     { pollingInterval: 10000 }
   );
-  const [updateOrder] = useUpdateOrderMutation();
+  const [updateOrderStatus] = useUpdateOrderStatusMutation();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -80,13 +83,13 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.6);
     } catch {
@@ -140,9 +143,9 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
     else if (currentStatus === "ready") nextStatus = "served";
 
     try {
-      await updateOrder({
+      await updateOrderStatus({
         id: orderId,
-        data: { status: nextStatus as any },
+        status: nextStatus,
       }).unwrap();
     } catch (err) {
       console.error("Failed to advance order status", err);
@@ -160,6 +163,47 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
     mobileLaneFilter === "all"
       ? KDS_STATUSES
       : KDS_STATUSES.filter((s) => s.key === mobileLaneFilter);
+
+  // Permission Restriction State
+  if (kdsError) {
+    const isForbidden = (kdsError as any)?.status === 403;
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 text-center select-none font-sans">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-2xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-500/15 text-rose-500 mx-auto border border-rose-500/30">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+
+          <div className="space-y-1.5">
+            <h2 className="text-xl font-black text-white">
+              {isForbidden ? "Access Restricted: Kitchen Display" : "Unable to Connect to KDS"}
+            </h2>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {isForbidden
+                ? "Your current account role does not have the required [view_kds] permission. Please ask your administrator to grant Kitchen Display access in Settings."
+                : (kdsError as any)?.data?.message || "Failed to load active kitchen tickets. Please check your network connection."}
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col gap-2">
+            <Button
+              onClick={() => refetch()}
+              className="w-full h-11 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
+            >
+              Retry Connection
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              className="w-full h-11 rounded-xl border-slate-800 text-slate-300 hover:text-white text-xs font-bold"
+            >
+              Return to Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-5 lg:p-6 flex flex-col gap-4 select-none font-sans">
