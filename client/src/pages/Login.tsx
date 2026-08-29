@@ -7,7 +7,7 @@ import { login } from "@/store/userSlice";
 import type { AppDispatch } from "@/store";
 import axios from "axios";
 import { useNavigate, Link } from "react-router";
-import { Coffee, Shield, UserCheck, Lock, QrCode } from "lucide-react";
+import { Coffee, Shield, UserCheck, QrCode } from "lucide-react";
 import { getBaseApiUrl } from "@/services/apiConfig";
 
 export default function Login() {

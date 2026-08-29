@@ -4,16 +4,13 @@ import {
   useCreateModifierGroupMutation,
   useUpdateModifierGroupMutation,
   useDeleteModifierGroupMutation,
-  ModifierGroup,
-  ModifierOption,
 } from "@/services/modifierApi";
+import type { ModifierGroup, ModifierOption } from "@/services/modifierApi";
 import {
   Sliders,
   Plus,
   Trash2,
   Edit2,
-  CheckCircle2,
-  Coffee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

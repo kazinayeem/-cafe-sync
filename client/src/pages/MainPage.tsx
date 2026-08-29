@@ -12,8 +12,8 @@ import { useGetCategoriesQuery } from "@/services/categoryApi";
 import {
   useGetProductsByCategoryQuery,
   useGetProductsQuery,
-  Product,
 } from "@/services/productApi";
+import type { Product } from "@/services/productApi";
 
 import { Search, ShoppingBag, X, RefreshCcw, AlertTriangle, Coffee } from "lucide-react";
 import {
@@ -44,8 +44,7 @@ export default function MainPage() {
   const [isClosed, setIsClosed] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
 
-  const { data: settingsData, isLoading: settingsLoading } =
-    useGetSettingsQuery({});
+  const { data: settingsData } = useGetSettingsQuery({});
 
   // Fetch categories
   const {
