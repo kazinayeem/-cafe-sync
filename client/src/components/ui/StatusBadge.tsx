@@ -28,7 +28,6 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
-  type = "general",
   className,
   dot = true,
 }) => {

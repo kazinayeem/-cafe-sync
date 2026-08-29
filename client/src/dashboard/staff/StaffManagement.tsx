@@ -6,8 +6,8 @@ import {
   useGetAllStaffQuery,
   useToggleStaffActiveMutation,
   useUpdateStaffMutation,
-  Staff,
 } from "@/services/staffService";
+import type { Staff } from "@/services/staffService";
 import {
   UserCheck,
   UserPlus,
@@ -15,10 +15,7 @@ import {
   Trash2,
   Edit2,
   CheckCircle2,
-  XCircle,
   Mail,
-  Lock,
-  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

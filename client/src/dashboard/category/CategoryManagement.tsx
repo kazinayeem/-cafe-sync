@@ -4,9 +4,9 @@ import {
   useAddCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
-  Category,
 } from "@/services/categoryApi";
-import { FolderTree, Plus, Edit2, Trash2, Layers } from "lucide-react";
+import type { Category } from "@/services/categoryApi";
+import { FolderTree, Plus, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -26,6 +26,12 @@ export interface LoyaltyTransaction {
   createdAt: string;
 }
 
+export interface CustomerDetailData {
+  customer: Customer;
+  orders: any[];
+  loyaltyHistory: LoyaltyTransaction[];
+}
+
 export interface CustomerResponse {
   success: boolean;
   data: Customer[];
@@ -53,7 +59,7 @@ export const customerApi = createApi({
       providesTags: ["Customer"],
     }),
 
-    getCustomerById: builder.query<{ success: boolean; data: Customer }, string>({
+    getCustomerById: builder.query<{ success: boolean; data: CustomerDetailData }, string>({
       query: (id: string) => `/api/customers/${id}`,
       providesTags: (_res, _err, id) => [{ type: "Customer", id }],
     }),

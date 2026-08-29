@@ -35,7 +35,8 @@ const formatAMPM = (time: string) => {
 };
 
 export default function MainPage() {
-  const { items, totalPrice } = useSelector((state: RootState) => state.cart);
+  const { items } = useSelector((state: RootState) => state.cart);
+  const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);

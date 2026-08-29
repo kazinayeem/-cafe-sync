@@ -5,8 +5,8 @@ import {
   useUpdateTableMutation,
   useUpdateTableStatusMutation,
   useDeleteTableMutation,
-  Table,
 } from "@/services/tableService";
+import type { Table } from "@/services/tableService";
 import { socket } from "@/utils/socket";
 import {
   Grid3X3,
@@ -14,11 +14,8 @@ import {
   Users,
   CheckCircle2,
   Clock,
-  Sparkles,
   Trash2,
   Edit2,
-  Receipt,
-  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +40,7 @@ import { StatusBadge } from "./ui/StatusBadge";
 import Swal from "sweetalert2";
 
 export const TableManager: React.FC = () => {
-  const { data: tablesResponse, isLoading, refetch } = useGetTablesQuery();
+  const { data: tablesResponse, refetch } = useGetTablesQuery();
   const [addTable, { isLoading: isAdding }] = useAddTableMutation();
   const [updateTable] = useUpdateTableMutation();
   const [updateTableStatus] = useUpdateTableStatusMutation();
@@ -225,7 +222,6 @@ export const TableManager: React.FC = () => {
           const isFree = table.status === "free";
           const isOccupied = table.status === "occupied";
           const isReserved = table.status === "reserved";
-          const isCleaning = table.status === "cleaning";
 
           return (
             <div

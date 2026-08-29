@@ -6,8 +6,8 @@ import {
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useAdjustLoyaltyPointsMutation,
-  Customer,
 } from "@/services/customerApi";
+import type { Customer } from "@/services/customerApi";
 import {
   Users,
   Search,
@@ -15,15 +15,14 @@ import {
   Star,
   Phone,
   Mail,
-  Calendar,
   DollarSign,
   Receipt,
-  Plus,
-  Minus,
   Edit2,
   Trash2,
   X,
   History,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +68,7 @@ export const CustomerManagement: React.FC = () => {
     limit: 20,
   });
 
-  const { data: customerDetailResponse, isLoading: isDetailLoading } =
+  const { data: customerDetailResponse } =
     useGetCustomerByIdQuery(selectedCustomerId || "", {
       skip: !selectedCustomerId,
     });
@@ -77,19 +76,19 @@ export const CustomerManagement: React.FC = () => {
   const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
   const [updateCustomer] = useUpdateCustomerMutation();
   const [deleteCustomer] = useDeleteCustomerMutation();
-  const [adjustLoyalty] = useAdjustLoyaltyPointsMutation();
+  const [adjustLoyalty, { isLoading: isAdjusting }] = useAdjustLoyaltyPointsMutation();
 
-  const customers = customerResponse?.data || [];
+  const customers: Customer[] = customerResponse?.data || [];
   const pagination = customerResponse?.pagination;
 
   // Aggregate stats
   const totalCustomers = pagination?.total || customers.length;
   const totalLoyaltyPoints = customers.reduce(
-    (sum, c) => sum + (c.loyaltyPoints || 0),
+    (sum: number, c: Customer) => sum + (c.loyaltyPoints || 0),
     0
   );
   const totalSpentByCustomers = customers.reduce(
-    (sum, c) => sum + (c.totalSpent || 0),
+    (sum: number, c: Customer) => sum + (c.totalSpent || 0),
     0
   );
 
@@ -120,24 +119,30 @@ export const CustomerManagement: React.FC = () => {
       if (editingCustomer) {
         await updateCustomer({
           id: editingCustomer._id,
-          name,
-          phone,
-          email,
-          notes,
+          data: { name, phone, email, notes },
         }).unwrap();
-        Swal.fire({ icon: "success", title: "Customer Updated!", timer: 1200, showConfirmButton: false });
+        Swal.fire({
+          icon: "success",
+          title: "Customer Updated!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
       } else {
-        await createCustomer({
-          name,
-          phone,
-          email,
-          notes,
-        }).unwrap();
-        Swal.fire({ icon: "success", title: "Customer Added!", timer: 1200, showConfirmButton: false });
+        await createCustomer({ name, phone, email, notes }).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "Customer Added!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
       }
       setIsAddModalOpen(false);
     } catch (err: any) {
-      Swal.fire({ icon: "error", title: "Error", text: err?.data?.message || "Failed to save customer" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.data?.message || "Failed to save customer",
+      });
     }
   };
 
@@ -145,7 +150,7 @@ export const CustomerManagement: React.FC = () => {
     e.stopPropagation();
     const res = await Swal.fire({
       title: "Delete Customer?",
-      text: "This customer profile and loyalty points will be removed.",
+      text: "This customer profile and points ledger will be permanently removed.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -156,36 +161,56 @@ export const CustomerManagement: React.FC = () => {
       try {
         await deleteCustomer(id).unwrap();
         if (selectedCustomerId === id) setSelectedCustomerId(null);
-        Swal.fire({ icon: "success", title: "Deleted", timer: 1000, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "Failed to delete" });
+        Swal.fire({
+          icon: "success",
+          title: "Customer Deleted",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err?.data?.message || "Failed to delete customer",
+        });
       }
     }
   };
 
-  const handleSaveLoyaltyAdjustment = async (e: React.FormEvent) => {
+  const handleAdjustPointsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCustomerId || !pointsDelta) return;
+    if (!selectedCustomerId || !pointsReason) return;
 
     try {
       await adjustLoyalty({
         id: selectedCustomerId,
         points: pointsDelta,
-        reason: pointsReason || "Staff adjustment",
+        reason: pointsReason,
       }).unwrap();
+
       setIsAdjustLoyaltyOpen(false);
       setPointsReason("");
-      Swal.fire({ icon: "success", title: "Points Adjusted!", timer: 1200, showConfirmButton: false });
+      Swal.fire({
+        icon: "success",
+        title: "Points Adjusted!",
+        text: `Updated customer loyalty balance by ${pointsDelta > 0 ? `+${pointsDelta}` : pointsDelta} pts`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } catch (err: any) {
-      Swal.fire({ icon: "error", title: "Error", text: err?.data?.message || "Failed to adjust points" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.data?.message || "Failed to adjust points",
+      });
     }
   };
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       <PageHeader
-        title="Customer CRM & Loyalty"
-        subtitle="Manage customer relationships, visit history, preferences, and reward points"
+        title="Customer CRM & Loyalty Program"
+        subtitle="Manage regular guests, point accrual, lifetime purchase value, and reward redemptions"
       >
         <Button
           onClick={handleOpenAdd}
@@ -196,26 +221,40 @@ export const CustomerManagement: React.FC = () => {
         </Button>
       </PageHeader>
 
-      {/* KPI Cards */}
+      {/* KPI Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard title="Total Customers" value={totalCustomers} icon={Users} accentColor="slate" />
-        <StatCard title="Loyalty Points Outstanding" value={`${totalLoyaltyPoints} pts`} icon={Star} accentColor="amber" />
-        <StatCard title="Customer Spend" value={`৳${totalSpentByCustomers.toLocaleString()}`} icon={DollarSign} accentColor="emerald" />
+        <StatCard
+          title="Total Registered Guests"
+          value={totalCustomers}
+          icon={Users}
+          accentColor="amber"
+        />
+        <StatCard
+          title="Total Active Loyalty Points"
+          value={totalLoyaltyPoints.toLocaleString()}
+          icon={Star}
+          accentColor="emerald"
+        />
+        <StatCard
+          title="CRM Lifetime Spend"
+          value={`৳${totalSpentByCustomers.toLocaleString()}`}
+          icon={DollarSign}
+          accentColor="slate"
+        />
       </div>
 
-      {/* Search & Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
+      {/* Search & Filter Toolbar */}
+      <div className="rounded-2xl border border-border/80 bg-card p-4 shadow-xs">
+        <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by customer name, phone number or email..."
+            placeholder="Search by customer name, mobile phone number, or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-11 rounded-xl bg-card border-border/80 text-xs font-medium shadow-xs"
+            className="pl-10 h-10 rounded-xl bg-background border-border/80 text-xs font-medium"
           />
           {search && (
             <button
-              type="button"
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
@@ -225,17 +264,17 @@ export const CustomerManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer Directory Table */}
+      {/* Customers Table */}
       <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border/80 uppercase font-bold text-muted-foreground tracking-wider">
               <tr>
                 <th className="py-3.5 px-4">Customer</th>
-                <th className="py-3.5 px-4">Phone / Email</th>
+                <th className="py-3.5 px-4">Contact</th>
                 <th className="py-3.5 px-4">Loyalty Points</th>
-                <th className="py-3.5 px-4">Orders & Spend</th>
-                <th className="py-3.5 px-4">Last Visit</th>
+                <th className="py-3.5 px-4">Orders & Lifetime Spend</th>
+                <th className="py-3.5 px-4">Last Order</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -250,7 +289,7 @@ export const CustomerManagement: React.FC = () => {
                   ))
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="py-8">
                     <EmptyState
                       icon={Users}
                       title="No Customers Found"
@@ -261,7 +300,7 @@ export const CustomerManagement: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                customers.map((customer) => (
+                customers.map((customer: Customer) => (
                   <tr
                     key={customer._id}
                     onClick={() => setSelectedCustomerId(customer._id)}
@@ -358,6 +397,37 @@ export const CustomerManagement: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="p-3 border-t border-border/80 flex items-center justify-between text-xs font-semibold">
+            <span className="text-muted-foreground">
+              Page {pagination.page} of {pagination.totalPages}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="h-8 rounded-lg text-xs"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= pagination.totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="h-8 rounded-lg text-xs"
+              >
+                Next
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Customer Profile & History Drawer */}
@@ -498,20 +568,21 @@ export const CustomerManagement: React.FC = () => {
                         >
                           <div>
                             <p className="font-bold text-foreground capitalize">
-                              {tx.description || tx.type}
+                              {tx.type} • {tx.reason || "Order Accrual"}
                             </p>
                             <p className="text-[10px] text-muted-foreground">
-                              {new Date(tx.createdAt).toLocaleString()}
+                              {new Date(tx.createdAt).toLocaleString()} •{" "}
+                              {tx.staff?.name || "System"}
                             </p>
                           </div>
                           <span
                             className={`font-black font-tabular text-sm ${
-                              tx.points > 0
+                              tx.points >= 0
                                 ? "text-emerald-600 dark:text-emerald-400"
                                 : "text-rose-600 dark:text-rose-400"
                             }`}
                           >
-                            {tx.points > 0 ? `+${tx.points}` : tx.points} pts
+                            {tx.points >= 0 ? `+${tx.points}` : tx.points} pts
                           </span>
                         </div>
                       ))
@@ -529,34 +600,34 @@ export const CustomerManagement: React.FC = () => {
         <DialogContent className="sm:max-w-md p-6 rounded-2xl border border-border/80 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-foreground">
-              {editingCustomer ? "Edit Customer Profile" : "Add New Customer"}
+              {editingCustomer ? "Edit Customer Profile" : "Register New Customer"}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSaveCustomer} className="space-y-4 py-2">
             <div>
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Customer Name *
+                Full Name *
               </Label>
               <Input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Sarah Jenkins"
+                placeholder="e.g. Alex Henderson"
                 className="rounded-xl mt-1 font-semibold"
               />
             </div>
 
             <div>
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Phone Number *
+                Mobile Phone Number *
               </Label>
               <Input
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. 01712345678"
-                className="rounded-xl mt-1 font-semibold"
+                placeholder="01712345678"
+                className="rounded-xl mt-1 font-semibold font-tabular"
               />
             </div>
 
@@ -568,19 +639,19 @@ export const CustomerManagement: React.FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="customer@example.com"
-                className="rounded-xl mt-1"
+                placeholder="alex@gmail.com"
+                className="rounded-xl mt-1 font-medium"
               />
             </div>
 
             <div>
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Preferences & Allergies
+                Customer Notes / Preferences
               </Label>
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="e.g. Prefers oat milk, allergic to nuts"
+                placeholder="e.g. Regular oat milk latte drinker, likes window seat"
                 className="rounded-xl mt-1"
               />
             </div>
@@ -612,34 +683,34 @@ export const CustomerManagement: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
               <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-              Adjust Loyalty Points
+              Adjust Customer Points
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSaveLoyaltyAdjustment} className="space-y-4 py-2">
+          <form onSubmit={handleAdjustPointsSubmit} className="space-y-4 py-2">
             <div>
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Points Adjustment (+ to add, - to deduct)
+                Points Adjustment (+ to add, - to deduct) *
               </Label>
               <Input
                 type="number"
                 required
                 value={pointsDelta}
                 onChange={(e) => setPointsDelta(Number(e.target.value))}
-                placeholder="e.g. 50 or -20"
-                className="rounded-xl mt-1 text-lg font-bold font-tabular"
+                placeholder="50"
+                className="rounded-xl mt-1 text-2xl font-black font-tabular"
               />
             </div>
 
             <div>
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Reason / Note for Audit Log
+                Reason / Audit Note *
               </Label>
               <Input
                 required
                 value={pointsReason}
                 onChange={(e) => setPointsReason(e.target.value)}
-                placeholder="e.g. Birthday gift, Courtesy bonus, Correction"
+                placeholder="e.g. Birthday reward, Service apology, Promo bonus"
                 className="rounded-xl mt-1"
               />
             </div>
@@ -655,9 +726,10 @@ export const CustomerManagement: React.FC = () => {
               </Button>
               <Button
                 type="submit"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-md"
+                disabled={isAdjusting}
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md"
               >
-                Apply Adjustment
+                Confirm Point Adjustment
               </Button>
             </DialogFooter>
           </form>

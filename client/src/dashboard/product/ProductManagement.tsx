@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useCreateProductMutation,
   useDeleteProductMutation,
   useGetProductsQuery,
   useUpdateProductMutation,
-  Product,
 } from "@/services/productApi";
+import type { Product } from "@/services/productApi";
 import {
   Package,
   Plus,
   Edit2,
   Trash2,
   CheckCircle2,
-  XCircle,
   Search,
   Coffee,
   Sliders,
-  Boxes,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
