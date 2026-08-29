@@ -144,6 +144,19 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Bengali Typography Utility Classes */
+.font-bangla-serif {
+  font-family: "Noto Serif Bengali", serif;
+}
+
+.font-bangla-sans {
+  font-family: "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+}
+
+.font-bangla-ui {
+  font-family: "Noto Sans Bengali", "Hind Siliguri", sans-serif;
+}
+
 /* Master 10-Second Natural Coffee Brewing Cycle Keyframes */
 @keyframes coffee-milk-stream {
   0%, 14% {
