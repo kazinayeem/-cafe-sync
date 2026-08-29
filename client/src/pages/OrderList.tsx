@@ -4,21 +4,14 @@ import {
   useUpdateOrderMutation,
   useRefundOrderMutation,
   useDeleteOrderMutation,
-  Order,
 } from "@/services/orderApi";
+import type { Order } from "@/services/orderApi";
 import { socket } from "@/utils/socket";
 import {
-  Receipt,
   Search,
-  Calendar,
-  Filter,
-  Eye,
   RotateCcw,
   Printer,
   Trash2,
-  CheckCircle2,
-  Clock,
-  User,
   ShoppingBag,
   Utensils,
   ChevronLeft,
@@ -187,12 +180,12 @@ export const OrderList: React.FC = () => {
       (order.table as any)?._id || null,
       order.totalPrice,
       {
-        businessName: settings.businessName,
-        address: settings.address,
-        phone: settings.phone,
-        website: settings.website,
-        receiptFooter: settings.receiptFooter,
-        taxRate: settings.taxRate,
+        businessName: settings.businessName || "Cafe Sync",
+        address: settings.address || "",
+        phone: settings.phone || "",
+        website: settings.website || "",
+        receiptFooter: settings.receiptFooter || "",
+        taxRate: settings.taxRate || 0,
       }
     );
   };

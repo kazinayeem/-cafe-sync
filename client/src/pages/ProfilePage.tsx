@@ -3,7 +3,6 @@ import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/services/userApi";
-import { User, Mail, Lock, Shield, Save, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +10,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import Swal from "sweetalert2";
 
 export const ProfilePage: React.FC = () => {
-  const { data, isLoading, refetch } = useGetUserProfileQuery();
+  const { data, refetch } = useGetUserProfileQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
 
   const [name, setName] = useState("");

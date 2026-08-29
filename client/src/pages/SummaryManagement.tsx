@@ -11,20 +11,17 @@ import {
   FileText,
   DollarSign,
   Receipt,
-  RotateCcw,
   TrendingUp,
-  Percent,
   Calendar,
-  Printer,
 } from "lucide-react";
 
 export const SummaryManagement: React.FC = () => {
   const todayStr = new Date().toISOString().split("T")[0];
   const [startDate, setStartDate] = useState<string>(todayStr);
   const [endDate, setEndDate] = useState<string>(todayStr);
-  const [status, setStatus] = useState<string>("all");
+  const [status] = useState<string>("all");
 
-  const { data, isLoading, refetch } = useGetSalesSummaryQuery({
+  const { data, isLoading } = useGetSalesSummaryQuery({
     startDate: new Date(`${startDate}T00:00:00+06:00`).toISOString(),
     endDate: new Date(`${endDate}T23:59:59+06:00`).toISOString(),
     status: status !== "all" ? status : undefined,

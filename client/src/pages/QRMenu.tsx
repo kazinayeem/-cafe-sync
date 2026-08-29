@@ -6,10 +6,7 @@ import {
   Phone,
   MapPin,
   Clock,
-  Globe,
   Utensils,
-  Sliders,
-  ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 

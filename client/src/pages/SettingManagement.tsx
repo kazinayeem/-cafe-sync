@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
-  SettingsData,
 } from "@/services/SettingsApi";
+import type { SettingsData } from "@/services/SettingsApi";
 import {
-  Settings,
   Store,
   DollarSign,
   Clock,
@@ -13,7 +12,6 @@ import {
   Printer,
   Shield,
   Save,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +20,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import Swal from "sweetalert2";
 
 export const SettingManagement: React.FC = () => {
-  const { data: settingsResponse, isLoading, refetch } = useGetSettingsQuery({});
+  const { data: settingsResponse, refetch } = useGetSettingsQuery({});
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
 
   const [activeTab, setActiveTab] = useState<

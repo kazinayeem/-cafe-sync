@@ -5,21 +5,15 @@ import {
   useLogCashMovementMutation,
   useCloseShiftMutation,
   useGetShiftHistoryQuery,
-  Shift,
 } from "@/services/shiftApi";
+import type { Shift } from "@/services/shiftApi";
 import {
-  Clock,
   Banknote,
-  DollarSign,
   ArrowUpRight,
   ArrowDownLeft,
   Lock,
   Unlock,
-  CheckCircle2,
-  AlertTriangle,
   History,
-  Receipt,
-  FileText,
   User,
   Plus,
 } from "lucide-react";
@@ -34,12 +28,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { StatCard } from "@/components/ui/StatCard";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import Swal from "sweetalert2";
 
 export const ShiftManagement: React.FC = () => {
-  const { data: currentShiftResponse, isLoading, refetch } = useGetCurrentShiftQuery();
+  const { data: currentShiftResponse } = useGetCurrentShiftQuery();
   const { data: shiftHistoryResponse } = useGetShiftHistoryQuery({ limit: 20 });
 
   const [openShift, { isLoading: isOpening }] = useOpenShiftMutation();

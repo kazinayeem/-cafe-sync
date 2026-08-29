@@ -4,8 +4,8 @@ import {
   useCreateReservationMutation,
   useUpdateReservationStatusMutation,
   useDeleteReservationMutation,
-  Reservation,
 } from "@/services/reservationApi";
+import type { Reservation } from "@/services/reservationApi";
 import { useGetTablesQuery } from "@/services/tableService";
 import { socket } from "@/utils/socket";
 import {
@@ -16,10 +16,7 @@ import {
   Phone,
   Plus,
   CheckCircle2,
-  XCircle,
-  Search,
   Grid3X3,
-  Edit2,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
