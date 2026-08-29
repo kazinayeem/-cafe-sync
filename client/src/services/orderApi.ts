@@ -1,77 +1,117 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createCustomBaseQuery } from "./apiConfig";
+
+export interface SelectedModifierPayload {
+  groupName: string;
+  optionName: string;
+  price: number;
+}
 
 export interface OrderItemPayload {
   productId: string;
+  name?: string;
   quantity: number;
   size: string;
   price: number;
+  modifiersPrice?: number;
+  selectedModifiers?: SelectedModifierPayload[];
+  itemNote?: string;
+}
+
+export interface PaymentRecordPayload {
+  method: "cash" | "card" | "online" | "bkash" | "nagad" | "loyalty";
+  amount: number;
+  transactionId?: string;
 }
 
 export interface CreateOrderPayload {
   items: OrderItemPayload[];
-  paymentMethod: "cash" | "card" | "online";
+  orderType?: "dine_in" | "takeaway" | "delivery";
+  paymentMethod?: "cash" | "card" | "online" | "bkash" | "nagad" | "split";
+  payments?: PaymentRecordPayload[];
   tableId?: string;
+  customerId?: string;
+  discountPercent?: number;
+  taxRate?: number;
+  serviceChargeRate?: number;
+  orderNote?: string;
+  loyaltyPointsUsed?: number;
 }
 
 export interface UpdateOrderPayload {
-  status?: "pending" | "preparing" | "served" | "cancelled";
-  paymentMethod?: "cash" | "card" | "online";
+  status?: "pending" | "confirmed" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+  paymentStatus?: "unpaid" | "paid" | "partial" | "refunded" | "partially_refunded";
+  paymentMethod?: string;
+  tableId?: string | null;
+  payments?: PaymentRecordPayload[];
 }
 
-// Define the Order type to be used in the allData object
-interface Order {
+export interface Order {
   _id: string;
-  table?: { tableNumber: string };
-  status: string;
+  customOrderID: string;
+  customer?: { _id: string; name: string; phone: string; email?: string; loyaltyPoints?: number };
+  orderType: "dine_in" | "takeaway" | "delivery";
+  items: {
+    product: { _id: string; name: string; imageUrl?: string; category?: string };
+    name?: string;
+    quantity: number;
+    size: string;
+    price: number;
+    modifiersPrice?: number;
+    selectedModifiers?: SelectedModifierPayload[];
+    itemNote?: string;
+  }[];
+  subtotal: number;
   totalPrice: number;
+  discountPercent: number;
+  discountAmount: number;
+  loyaltyPointsUsed?: number;
+  loyaltyDiscount?: number;
+  taxRate: number;
+  taxAmount: number;
+  serviceChargeRate?: number;
+  serviceChargeAmount?: number;
+  amountPaid: number;
+  changeDue?: number;
+  status: "pending" | "confirmed" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+  paymentStatus: "unpaid" | "paid" | "partial" | "refunded" | "partially_refunded";
   paymentMethod: string;
+  payments: PaymentRecordPayload[];
+  refunds?: { amount: number; reason: string; date: string }[];
+  table?: { _id: string; name: string; seats?: number; section?: string };
+  orderNote?: string;
+  cashier?: { _id: string; name: string; role: string };
   createdAt: string;
+  updatedAt?: string;
 }
 
-// Define the StatusBreakdown type
-export interface StatusBreakdown {
-  _id: "pending" | "preparing" | "served" | "cancelled";
-  count: number;
-}
-
-// Define the AllData type
-export interface AllData {
-  pending?: Order[];
-  preparing?: Order[];
-  served?: Order[];
-  cancelled?: Order[];
-}
-
-// 📊 Corrected Sales Summary Response type to match API response
 export interface SalesSummaryResponse {
   summary: {
     totalOrders: number;
     totalSales: number;
   };
-  statusBreakdown: StatusBreakdown[];
-  allData: AllData;
+  statusBreakdown: { _id: string; count: number; sales: number }[];
+  orders: Order[];
+  allData: Record<string, Order[]>;
 }
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export const orderApi = createApi({
   reducerPath: "orderApi",
-  baseQuery: fetchBaseQuery({ baseUrl: baseUrl + "/api/orders" }),
+  baseQuery: createCustomBaseQuery("/api/orders"),
   tagTypes: ["Orders", "Summary", "Chart"],
   endpoints: (builder) => ({
-    createOrder: builder.mutation({
+    createOrder: builder.mutation<{ success: boolean; data: Order }, CreateOrderPayload>({
       query: (order) => ({
         url: "/",
         method: "POST",
         body: order,
       }),
-      invalidatesTags: ["Orders", "Summary"],
+      invalidatesTags: ["Orders", "Summary", "Chart"],
     }),
 
-    // Get all orders
     getOrders: builder.query<
       {
-        data: any[];
+        data: Order[];
         pagination: {
           total: number;
           page: number;
@@ -82,53 +122,66 @@ export const orderApi = createApi({
       {
         page?: number;
         limit?: number;
-        status?: "pending" | "preparing" | "served" | "cancelled";
+        status?: string;
+        paymentStatus?: string;
+        paymentMethod?: string;
         startDate?: string;
         endDate?: string;
         orderId?: string;
-      }
+      } | void
     >({
-      query: ({
-        page = 1,
-        limit = 10,
-        status,
-        startDate,
-        endDate,
-        orderId,
-      } = {}) => {
-        let url = `/?page=${page}&limit=${limit}`;
-        if (status) url += `&status=${status}`;
-        if (startDate) url += `&startDate=${startDate}`;
-        if (endDate) url += `&endDate=${endDate}`;
-        if (orderId) url += `&orderId=${orderId}`;
-        return url;
+      query: (params) => {
+        let url = "/";
+        const queryParams = new URLSearchParams();
+        if (params?.page) queryParams.set("page", String(params.page));
+        if (params?.limit) queryParams.set("limit", String(params.limit));
+        if (params?.status && params.status !== "all") queryParams.set("status", params.status);
+        if (params?.paymentStatus && params.paymentStatus !== "all") queryParams.set("paymentStatus", params.paymentStatus);
+        if (params?.paymentMethod && params.paymentMethod !== "all") queryParams.set("paymentMethod", params.paymentMethod);
+        if (params?.startDate) queryParams.set("startDate", params.startDate);
+        if (params?.endDate) queryParams.set("endDate", params.endDate);
+        if (params?.orderId) queryParams.set("orderId", params.orderId);
+        const qs = queryParams.toString();
+        return qs ? `${url}?${qs}` : url;
       },
       providesTags: ["Orders"],
     }),
 
-    // Get order by ID
-    getOrderById: builder.query({
+    getOrderById: builder.query<{ success: boolean; data: Order }, string>({
       query: (id) => `/${id}`,
       providesTags: ["Orders"],
     }),
 
-    // Update order
-    updateOrder: builder.mutation({
+    updateOrder: builder.mutation<
+      { success: boolean; data: Order },
+      { id: string; data: UpdateOrderPayload }
+    >({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Orders", "Summary"],
+      invalidatesTags: ["Orders", "Summary", "Chart"],
     }),
 
-    // Delete order
-    deleteOrder: builder.mutation<{ success: boolean; id: string }, string>({
+    refundOrder: builder.mutation<
+      { success: boolean; data: Order; message: string },
+      { id: string; amount?: number; reason: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/${id}/refund`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Orders", "Summary", "Chart"],
+    }),
+
+    deleteOrder: builder.mutation<{ success: boolean; message: string }, string>({
       query: (id) => ({
         url: `/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Orders", "Summary"],
+      invalidatesTags: ["Orders", "Summary", "Chart"],
     }),
 
     getSalesSummary: builder.query<
@@ -141,25 +194,17 @@ export const orderApi = createApi({
       }
     >({
       query: ({ startDate, endDate, status, search }) => {
-        let url = `/summary/report?`;
-
-        url += `startDate=${startDate}&endDate=${endDate}&`;
-
-        if (status && status !== "all") {
-          url += `status=${status}&`;
-        }
-
-        if (search) {
-          url += `search=${encodeURIComponent(search)}&`;
-        }
-
+        let url = "/summary/report?";
+        url += `startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&`;
+        if (status && status !== "all") url += `status=${encodeURIComponent(status)}&`;
+        if (search) url += `search=${encodeURIComponent(search)}&`;
         return url;
       },
       providesTags: ["Summary"],
     }),
 
     getSalesByDateRange: builder.query<
-      { success: boolean; data: { date: string; totalSales: number }[] },
+      { success: boolean; data: { date: string; totalSales: number; totalOrders: number }[] },
       { startDate: string; endDate: string }
     >({
       query: ({ startDate, endDate }) =>
@@ -176,6 +221,7 @@ export const {
   useGetOrdersQuery,
   useGetOrderByIdQuery,
   useUpdateOrderMutation,
+  useRefundOrderMutation,
   useDeleteOrderMutation,
   useGetSalesSummaryQuery,
   useGetSalesByDateRangeQuery,

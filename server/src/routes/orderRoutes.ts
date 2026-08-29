@@ -1,4 +1,3 @@
-// routes/orderRoutes.ts
 import { Router } from "express";
 import {
   createOrder,
@@ -6,38 +5,30 @@ import {
   getOrderById,
   updateOrder,
   deleteOrder,
+  refundOrder,
   getTodayOrderSummaryController,
 } from "../controllers/order.Controller";
 import {
   getSalesLast7Days,
   getOrderReport,
 } from "../controllers/orderReport.Controller";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { checkPermission } from "../middleware/checkPermission";
 
 const router = Router();
 
-// @route   POST /api/orders
-// @desc    Create a new order
-router.post("/", createOrder);
+// Public summary for quick status check if needed or guarded with auth
+router.use(authMiddleware);
 
-// @route   GET /api/orders
-// @desc    Get all orders
-router.get("/", getOrders);
-
-// @route   GET /api/orders/:id
-// @desc    Get single order by ID
-router.get("/:id", getOrderById);
-
-// @route   PUT /api/orders/:id
-// @desc    Update order (status/paymentMethod)
-router.put("/:id", updateOrder);
-
-// @route   DELETE /api/orders/:id
-// @desc    Delete order
-router.delete("/:id", deleteOrder);
-
+router.post("/", checkPermission("create_order"), createOrder);
+router.get("/", checkPermission("view_orders"), getOrders);
 router.get("/summary/today", getTodayOrderSummaryController);
+router.get("/summary/report", checkPermission("view_reports"), getOrderReport);
+router.get("/sales/last-7-days", checkPermission("view_reports"), getSalesLast7Days);
 
-// 📊 Sales summary
-router.get("/summary/report", getOrderReport);
-router.get("/sales/last-7-days", getSalesLast7Days);
+router.get("/:id", checkPermission("view_orders"), getOrderById);
+router.put("/:id", checkPermission("edit_order"), updateOrder);
+router.post("/:id/refund", checkPermission("refund_order"), refundOrder);
+router.delete("/:id", checkPermission("cancel_order"), deleteOrder);
+
 export default router;

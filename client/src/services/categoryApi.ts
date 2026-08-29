@@ -1,47 +1,48 @@
-// src/store/categoryApi.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createCustomBaseQuery } from "./apiConfig";
 
 export interface Category {
   _id: string;
   name: string;
   items?: any[];
-  createdAt?: string;
 }
-const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export const categoryApi = createApi({
   reducerPath: "categoryApi",
-  baseQuery: fetchBaseQuery({ baseUrl: baseUrl + "/api" }),
+  baseQuery: createCustomBaseQuery("/api/categories"),
   tagTypes: ["Category"],
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], void>({
-      query: () => "/categories",
+      query: () => "/",
+      transformResponse: (res: any) => {
+        if (Array.isArray(res)) return res;
+        if (res && Array.isArray(res.data)) return res.data;
+        return [];
+      },
       providesTags: ["Category"],
-      transformResponse: (response: { data: Category[] }) => response.data,
     }),
 
     addCategory: builder.mutation<Category, { name: string }>({
-      query: (body) => ({
-        url: "/categories",
+      query: (category) => ({
+        url: "/",
         method: "POST",
-        body,
+        body: category,
       }),
       invalidatesTags: ["Category"],
     }),
 
     updateCategory: builder.mutation<Category, { id: string; name: string }>({
       query: ({ id, name }) => ({
-        url: `/categories/${id}`,
+        url: `/${id}`,
         method: "PUT",
         body: { name },
       }),
       invalidatesTags: ["Category"],
     }),
-    deleteCategory: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+
+    deleteCategory: builder.mutation<{ success: boolean; id: string }, string>({
       query: (id) => ({
-        url: `/categories/${id}`,
+        url: `/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Category"],

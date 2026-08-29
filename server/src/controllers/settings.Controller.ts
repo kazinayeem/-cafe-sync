@@ -4,15 +4,13 @@ import {
   defaultSettings,
   SettingModel,
 } from "../models/Settings";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 export const getSettings = async (req: Request, res: Response) => {
   try {
     let settings = await SettingModel.findOne();
     if (!settings) {
-      // if no settings exist, create default
-      return res
-        .status(404)
-        .json({ success: false, message: "Settings not found" });
+      settings = await SettingModel.create(defaultSettings);
     }
     return res.status(200).json({ success: true, data: settings });
   } catch (err) {
@@ -21,24 +19,20 @@ export const getSettings = async (req: Request, res: Response) => {
   }
 };
 
-// ======================
-// Update/Edit Settings
-// ======================
-export const updateSettings = async (req: Request, res: Response) => {
+export const updateSettings = async (req: AuthRequest, res: Response) => {
   try {
     const updates: Partial<BusinessSettingsDocument> = req.body;
 
-    // get the current settings (only one)
     let settings = await SettingModel.findOne();
     if (!settings) {
       settings = await SettingModel.create(defaultSettings);
     }
 
-    // update only the provided fields
     Object.keys(updates).forEach((key) => {
       (settings as any)[key] = (updates as any)[key];
     });
 
+    settings.updatedAt = new Date();
     await settings.save();
     return res.status(200).json({ success: true, data: settings });
   } catch (err) {

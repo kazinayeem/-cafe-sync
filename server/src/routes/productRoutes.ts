@@ -9,15 +9,18 @@ import {
   updateProduct,
 } from "../controllers/product.controller";
 import { upload } from "../config/multer";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { checkPermission } from "../middleware/checkPermission";
 
 const router = Router();
 
-router.post("/", upload.single("image"), createProduct);
 router.get("/", getProducts);
 router.get("/search", searchProducts);
 router.get("/category/:categoryId", getProductsByCategory);
 router.get("/:id", getProductById);
-router.put("/:id", upload.single("image"), updateProduct);
-router.delete("/:id", deleteProduct);
+
+router.post("/", authMiddleware, checkPermission("manage_products"), upload.single("image"), createProduct);
+router.put("/:id", authMiddleware, checkPermission("manage_products"), upload.single("image"), updateProduct);
+router.delete("/:id", authMiddleware, checkPermission("manage_products"), deleteProduct);
 
 export default router;

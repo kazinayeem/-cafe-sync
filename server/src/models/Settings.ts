@@ -1,14 +1,11 @@
 import { Schema, model, Document } from "mongoose";
 
-// ======================
-// 1️⃣ Pure TypeScript Interface (plain object type)
-// ======================
 export interface IBusinessSettings {
-  // 🧾 Finance
+  // 🧾 Finance & Tax
   taxRate: number;
   discountRate: number;
   currency: string;
-  serviceCharge?: number;
+  serviceCharge: number;
 
   // 🏢 Business Info
   businessName: string;
@@ -17,7 +14,7 @@ export interface IBusinessSettings {
   email?: string;
   website?: string;
 
-  // 🖨️ Printing
+  // 🖨️ Printing & Receipt
   receiptFooter?: string;
   logoUrl?: string;
   showTableName?: boolean;
@@ -27,30 +24,32 @@ export interface IBusinessSettings {
   enableTaxOverride: boolean;
   allowNegativeStock: boolean;
 
-  // 🕒 Shifts & Timing
-  openingTime?: string; // e.g. "09:00"
-  closingTime?: string; // e.g. "23:00"
-  offDays?: string[]; // e.g. ["Friday"]
+  // 🎁 Loyalty Program
+  enableLoyalty: boolean;
+  loyaltyEarnRate: number; // e.g., 1 point per 100 spent
+  loyaltyRedeemRate: number; // e.g., 1 currency per 10 points
 
-  // 📊 Reports
-  lowStockAlertLevel?: number;
-  salesTarget?: number;
+  // 🕒 Shifts & Timing
+  openingTime: string;
+  closingTime: string;
+  offDays: string[];
+
+  // 📊 Reports & Thresholds
+  lowStockAlertLevel: number;
+  salesTarget: number;
+
+  // 🔐 Permissions
+  permissions?: Record<string, string[]>;
 
   updatedAt?: Date;
 }
 
-// ======================
-// 2️⃣ Mongoose Interface (extends Document)
-// ======================
 export interface BusinessSettingsDocument extends IBusinessSettings, Document {}
 
-// ======================
-// 3️⃣ Mongoose Schema
-// ======================
 const settingSchema = new Schema<BusinessSettingsDocument>(
   {
     // 🧾 Finance
-    taxRate: { type: Number, required: true, default: 0 },
+    taxRate: { type: Number, required: true, default: 5 },
     discountRate: { type: Number, required: true, default: 0 },
     currency: { type: String, required: true, default: "BDT" },
     serviceCharge: { type: Number, default: 0 },
@@ -59,13 +58,13 @@ const settingSchema = new Schema<BusinessSettingsDocument>(
     businessName: { type: String, required: true, default: "Cafe Sync" },
     address: { type: String, required: true, default: "Mirpur, Dhaka - 1206" },
     phone: { type: String, required: true, default: "012-345-6789" },
-    email: { type: String },
-    website: { type: String },
+    email: { type: String, default: "contact@cafesync.com" },
+    website: { type: String, default: "https://cafe-sync.vercel.app" },
 
     // 🖨️ Printing
     receiptFooter: {
       type: String,
-      default: "nayeemsoft - made by www.kazinayee.site",
+      default: "Thank you for visiting Cafe Sync! Please come again.",
     },
     logoUrl: { type: String },
     showTableName: { type: Boolean, default: true },
@@ -75,50 +74,94 @@ const settingSchema = new Schema<BusinessSettingsDocument>(
     enableTaxOverride: { type: Boolean, default: false },
     allowNegativeStock: { type: Boolean, default: false },
 
+    // 🎁 Loyalty
+    enableLoyalty: { type: Boolean, default: true },
+    loyaltyEarnRate: { type: Number, default: 1 }, // 1 pt per 10 currency
+    loyaltyRedeemRate: { type: Number, default: 0.5 }, // 1 pt = 0.5 currency
+
     // 🕒 Shifts & Timing
     openingTime: { type: String, default: "09:00" },
     closingTime: { type: String, default: "23:00" },
-    offDays: { type: [String], default: ["Friday"] },
+    offDays: { type: [String], default: [] },
 
     // 📊 Reports
-    lowStockAlertLevel: { type: Number, default: 5 },
-    salesTarget: { type: Number, default: 10000 },
+    lowStockAlertLevel: { type: Number, default: 10 },
+    salesTarget: { type: Number, default: 15000 },
+
+    // 🔐 Role Permissions
+    permissions: { type: Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }
 );
 
-// ======================
-// 4️⃣ Mongoose Model
-// ======================
 export const SettingModel = model<BusinessSettingsDocument>(
   "Setting",
   settingSchema
 );
 
-// ======================
-// 5️⃣ Default Settings (plain object)
-// ======================
 export const defaultSettings: IBusinessSettings = {
   taxRate: 5,
   discountRate: 0,
   currency: "BDT",
   serviceCharge: 0,
-
   businessName: "Cafe Sync",
   address: "Mirpur, Dhaka - 1206",
   phone: "012-345-6789",
-  website: "https://www.kazinayee.site",
-  receiptFooter: "nayeemsoft - made by www.kazinayee.site",
-
+  email: "contact@cafesync.com",
+  website: "https://cafe-sync.vercel.app",
+  receiptFooter: "Thank you for visiting Cafe Sync! Please come again.",
   enableDiscountInput: true,
   enableTaxOverride: false,
   allowNegativeStock: false,
-
+  enableLoyalty: true,
+  loyaltyEarnRate: 1,
+  loyaltyRedeemRate: 0.5,
   openingTime: "09:00",
   closingTime: "23:00",
-  offDays: ["Friday"],
-
-  lowStockAlertLevel: 5,
-  salesTarget: 10000,
+  offDays: [],
+  lowStockAlertLevel: 10,
+  salesTarget: 15000,
+  permissions: {
+    admin: [
+      "view_dashboard",
+      "create_order",
+      "edit_order",
+      "cancel_order",
+      "refund_order",
+      "manage_products",
+      "manage_inventory",
+      "manage_customers",
+      "manage_staff",
+      "manage_settings",
+      "view_reports",
+      "manage_tables",
+      "manage_shifts",
+      "manage_reservations",
+    ],
+    manager: [
+      "view_dashboard",
+      "create_order",
+      "edit_order",
+      "cancel_order",
+      "refund_order",
+      "manage_products",
+      "manage_inventory",
+      "manage_customers",
+      "view_reports",
+      "manage_tables",
+      "manage_shifts",
+      "manage_reservations",
+    ],
+    cashier: [
+      "create_order",
+      "view_orders",
+      "manage_tables",
+      "manage_customers",
+      "manage_shifts",
+      "manage_reservations",
+    ],
+    barista: ["view_orders", "update_order_status", "view_kds"],
+    staff: ["create_order", "view_orders", "manage_tables"],
+  },
   updatedAt: new Date(),
 };

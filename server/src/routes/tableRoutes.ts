@@ -6,25 +6,21 @@ import {
   getTableStats,
   deleteTable,
   updateTable,
+  updateTableLayout,
 } from "../controllers/table.Controller";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { checkPermission } from "../middleware/checkPermission";
 
 const router = express.Router();
 
-// Get all tables
-router.get("/", getAllTables);
+router.use(authMiddleware);
 
-// Create a table
-router.post("/", createTable);
-
-// Update table status (occupied/free)
-router.post("/:id/status", updateTableStatus);
-
-router.put("/:id", updateTable);
-
-// Delete table
-router.delete("/:id", deleteTable);
-
-// Get table stats (total & available)
+router.get("/", checkPermission("manage_tables"), getAllTables);
+router.post("/", checkPermission("manage_tables"), createTable);
+router.post("/:id/status", checkPermission("manage_tables"), updateTableStatus);
+router.put("/layout", checkPermission("manage_tables"), updateTableLayout);
+router.put("/:id", checkPermission("manage_tables"), updateTable);
+router.delete("/:id", checkPermission("manage_tables"), deleteTable);
 router.get("/stats", getTableStats);
 
 export default router;

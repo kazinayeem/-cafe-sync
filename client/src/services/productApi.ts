@@ -1,58 +1,79 @@
-// src/store/api.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createCustomBaseQuery } from "./apiConfig";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+export interface ProductSize {
+  small?: number;
+  large?: number;
+  extraLarge?: number;
+}
+
+export interface Product {
+  _id: string;
+  name: string;
+  category?: { _id: string; name: string };
+  description?: string;
+  imageUrl?: string;
+  available: boolean;
+  stockQuantity: number;
+  minStockLevel: number;
+  trackInventory: boolean;
+  unit: string;
+  sizes: ProductSize;
+  modifierGroups?: any[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export const productApi = createApi({
-  reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Product"],
+  reducerPath: "productApi",
+  baseQuery: createCustomBaseQuery("/api/products"),
+  tagTypes: ["Products"],
   endpoints: (builder) => ({
-    getProducts: builder.query<any[], void>({
-      query: () => "/api/products",
-      providesTags: ["Product"],
+    getProducts: builder.query<Product[] | { data: Product[] }, void>({
+      query: () => "/",
+      providesTags: ["Products"],
     }),
-    getProductById: builder.query<any, string>({
-      query: (id) => `/api/products/${id}`,
-      providesTags: ["Product"],
+
+    getProductsByCategory: builder.query<Product[], string>({
+      query: (categoryId) => `/category/${categoryId}`,
+      providesTags: ["Products"],
     }),
-    getProductsByCategory: builder.query<any[], string>({
-      query: (categoryId) => `/api/products/category/${categoryId}`,
-      providesTags: ["Product"],
+
+    searchProducts: builder.query<Product[], string>({
+      query: (q) => `/search?q=${encodeURIComponent(q)}`,
+      providesTags: ["Products"],
     }),
-    searchProducts: builder.query<any[], string>({
-      query: (q) => `/api/products/search?q=${q}`,
-      providesTags: ["Product"],
-    }),
-    createProduct: builder.mutation<any, Partial<any>>({
+
+    createProduct: builder.mutation<Product, FormData>({
       query: (body) => ({
-        url: "/api/products",
+        url: "/",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Products"],
     }),
-    updateProduct: builder.mutation<any, { id: string; body: any }>({
+
+    updateProduct: builder.mutation<Product, { id: string; body: any }>({
       query: ({ id, body }) => ({
-        url: `/api/products/${id}`,
+        url: `/${id}`,
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Products"],
     }),
-    deleteProduct: builder.mutation<any, string>({
+
+    deleteProduct: builder.mutation<{ message: string }, string>({
       query: (id) => ({
-        url: `/api/products/${id}`,
+        url: `/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Products"],
     }),
   }),
 });
 
 export const {
   useGetProductsQuery,
-  useGetProductByIdQuery,
   useGetProductsByCategoryQuery,
   useSearchProductsQuery,
   useCreateProductMutation,

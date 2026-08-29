@@ -3,13 +3,12 @@ import {
   getSettings,
   updateSettings,
 } from "../controllers/settings.Controller";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { checkPermission } from "../middleware/checkPermission";
 
 const router = express.Router();
 
-// GET /api/settings
 router.get("/", getSettings);
-
-// PUT /api/settings
-router.put("/", updateSettings);
+router.put("/", authMiddleware, checkPermission("manage_settings"), updateSettings);
 
 export default router;
