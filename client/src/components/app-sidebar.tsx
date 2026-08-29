@@ -1,6 +1,5 @@
 import {
   LayoutDashboard,
-  Store,
   Receipt,
   CookingPot,
   Grid3X3,

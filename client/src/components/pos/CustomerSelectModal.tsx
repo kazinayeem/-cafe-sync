@@ -11,16 +11,15 @@ import { Label } from "@/components/ui/label";
 import {
   useGetCustomersQuery,
   useCreateCustomerMutation,
-  Customer,
 } from "@/services/customerApi";
+import type { Customer } from "@/services/customerApi";
 import { Search, UserPlus, Star, User, Phone, Check, ArrowLeft } from "lucide-react";
-import { CartCustomer } from "@/store/cartSlice";
 
 interface CustomerSelectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedCustomer: CartCustomer | null;
-  onSelectCustomer: (customer: CartCustomer | null) => void;
+  selectedCustomer: Customer | null;
+  onSelectCustomer: (customer: Customer | null) => void;
 }
 
 export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
@@ -44,13 +43,7 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
   const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
 
   const handleSelect = (c: Customer) => {
-    onSelectCustomer({
-      _id: c._id,
-      name: c.name,
-      phone: c.phone,
-      email: c.email,
-      loyaltyPoints: c.loyaltyPoints || 0,
-    });
+    onSelectCustomer(c);
     onClose();
   };
 
@@ -72,13 +65,7 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
       }).unwrap();
 
       if (res.success && res.data) {
-        onSelectCustomer({
-          _id: res.data._id,
-          name: res.data.name,
-          phone: res.data.phone,
-          email: res.data.email,
-          loyaltyPoints: res.data.loyaltyPoints || 0,
-        });
+        onSelectCustomer(res.data);
         setIsCreatingNew(false);
         setNewName("");
         setNewPhone("");
@@ -86,8 +73,8 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
         setNewNotes("");
         onClose();
       }
-    } catch (err: any) {
-      alert(err?.data?.message || "Failed to create customer");
+    } catch (err) {
+      console.error("Failed to register customer:", err);
     }
   };
 

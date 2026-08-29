@@ -9,13 +9,11 @@ import {
   ChefHat,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Maximize2,
   Minimize2,
   Volume2,
   VolumeX,
   User,
-  Coffee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

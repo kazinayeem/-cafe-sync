@@ -1,5 +1,5 @@
-import { useNavigate, Link } from "react-router";
-import { Coffee, ArrowRight, Shield, QrCode, Sparkles, CheckCircle2, Clock } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Coffee, ArrowRight, QrCode, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function App() {
