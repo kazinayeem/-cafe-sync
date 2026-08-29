@@ -1072,11 +1072,40 @@ export function App() {
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#8C6446] dark:text-[#887463]">
-            <p>
-              © {new Date().getFullYear()} {business.name}। সর্বস্বত্ব সংরক্ষিত।
+          {/* Developer Credit & Brand Philosophy Signature */}
+          <div className="pt-10 pb-4 text-center space-y-4 max-w-2xl mx-auto px-4">
+            <div className="space-y-1.5">
+              <p className="font-bangla-serif font-bold text-sm sm:text-base text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
+                “নিজের হাতে যত্নে বানানো।”
+              </p>
+              <p className="font-bangla-sans text-xs sm:text-[13px] text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-relaxed">
+                “এক কাপ কফির মতোই—ছোট ছোট ভাবনা আর ভালোবাসা দিয়ে তৈরি।”
+              </p>
+            </div>
+
+            <p className="font-bangla-serif text-xs sm:text-[13px] text-[#8C5D3D] dark:text-[#D4A373] font-medium">
+              ☕ “Bornocafe” — যেখানে প্রতিটি কাপের সাথে থাকে একটি গল্প।
             </p>
-            <p>ভালোবাসা ও যত্নের সাথে পরিবেশিত।</p>
+
+            <div className="pt-2 space-y-1 text-center">
+              <p className="text-[11px] sm:text-xs text-[#6E4F39] dark:text-[#A89684] font-medium tracking-wide">
+                “Crafted with care by Bornosoft”
+              </p>
+              <div>
+                <a
+                  href="https://bornosoft.bd"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-[#C86D3B] hover:text-[#B35E2F] dark:hover:text-[#E8925A] hover:underline transition-colors inline-block"
+                >
+                  bornosoft.bd
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-[#DFCBB5]/50 dark:border-[#332317]/60 text-[10px] sm:text-[11px] text-[#8C6446]/80 dark:text-[#887463]">
+              © {new Date().getFullYear()} {business.name}। সর্বস্বত্ব সংরক্ষিত।
+            </div>
           </div>
         </div>
       </footer>
