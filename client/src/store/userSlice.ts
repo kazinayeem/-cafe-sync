@@ -1,11 +1,12 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
-export interface UserState {
+interface UserState {
   name: string | null;
   email: string | null;
-  role: "admin" | "manager" | "cashier" | "barista" | "staff" | "customer" | null;
+  role: string | null;
   token: string | null;
-  permissions: string[];
+  permissions?: string[];
 }
 
 const initialState: UserState = {
@@ -23,16 +24,16 @@ const userSlice = createSlice({
     login: (
       state,
       action: PayloadAction<{
-        name: string;
-        email: string;
-        role: "admin" | "manager" | "cashier" | "barista" | "staff" | "customer";
+        name?: string;
+        email?: string;
+        role?: string;
         token: string;
         permissions?: string[];
       }>
     ) => {
-      state.name = action.payload.name;
-      state.email = action.payload.email;
-      state.role = action.payload.role;
+      state.name = action.payload.name || null;
+      state.email = action.payload.email || null;
+      state.role = action.payload.role || null;
       state.token = action.payload.token;
       state.permissions = action.payload.permissions || [];
     },
@@ -43,11 +44,8 @@ const userSlice = createSlice({
       state.token = null;
       state.permissions = [];
     },
-    updatePermissions: (state, action: PayloadAction<string[]>) => {
-      state.permissions = action.payload;
-    },
   },
 });
 
-export const { login, logout, updatePermissions } = userSlice.actions;
+export const { login, logout } = userSlice.actions;
 export default userSlice.reducer;

@@ -3,20 +3,16 @@ import {
   useGetInventoryQuery,
   useAdjustStockMutation,
   useGetInventoryHistoryQuery,
-  InventoryItem,
 } from "@/services/inventoryApi";
+import type { InventoryItem } from "@/services/inventoryApi";
 import { socket } from "@/utils/socket";
 import {
   Boxes,
   AlertTriangle,
   CheckCircle2,
   XCircle,
-  Plus,
-  Minus,
-  RotateCcw,
   Search,
   History,
-  TrendingDown,
   Layers,
   Edit2,
   X,
@@ -31,13 +27,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";

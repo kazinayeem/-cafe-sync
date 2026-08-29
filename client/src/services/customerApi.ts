@@ -1,98 +1,109 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { createCustomBaseQuery } from "./apiConfig";
+import { baseQueryWithAuth } from "./apiConfig";
 
 export interface Customer {
   _id: string;
   name: string;
   phone: string;
   email?: string;
-  notes?: string;
-  totalOrders: number;
-  totalSpent: number;
   loyaltyPoints: number;
+  totalSpent: number;
+  totalOrders: number;
+  tags?: string[];
+  notes?: string;
   lastVisit?: string;
   createdAt: string;
-  updatedAt: string;
 }
 
-export interface CustomerDetailResponse {
-  customer: Customer;
-  orders: any[];
-  loyaltyHistory: any[];
+export interface LoyaltyTransaction {
+  _id: string;
+  customer: string;
+  type: "earned" | "redeemed" | "adjusted";
+  points: number;
+  order?: any;
+  reason?: string;
+  staff?: { name: string };
+  createdAt: string;
+}
+
+export interface CustomerResponse {
+  success: boolean;
+  data: Customer[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export const customerApi = createApi({
   reducerPath: "customerApi",
-  baseQuery: createCustomBaseQuery("/api/customers"),
-  tagTypes: ["Customers", "CustomerDetail"],
+  baseQuery: baseQueryWithAuth,
+  tagTypes: ["Customer", "Loyalty"],
   endpoints: (builder) => ({
     getCustomers: builder.query<
-      {
-        success: boolean;
-        data: Customer[];
-        pagination: { total: number; page: number; limit: number; totalPages: number };
-      },
-      { search?: string; page?: number; limit?: number } | void
+      CustomerResponse,
+      { page?: number; limit?: number; search?: string; phone?: string } | void
     >({
-      query: (params) => {
-        let url = "/";
-        const queryParams = new URLSearchParams();
-        if (params?.search) queryParams.set("search", params.search);
-        if (params?.page) queryParams.set("page", String(params.page));
-        if (params?.limit) queryParams.set("limit", String(params.limit));
-        const qs = queryParams.toString();
-        return qs ? `${url}?${qs}` : url;
-      },
-      providesTags: ["Customers"],
+      query: (params) => ({
+        url: "/api/customers",
+        params: params || {},
+      }),
+      providesTags: ["Customer"],
     }),
 
-    getCustomerById: builder.query<{ success: boolean; data: CustomerDetailResponse }, string>({
-      query: (id) => `/${id}`,
-      providesTags: (result, error, id) => [{ type: "CustomerDetail", id }],
+    getCustomerById: builder.query<{ success: boolean; data: Customer }, string>({
+      query: (id) => `/api/customers/${id}`,
+      providesTags: (_res, _err, id) => [{ type: "Customer", id }],
     }),
 
     createCustomer: builder.mutation<
       { success: boolean; data: Customer },
-      { name: string; phone: string; email?: string; notes?: string }
+      Partial<Customer>
     >({
       query: (body) => ({
-        url: "/",
+        url: "/api/customers",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Customers"],
+      invalidatesTags: ["Customer"],
     }),
 
     updateCustomer: builder.mutation<
       { success: boolean; data: Customer },
-      { id: string; name?: string; phone?: string; email?: string; notes?: string; loyaltyPoints?: number }
+      { id: string; data: Partial<Customer> }
     >({
-      query: ({ id, ...body }) => ({
-        url: `/${id}`,
+      query: ({ id, data }) => ({
+        url: `/api/customers/${id}`,
         method: "PUT",
-        body,
+        body: data,
       }),
-      invalidatesTags: (result, error, { id }) => ["Customers", { type: "CustomerDetail", id }],
-    }),
-
-    deleteCustomer: builder.mutation<{ success: boolean; message: string }, string>({
-      query: (id) => ({
-        url: `/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Customers"],
+      invalidatesTags: (_r, _e, { id }) => [{ type: "Customer", id }, "Customer"],
     }),
 
     adjustLoyaltyPoints: builder.mutation<
-      { success: boolean; data: any; message: string },
-      { id: string; points: number; reason?: string }
+      { success: boolean; data: Customer },
+      { id: string; points: number; reason: string }
     >({
-      query: ({ id, ...body }) => ({
-        url: `/${id}/loyalty`,
+      query: ({ id, points, reason }) => ({
+        url: `/api/customers/${id}/loyalty`,
         method: "POST",
-        body,
+        body: { points, reason },
       }),
-      invalidatesTags: (result, error, { id }) => ["Customers", { type: "CustomerDetail", id }],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "Customer", id },
+        "Customer",
+        "Loyalty",
+      ],
+    }),
+
+    getLoyaltyLedger: builder.query<
+      { success: boolean; data: LoyaltyTransaction[] },
+      string
+    >({
+      query: (id) => `/api/customers/${id}/loyalty-ledger`,
+      providesTags: ["Loyalty"],
     }),
   }),
 });
@@ -102,6 +113,6 @@ export const {
   useGetCustomerByIdQuery,
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
-  useDeleteCustomerMutation,
   useAdjustLoyaltyPointsMutation,
+  useGetLoyaltyLedgerQuery,
 } = customerApi;

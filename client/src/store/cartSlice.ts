@@ -1,213 +1,161 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { Product } from "@/services/productApi";
+import type { Customer } from "@/services/customerApi";
 
 export interface SelectedModifier {
+  groupId: string;
   groupName: string;
   optionName: string;
   price: number;
 }
 
 export interface CartItem {
-  itemKey: string; // Unique hash: productId-size-[modifiers]
-  productId: string;
-  name: string;
-  size: string;
-  price: number; // Base unit price for this size
-  modifiersPrice: number; // Total add-on price for modifiers per unit
+  itemKey: string;
+  product: Product;
+  size: "small" | "large" | "extraLarge";
   quantity: number;
-  imageUrl?: string;
-  selectedModifiers?: SelectedModifier[];
+  selectedModifiers: SelectedModifier[];
   itemNote?: string;
-}
-
-export interface CartCustomer {
-  _id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  loyaltyPoints: number;
-}
-
-interface CartState {
-  items: CartItem[];
-  subtotal: number;
+  unitPrice: number;
   totalPrice: number;
+}
+
+export interface CartState {
+  items: CartItem[];
+  selectedTable: string | null;
+  selectedCustomer: Customer | null;
+  orderType: "dine_in" | "takeaway" | "delivery";
   discountPercent: number;
   loyaltyPointsToRedeem: number;
-  customer: CartCustomer | null;
-  selectedTable: string | null;
-  orderType: "dine_in" | "takeaway" | "delivery";
   orderNote: string;
 }
 
 const initialState: CartState = {
   items: [],
-  subtotal: 0,
-  totalPrice: 0,
+  selectedTable: null,
+  selectedCustomer: null,
+  orderType: "dine_in",
   discountPercent: 0,
   loyaltyPointsToRedeem: 0,
-  customer: null,
-  selectedTable: null,
-  orderType: "dine_in",
   orderNote: "",
 };
 
-const generateItemKey = (
+export const generateCartItemKey = (
   productId: string,
   size: string,
-  modifiers: SelectedModifier[] = []
-) => {
-  const modStr = modifiers
-    .map((m) => `${m.groupName}:${m.optionName}`)
-    .sort()
+  modifiers: SelectedModifier[] = [],
+  itemNote: string = ""
+): string => {
+  const sortedModifiers = [...modifiers]
+    .sort((a, b) => a.optionName.localeCompare(b.optionName))
+    .map((m) => `${m.groupId}:${m.optionName}`)
     .join("|");
-  return `${productId}-${size}-${modStr}`;
+  return `${productId}_${size}_[${sortedModifiers}]_${itemNote.trim().toLowerCase()}`;
 };
 
-const calculateTotals = (state: CartState) => {
-  state.subtotal = state.items.reduce(
-    (sum, item) =>
-      sum + (item.price + (item.modifiersPrice || 0)) * item.quantity,
-    0
-  );
-  const discountAmount = (state.subtotal * (state.discountPercent || 0)) / 100;
-  state.totalPrice = Math.max(0, state.subtotal - discountAmount);
-};
-
-const cartSlice = createSlice({
+export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addItem: (
+    addToCart: (
       state,
       action: PayloadAction<{
-        productId: string;
-        name: string;
-        size: string;
-        price: number;
-        imageUrl?: string;
+        product: Product;
+        size: "small" | "large" | "extraLarge";
+        quantity?: number;
         selectedModifiers?: SelectedModifier[];
         itemNote?: string;
-        quantity?: number;
       }>
     ) => {
       const {
-        productId,
-        name,
+        product,
         size,
-        price,
-        imageUrl,
+        quantity = 1,
         selectedModifiers = [],
         itemNote = "",
-        quantity = 1,
       } = action.payload;
 
-      const itemKey = generateItemKey(productId, size, selectedModifiers);
-      const modifiersPrice = selectedModifiers.reduce(
-        (sum, m) => sum + (Number(m.price) || 0),
+      const basePrice = product.sizes?.[size] ?? 0;
+      const modifiersTotal = selectedModifiers.reduce(
+        (sum, mod) => sum + (mod.price || 0),
         0
       );
+      const unitPrice = basePrice + modifiersTotal;
 
-      const existingIndex = state.items.findIndex(
-        (item) => item.itemKey === itemKey
+      const itemKey = generateCartItemKey(
+        product._id,
+        size,
+        selectedModifiers,
+        itemNote
       );
 
-      if (existingIndex >= 0) {
-        state.items[existingIndex].quantity += quantity;
-        if (itemNote) {
-          state.items[existingIndex].itemNote = itemNote;
-        }
+      const existingItem = state.items.find((item) => item.itemKey === itemKey);
+
+      if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.totalPrice = existingItem.quantity * existingItem.unitPrice;
       } else {
         state.items.push({
           itemKey,
-          productId,
-          name,
+          product,
           size,
-          price,
-          modifiersPrice,
           quantity,
-          imageUrl,
           selectedModifiers,
           itemNote,
+          unitPrice,
+          totalPrice: unitPrice * quantity,
         });
       }
-
-      calculateTotals(state);
     },
 
-    removeItem: (state, action: PayloadAction<{ itemKey: string } | { productId: string; size: string }>) => {
-      if ("itemKey" in action.payload) {
-        state.items = state.items.filter(
-          (item) => item.itemKey !== action.payload.itemKey
-        );
-      } else {
-        state.items = state.items.filter(
-          (item) =>
-            !(
-              item.productId === action.payload.productId &&
-              item.size === action.payload.size
-            )
-        );
+    updateItemQuantity: (
+      state,
+      action: PayloadAction<{ itemKey: string; quantity: number }>
+    ) => {
+      const { itemKey, quantity } = action.payload;
+      const item = state.items.find((i) => i.itemKey === itemKey);
+      if (item) {
+        if (quantity <= 0) {
+          state.items = state.items.filter((i) => i.itemKey !== itemKey);
+        } else {
+          item.quantity = quantity;
+          item.totalPrice = item.quantity * item.unitPrice;
+        }
       }
-      calculateTotals(state);
     },
 
-    updateQuantity: (
+    removeFromCart: (
       state,
       action: PayloadAction<{
         itemKey?: string;
         productId?: string;
         size?: string;
-        quantity: number;
       }>
     ) => {
-      const { itemKey, productId, size, quantity } = action.payload;
-      let item = null;
-
-      if (itemKey) {
-        item = state.items.find((i) => i.itemKey === itemKey);
-      } else if (productId && size) {
-        item = state.items.find(
-          (i) => i.productId === productId && i.size === size
+      if (action.payload.itemKey) {
+        state.items = state.items.filter(
+          (item) => item.itemKey !== action.payload.itemKey
         );
-      }
-
-      if (item) {
-        item.quantity = Math.max(1, quantity);
-      }
-
-      calculateTotals(state);
-    },
-
-    updateItemNote: (
-      state,
-      action: PayloadAction<{ itemKey: string; note: string }>
-    ) => {
-      const item = state.items.find((i) => i.itemKey === action.payload.itemKey);
-      if (item) {
-        item.itemNote = action.payload.note;
-      }
-    },
-
-    setDiscountPercent: (state, action: PayloadAction<number>) => {
-      state.discountPercent = Math.max(0, Math.min(100, action.payload));
-      calculateTotals(state);
-    },
-
-    setLoyaltyPointsToRedeem: (state, action: PayloadAction<number>) => {
-      state.loyaltyPointsToRedeem = Math.max(0, action.payload);
-    },
-
-    setCustomer: (state, action: PayloadAction<CartCustomer | null>) => {
-      state.customer = action.payload;
-      if (!action.payload) {
-        state.loyaltyPointsToRedeem = 0;
+      } else if (action.payload.productId && action.payload.size) {
+        state.items = state.items.filter(
+          (item) =>
+            !(
+              item.product._id === action.payload.productId &&
+              item.size === action.payload.size
+            )
+        );
       }
     },
 
     setSelectedTable: (state, action: PayloadAction<string | null>) => {
       state.selectedTable = action.payload;
-      if (action.payload) {
-        state.orderType = "dine_in";
+    },
+
+    setSelectedCustomer: (state, action: PayloadAction<Customer | null>) => {
+      state.selectedCustomer = action.payload;
+      if (!action.payload) {
+        state.loyaltyPointsToRedeem = 0;
       }
     },
 
@@ -221,34 +169,39 @@ const cartSlice = createSlice({
       }
     },
 
+    setDiscountPercent: (state, action: PayloadAction<number>) => {
+      state.discountPercent = Math.max(0, Math.min(100, action.payload));
+    },
+
+    setLoyaltyPointsToRedeem: (state, action: PayloadAction<number>) => {
+      state.loyaltyPointsToRedeem = Math.max(0, action.payload);
+    },
+
     setOrderNote: (state, action: PayloadAction<string>) => {
       state.orderNote = action.payload;
     },
 
     clearCart: (state) => {
       state.items = [];
-      state.subtotal = 0;
-      state.totalPrice = 0;
+      state.selectedTable = null;
+      state.selectedCustomer = null;
       state.discountPercent = 0;
       state.loyaltyPointsToRedeem = 0;
-      state.customer = null;
-      state.selectedTable = null;
-      state.orderType = "dine_in";
       state.orderNote = "";
+      state.orderType = "dine_in";
     },
   },
 });
 
 export const {
-  addItem,
-  removeItem,
-  updateQuantity,
-  updateItemNote,
+  addToCart,
+  updateItemQuantity,
+  removeFromCart,
+  setSelectedTable,
+  setSelectedCustomer,
+  setOrderType,
   setDiscountPercent,
   setLoyaltyPointsToRedeem,
-  setCustomer,
-  setSelectedTable,
-  setOrderType,
   setOrderNote,
   clearCart,
 } = cartSlice.actions;
