@@ -97,7 +97,6 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
     if (isSubmitting || isLoading || items.length === 0) return;
 
     setIsSubmitting(true);
-    const itemsToPrint = [...items];
 
     try {
       const payload: any = {
@@ -139,26 +138,6 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
 
       // Clear cart ONLY upon confirmed success
       dispatch(clearCart());
-
-      // Print thermal receipt if print enabled
-      if (settings) {
-        printReceipt(
-          orderData,
-          itemsToPrint,
-          discountPercent,
-          tables,
-          selectedTable,
-          finalTotal,
-          {
-            businessName: settings.businessName || "Cafe Sync",
-            address: settings.address || "",
-            phone: settings.phone || "",
-            website: settings.website || "",
-            receiptFooter: settings.receiptFooter || "",
-            taxRate: settings.taxRate || 0,
-          }
-        );
-      }
     } catch (err: any) {
       setIsPaymentModalOpen(false);
       Swal.fire({
@@ -176,24 +155,20 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
 
   const handlePrintCurrentReceipt = () => {
     if (!createdOrder) return;
-    if (settings) {
-      printReceipt(
-        createdOrder,
-        createdOrder.items || [],
-        createdOrder.discountPercent || 0,
-        tables,
-        createdOrder.table?._id || createdOrder.table,
-        createdOrder.totalPrice,
-        {
-          businessName: settings.businessName || "Cafe Sync",
-          address: settings.address || "",
-          phone: settings.phone || "",
-          website: settings.website || "",
-          receiptFooter: settings.receiptFooter || "",
-          taxRate: settings.taxRate || 0,
-        }
-      );
-    }
+    printReceipt(
+      createdOrder,
+      settings || {
+        businessName: "Cafe Sync",
+        address: "Specialty Coffee House",
+        phone: "+880 1700-000000",
+        website: "https://cafe-sync.vercel.app",
+        receiptFooter: "Thank you for your visit! Enjoy your coffee.",
+        taxRate: taxRate || 0,
+        serviceCharge: serviceChargeRate || 0,
+        currency: "BDT",
+      },
+      tables
+    );
   };
 
   return (
@@ -536,6 +511,8 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
           setCreatedOrder(null);
         }}
         order={createdOrder}
+        settings={settings}
+        tables={tables}
         onPrintReceipt={handlePrintCurrentReceipt}
       />
     </>

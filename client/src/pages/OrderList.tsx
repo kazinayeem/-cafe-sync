@@ -11,6 +11,7 @@ import {
   Search,
   RotateCcw,
   Printer,
+  Download,
   Trash2,
   ShoppingBag,
   Utensils,
@@ -48,9 +49,9 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { printReceipt } from "@/utils/printReceipt";
 import { useGetSettingsQuery } from "@/services/SettingsApi";
 import { useGetTablesQuery } from "@/services/tableService";
+import { printReceipt, downloadReceiptPDF } from "@/utils/printReceipt";
 import Swal from "sweetalert2";
 
 export const OrderList: React.FC = () => {
@@ -173,22 +174,34 @@ export const OrderList: React.FC = () => {
   };
 
   const handlePrint = (order: Order) => {
-    if (!settings) return;
     printReceipt(
       order,
-      order.items,
-      order.discountPercent || 0,
-      tables,
-      (order.table as any)?._id || null,
-      order.totalPrice,
-      {
-        businessName: settings.businessName || "Cafe Sync",
-        address: settings.address || "",
-        phone: settings.phone || "",
-        website: settings.website || "",
-        receiptFooter: settings.receiptFooter || "",
-        taxRate: settings.taxRate || 0,
-      }
+      settings || {
+        businessName: "Cafe Sync",
+        address: "Specialty Coffee House",
+        phone: "+880 1700-000000",
+        website: "https://cafe-sync.vercel.app",
+        receiptFooter: "Thank you for your visit! Enjoy your coffee.",
+        taxRate: 0,
+        currency: "BDT",
+      },
+      tables
+    );
+  };
+
+  const handleDownloadPDF = (order: Order) => {
+    downloadReceiptPDF(
+      order,
+      settings || {
+        businessName: "Cafe Sync",
+        address: "Specialty Coffee House",
+        phone: "+880 1700-000000",
+        website: "https://cafe-sync.vercel.app",
+        receiptFooter: "Thank you for your visit! Enjoy your coffee.",
+        taxRate: 0,
+        currency: "BDT",
+      },
+      tables
     );
   };
 
@@ -579,14 +592,23 @@ export const OrderList: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
-                    onClick={() => handlePrint(selectedOrder)}
-                    className="bg-secondary hover:bg-accent text-secondary-foreground font-bold rounded-xl text-xs"
+                    variant="outline"
+                    onClick={() => handleDownloadPDF(selectedOrder)}
+                    className="h-8 rounded-xl text-xs font-bold border-border hover:bg-accent flex items-center gap-1"
                   >
-                    <Printer className="h-3.5 w-3.5 mr-1" />
+                    <Download className="h-3.5 w-3.5 text-emerald-600" />
+                    PDF
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handlePrint(selectedOrder)}
+                    className="h-8 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs shadow-xs flex items-center gap-1"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
                     Print Receipt
                   </Button>
                   <DrawerClose asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
                       <X className="h-4 w-4" />
                     </Button>
                   </DrawerClose>
