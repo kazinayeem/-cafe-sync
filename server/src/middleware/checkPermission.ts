@@ -2,7 +2,9 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "./authMiddleware";
 import { SettingModel, defaultSettings } from "../models/Settings";
 
-export const checkPermission = (permission: string) => {
+export const checkPermission = (required: string | string[]) => {
+  const permissions = Array.isArray(required) ? required : [required];
+
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
@@ -15,27 +17,25 @@ export const checkPermission = (permission: string) => {
       }
 
       // Check user-specific permissions first
-      if (
-        req.userDetails?.permissions &&
-        req.userDetails.permissions.includes(permission)
-      ) {
+      const userDirectPerms: string[] = req.userDetails?.permissions || [];
+      if (permissions.some((p) => userDirectPerms.includes(p))) {
         return next();
       }
 
       // Otherwise check role permissions from Settings
       const settings = (await SettingModel.findOne()) || defaultSettings;
-      const rolePerms =
+      const rolePerms: string[] =
         settings.permissions?.[req.user.role] ||
         defaultSettings.permissions?.[req.user.role] ||
         [];
 
-      if (rolePerms.includes(permission)) {
+      if (permissions.some((p) => rolePerms.includes(p))) {
         return next();
       }
 
       return res.status(403).json({
         success: false,
-        message: `Forbidden: Missing required permission [${permission}]`,
+        message: `Forbidden: Missing required permission [${permissions.join(" or ")}]`,
       });
     } catch (error) {
       return res.status(500).json({

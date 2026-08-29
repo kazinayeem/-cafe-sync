@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Coffee, Sparkles, Flame, Droplets, RotateCcw, Heart } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Coffee, Sparkles, Droplets, Heart } from "lucide-react";
 
 type BrewStage = "all" | "espresso" | "pour" | "latte-art" | "steam";
 
@@ -22,16 +22,6 @@ export const InteractiveCoffeeHero: React.FC = () => {
     setTilt({ x: 0, y: 0 });
     setIsHovered(false);
   };
-
-  // Auto progression if in full cycle mode
-  const [cycleStep, setCycleStep] = useState(0);
-  useEffect(() => {
-    if (activeStage !== "all") return;
-    const interval = setInterval(() => {
-      setCycleStep((prev) => (prev + 1) % 4);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [activeStage]);
 
   return (
     <div
