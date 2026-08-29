@@ -332,6 +332,38 @@
   animation: subtle-bean-drift 7s infinite ease-in-out 3s;
 }
 
+@keyframes hero-breathe {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.005);
+  }
+}
+
+@keyframes steam-rise-slow {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scaleX(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateY(-8px) scaleX(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scaleX(1.2);
+  }
+}
+
+.animate-hero-breathe {
+  animation: hero-breathe 8s ease-in-out infinite;
+}
+
+.animate-steam-slow {
+  animation: steam-rise-slow 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-coffee-milk,
   .animate-coffee-ripple-1,
@@ -341,7 +373,9 @@
   .animate-natural-steam-3,
   .animate-bean-drift-1,
   .animate-bean-drift-2,
-  .animate-bean-drift-3 {
+  .animate-bean-drift-3,
+  .animate-hero-breathe,
+  .animate-steam-slow {
     animation: none !important;
   }
   .animate-coffee-latte {

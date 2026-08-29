@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGetPublicMenuQuery } from "@/services/publicMenuApi";
 import { BanglaCoffeeQuotes } from "@/components/coffee/BanglaCoffeeQuotes";
@@ -31,6 +31,16 @@ export function App() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Dynamic navbar scroll state
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Load public menu items
   const { data: menuData } = useGetPublicMenuQuery();
@@ -183,15 +193,21 @@ export function App() {
       {/* ========================================================================= */}
       {/* 1. NAVBAR */}
       {/* ========================================================================= */}
-      <nav className="sticky top-0 z-50 bg-[#FDFBF7]/92 dark:bg-[#120B06]/92 backdrop-blur-md border-b border-[#EDE1D1] dark:border-[#332317] transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <nav
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-[#FDFBF7]/95 dark:bg-[#120B06]/95 backdrop-blur-md shadow-xs border-b border-[#EDE1D1] dark:border-[#332317] py-2.5"
+            : "bg-[#FDFBF7]/85 dark:bg-[#120B06]/85 backdrop-blur-xs border-b border-transparent py-4"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Brand Logo with Steam Micro-Interaction */}
           <div
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C86D3B] text-white shadow-md shadow-[#C86D3B]/25 group-hover:scale-105 transition-transform duration-300">
-              <Coffee className="h-6 w-6 relative z-10" />
+            <div className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-[#C86D3B] text-white shadow-md shadow-[#C86D3B]/25 group-hover:scale-105 transition-transform duration-300 shrink-0">
+              <Coffee className="h-5 w-5 sm:h-6 sm:w-6 relative z-10" />
               {/* Micro Steam Sparks */}
               <span className="absolute -top-1 left-2.5 w-1 h-2 bg-amber-200/80 rounded-full animate-steam-1" />
               <span className="absolute -top-1.5 left-5 w-1 h-3 bg-amber-200/90 rounded-full animate-steam-2" />
@@ -199,10 +215,10 @@ export function App() {
             </div>
 
             <div className="flex flex-col">
-              <span className="font-bangla-serif font-black text-xl tracking-tight text-[#22150C] dark:text-[#FAF4ED] group-hover:text-[#C86D3B] transition-colors">
+              <span className="font-bangla-serif font-black text-xl tracking-tight text-[#22150C] dark:text-[#FAF4ED] group-hover:text-[#C86D3B] transition-colors leading-tight">
                 {business.name}
               </span>
-              <span className="text-[11px] font-normal text-[#8C5D3D] dark:text-[#D4A373]">
+              <span className="text-[10px] sm:text-[11px] font-normal text-[#8C5D3D] dark:text-[#D4A373]">
                 কফির সাথে ছোট্ট কিছু মুহূর্ত
               </span>
             </div>
@@ -218,7 +234,7 @@ export function App() {
             </a>
             <button
               onClick={() => navigate("/find-my-coffee")}
-              className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors flex items-center gap-1 font-bold text-[#C86D3B]"
+              className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors flex items-center gap-1.5 font-bold text-[#C86D3B]"
             >
               <Sparkles className="h-3.5 w-3.5 text-[#C86D3B]" />
               <span>কফি খুঁজুন</span>
@@ -233,7 +249,7 @@ export function App() {
               href="#bean-to-cup"
               className="hover:text-[#C86D3B] dark:hover:text-[#E8925A] transition-colors"
             >
-              কফি
+              কফি প্রক্রিয়া
             </a>
             <a
               href="#atmosphere"
@@ -254,14 +270,14 @@ export function App() {
             <Button
               variant="outline"
               onClick={() => navigate("/login")}
-              className="h-11 px-4 rounded-2xl border-[#D8C7B5] dark:border-[#422F22] hover:bg-[#F2E8DC] dark:hover:bg-[#20150E] text-[#422818] dark:text-[#EFE2D3] font-bold text-xs transition-all"
+              className="h-10 px-4 rounded-2xl border-[#D8C7B5] dark:border-[#422F22] hover:bg-[#F2E8DC] dark:hover:bg-[#20150E] text-[#422818] dark:text-[#EFE2D3] font-bold text-xs transition-all"
             >
               স্টাফ POS →
             </Button>
 
             <Button
               onClick={() => navigate("/menu")}
-              className="h-11 px-5 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-xs shadow-md shadow-[#C86D3B]/25 hover:shadow-lg hover:shadow-[#C86D3B]/40 active:scale-98 transition-all flex items-center gap-2"
+              className="h-10 px-5 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-xs shadow-md shadow-[#C86D3B]/25 hover:shadow-lg hover:shadow-[#C86D3B]/40 active:scale-98 transition-all flex items-center gap-2"
             >
               <QrCode className="h-4 w-4" />
               টেবিল থেকে অর্ডার
@@ -371,9 +387,20 @@ export function App() {
       {/* 2. HERO SECTION */}
       {/* ========================================================================= */}
       <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 border-b border-[#EDE1D1] dark:border-[#332317]">
-        {/* Subtle Warm Background Glow */}
+        {/* Subtle Ambient Atmosphere Elements */}
         <div className="absolute top-12 left-1/4 w-96 h-96 rounded-full bg-[#EAD4BB]/35 dark:bg-[#2A180E]/35 blur-3xl -z-10 pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-[450px] h-[450px] rounded-full bg-[#F3DECA]/45 dark:bg-[#381F12]/25 blur-3xl -z-10 pointer-events-none" />
+
+        {/* Slow Floating Ambient Coffee Bean Particles */}
+        <div className="absolute top-20 left-10 text-xl opacity-15 pointer-events-none animate-bean-drift-1 select-none">
+          ☕
+        </div>
+        <div className="absolute bottom-24 left-1/3 text-lg opacity-15 pointer-events-none animate-bean-drift-2 select-none">
+          🌿
+        </div>
+        <div className="absolute top-32 right-12 text-xl opacity-15 pointer-events-none animate-bean-drift-3 select-none">
+          ☕
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -405,7 +432,7 @@ export function App() {
                     const el = document.getElementById("menu");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="w-full sm:w-auto h-13 px-8 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-sm shadow-xl shadow-[#C86D3B]/25 hover:shadow-2xl hover:shadow-[#C86D3B]/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto h-13 px-8 rounded-2xl bg-[#C86D3B] hover:bg-[#B35E2F] text-white font-bold text-sm shadow-xl shadow-[#C86D3B]/25 hover:shadow-2xl hover:shadow-[#C86D3B]/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Coffee className="h-4 w-4" />
                   মেনু দেখুন
@@ -414,7 +441,7 @@ export function App() {
                 <Button
                   onClick={() => navigate("/menu")}
                   variant="outline"
-                  className="w-full sm:w-auto h-13 px-7 rounded-2xl border-[#D8C7B5] dark:border-[#422F22] bg-[#F7F0E6]/80 dark:bg-[#1E130B]/80 hover:bg-[#EFE4D6] dark:hover:bg-[#2C1C11] text-[#3A2213] dark:text-[#F3E7DC] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto h-13 px-7 rounded-2xl border-[#D8C7B5] dark:border-[#422F22] bg-[#F7F0E6]/80 dark:bg-[#1E130B]/80 hover:bg-[#EFE4D6] dark:hover:bg-[#2C1C11] text-[#3A2213] dark:text-[#F3E7DC] font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <QrCode className="h-4 w-4 text-[#C86D3B]" />
                   টেবিল থেকে অর্ডার
@@ -443,8 +470,8 @@ export function App() {
                 {/* Subtle Warm Glow Backdrop */}
                 <div className="absolute -inset-2 bg-gradient-to-tr from-[#EAD4BB]/60 via-[#F3DECA]/40 to-[#E0C7AA]/50 dark:from-[#3A1E0E]/40 dark:via-[#261309]/30 dark:to-[#4A2612]/30 rounded-[32px] sm:rounded-[40px] blur-2xl -z-10 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
 
-                {/* Hero Image Container */}
-                <div className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-[#3C2415]/15 dark:shadow-black/50 border border-[#E9DAC8]/90 dark:border-[#3A2417] bg-[#EFE4D6] dark:bg-[#1A1009] transition-all duration-500 hover:scale-[1.015]">
+                {/* Hero Image Container with Gentle Breathing Animation */}
+                <div className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-[#3C2415]/15 dark:shadow-black/50 border border-[#E9DAC8]/90 dark:border-[#3A2417] bg-[#EFE4D6] dark:bg-[#1A1009] transition-all duration-500 hover:scale-[1.015] animate-hero-breathe">
                   <img
                     src="/heroimage.png"
                     alt="বর্নোক্যাফেতে কফি উপভোগরত এক জুটি"
