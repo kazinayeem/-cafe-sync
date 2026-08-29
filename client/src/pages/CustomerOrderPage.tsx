@@ -13,14 +13,11 @@ import {
   AlertCircle,
   WifiOff,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  CustomerProductSheet,
-  CustomerCartItem,
-} from "@/components/qr/CustomerProductSheet";
+import { CustomerProductSheet } from "@/components/qr/CustomerProductSheet";
+import type { CustomerCartItem } from "@/components/qr/CustomerProductSheet";
 import { CustomerCartSheet } from "@/components/qr/CustomerCartSheet";
 import Swal from "sweetalert2";
 

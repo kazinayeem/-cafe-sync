@@ -131,7 +131,6 @@ export const CustomerOrderTracking: React.FC = () => {
   const currentStepIdx = getStepIndex(currentStatus);
   const isCancelled = currentStatus === "cancelled";
   const isReady = currentStatus === "ready";
-  const isCompleted = currentStatus === "completed";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground pb-12 select-none">

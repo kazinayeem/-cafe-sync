@@ -68,8 +68,6 @@ export const TableManager: React.FC = () => {
   const [tableSection, setTableSection] = useState("Main Hall");
   const [tableShape, setTableShape] = useState<"square" | "round" | "rectangle">("square");
 
-  const canvasRef = useRef<HTMLDivElement>(null);
-
   // Real-time socket listeners
   useEffect(() => {
     socket.on("tableAdded", () => refetch());
