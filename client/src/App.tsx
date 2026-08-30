@@ -818,7 +818,7 @@ export function App() {
                     autoplayInterval={4000}
                     pauseOnHover={true}
                     interactive={true}
-                    showControls={true}
+                 
                     showPageNumbers={false}
                     /* ── Animation ── */
                     duration={0.7}
