@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
   useGetKdsOrdersQuery,
@@ -6,6 +6,7 @@ import {
 } from "@/services/orderApi";
 import type { Order } from "@/services/orderApi";
 import { socket } from "@/utils/socket";
+import { orderAnnouncer, type AnnouncementActiveState } from "@/utils/orderAnnouncer";
 import {
   ChefHat,
   Clock,
@@ -14,8 +15,11 @@ import {
   Minimize2,
   Volume2,
   VolumeX,
+  Volume1,
   User,
   ShieldAlert,
+  Megaphone,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -66,37 +70,59 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
   );
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
 
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem("bornocafe_kds_sound");
+    return saved !== null ? saved === "true" : true;
+  });
+  const [volume, setVolume] = useState<number>(() => {
+    const saved = localStorage.getItem("bornocafe_kds_volume");
+    return saved !== null ? parseFloat(saved) : 0.85;
+  });
+  const [showVolumeMenu, setShowVolumeMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [mobileLaneFilter, setMobileLaneFilter] = useState<string>("all");
+  const [activeAnnouncement, setActiveAnnouncement] = useState<AnnouncementActiveState | null>(null);
+  const [needsUserInteraction, setNeedsUserInteraction] = useState(true);
 
+  // Map of known order statuses to detect real transitions without duplicates
+  const knownOrdersMap = useRef<Map<string, string>>(new Map());
+  const isFirstLoadRef = useRef<boolean>(true);
+
+  // Live Digital Clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const playChime = () => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.6);
-    } catch {
-      // Audio context might be restricted before user interaction
-    }
+  // Sync sound settings with announcer
+  useEffect(() => {
+    orderAnnouncer.setSoundEnabled(soundEnabled);
+    localStorage.setItem("bornocafe_kds_sound", soundEnabled.toString());
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    orderAnnouncer.setVolume(volume);
+    localStorage.setItem("bornocafe_kds_volume", volume.toString());
+  }, [volume]);
+
+  // Subscribe to announcer active states (for visual order card pulse)
+  useEffect(() => {
+    const unsubscribe = orderAnnouncer.onActiveChange((state) => {
+      setActiveAnnouncement(state);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const handleUserUnlock = () => {
+    orderAnnouncer.unlockAudio();
+    setNeedsUserInteraction(false);
   };
 
+  // Real-time Socket.io listeners
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
     const onDisconnect = () => setIsConnected(false);
@@ -104,13 +130,22 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
-    const onNewOrder = () => {
+    const onNewOrder = (data: any) => {
       refetch();
-      playChime();
+      if (data && data.orderId && data.orderToken) {
+        orderAnnouncer.announceNewOrder(data.orderId, data.orderToken, data.table);
+      }
     };
 
-    const onStatusUpdate = () => {
+    const onStatusUpdate = (data: any) => {
       refetch();
+      if (data && data.orderId && data.orderToken) {
+        if (data.status === "ready") {
+          orderAnnouncer.announceOrderReady(data.orderId, data.orderToken, data.table);
+        } else if (data.status === "served" || data.status === "completed") {
+          orderAnnouncer.announceOrderCompleted(data.orderId, data.orderToken, data.table);
+        }
+      }
     };
 
     socket.on("newOrder", onNewOrder);
@@ -122,7 +157,46 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
       socket.off("newOrder", onNewOrder);
       socket.off("orderStatusUpdated", onStatusUpdate);
     };
-  }, [refetch, soundEnabled]);
+  }, [refetch]);
+
+  // Diffing query data to detect real new arrivals and status transitions
+  useEffect(() => {
+    if (!kdsResponse?.data) return;
+
+    const orders: Order[] = kdsResponse.data;
+
+    // On initial load, initialize snapshot so existing orders are NOT re-announced
+    if (isFirstLoadRef.current) {
+      const allInitial = orders.map((o) => ({ _id: o._id, status: o.status }));
+      orderAnnouncer.initializeSnapshot(allInitial);
+
+      orders.forEach((ord) => {
+        knownOrdersMap.current.set(ord._id, ord.status);
+      });
+      isFirstLoadRef.current = false;
+      return;
+    }
+
+    // Subsequent updates: detect new tickets and status transitions
+    orders.forEach((ord) => {
+      const prevStatus = knownOrdersMap.current.get(ord._id);
+      const token = ord.orderToken || ord.customOrderID?.slice(-4) || "Order";
+
+      if (!prevStatus) {
+        // Genuinely new ticket in KDS
+        knownOrdersMap.current.set(ord._id, ord.status);
+        orderAnnouncer.announceNewOrder(ord._id, token, ord.table?.name);
+      } else if (prevStatus !== ord.status) {
+        // Status changed
+        knownOrdersMap.current.set(ord._id, ord.status);
+        if (ord.status === "ready") {
+          orderAnnouncer.announceOrderReady(ord._id, token, ord.table?.name);
+        } else if (ord.status === "served" || ord.status === "completed") {
+          orderAnnouncer.announceOrderCompleted(ord._id, token, ord.table?.name);
+        }
+      }
+    });
+  }, [kdsResponse]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -159,14 +233,15 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
     return Math.max(0, Math.floor(elapsedMs / 60000));
   };
 
-  const filteredStatuses =
-    mobileLaneFilter === "all"
-      ? KDS_STATUSES
-      : KDS_STATUSES.filter((s) => s.key === mobileLaneFilter);
+  const getTimerBadgeStyle = (mins: number) => {
+    if (mins < 10) return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+    if (mins < 20) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    return "bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse";
+  };
 
-  // Permission Restriction State
   if (kdsError) {
     const isForbidden = (kdsError as any)?.status === 403;
+
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 text-center select-none font-sans">
         <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-2xl">
@@ -206,7 +281,10 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-5 lg:p-6 flex flex-col gap-4 select-none font-sans">
+    <div
+      onClick={handleUserUnlock}
+      className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-5 lg:p-6 flex flex-col gap-4 select-none font-sans"
+    >
       {/* Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-3">
@@ -247,71 +325,162 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
         </div>
 
         {/* Action Controls & Digital Clock */}
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Digital Clock */}
+          <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400 hidden sm:flex items-center">
             <Clock className="h-3.5 w-3.5 inline-block mr-1.5 text-slate-400" />
             {currentTime.toLocaleTimeString()}
           </div>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="h-9 w-9 p-0 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
-            title={soundEnabled ? "Mute Chime" : "Enable Chime"}
-          >
-            {soundEnabled ? (
-              <Volume2 className="h-4 w-4 text-emerald-400" />
-            ) : (
-              <VolumeX className="h-4 w-4 text-slate-500" />
-            )}
-          </Button>
+          {/* Audio Notifications Status Indicator & Controls */}
+          <div className="relative flex items-center gap-1.5">
+            {/* Test Notification Sound Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUserUnlock();
+                orderAnnouncer.testNotification("new_order");
+              }}
+              className="h-9 px-2.5 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white text-xs font-semibold flex items-center gap-1.5"
+              title="Test Sound: 'New order. Order A106. A106.'"
+            >
+              <Megaphone className="h-3.5 w-3.5 text-amber-400" />
+              <span className="hidden md:inline">Test Sound</span>
+            </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={toggleFullscreen}
-            className="h-9 w-9 p-0 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
-            title="Toggle Fullscreen"
-          >
-            {isFullscreen ? (
-              <Minimize2 className="h-4 w-4" />
-            ) : (
-              <Maximize2 className="h-4 w-4" />
-            )}
-          </Button>
+            {/* Sound On/Off Indicator & Volume Button */}
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVolumeMenu(!showVolumeMenu);
+                }}
+                className={`h-9 px-2.5 rounded-xl border-slate-800 bg-slate-900 text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  soundEnabled ? "text-emerald-400 hover:text-emerald-300" : "text-slate-500 hover:text-slate-400"
+                }`}
+                title="Audio Settings"
+              >
+                {soundEnabled ? (
+                  volume > 0.5 ? (
+                    <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Volume1 className="h-3.5 w-3.5 text-emerald-400" />
+                  )
+                ) : (
+                  <VolumeX className="h-3.5 w-3.5 text-rose-400" />
+                )}
+                <span className="hidden sm:inline">
+                  {soundEnabled ? "Sound On" : "Sound Off"}
+                </span>
+              </Button>
+
+              {/* Volume Popover Menu */}
+              {showVolumeMenu && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-11 z-50 p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl space-y-3 min-w-[200px] animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">POS Audio Volume</span>
+                    <button
+                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer"
+                    >
+                      {soundEnabled ? "Mute" : "Unmute"}
+                    </button>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={soundEnabled ? volume : 0}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setVolume(val);
+                      if (!soundEnabled && val > 0) setSoundEnabled(true);
+                    }}
+                    className="w-full accent-amber-500 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span>0%</span>
+                    <span>{Math.round(volume * 100)}%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Fullscreen Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+              }}
+              className="h-9 w-9 p-0 rounded-xl border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
+              title="Toggle Fullscreen"
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile/Tablet Lane Filter Tabs */}
-      <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+      {/* Autoplay unlock notice for staff */}
+      {needsUserInteraction && soundEnabled && (
+        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between text-xs text-amber-300">
+          <div className="flex items-center gap-2">
+            <Radio className="h-4 w-4 animate-pulse text-amber-400" />
+            <span className="font-medium">
+              Click anywhere on the screen to enable automatic English POS voice notifications.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            onClick={handleUserUnlock}
+            className="h-7 px-3 text-[11px] font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950"
+          >
+            Enable Audio
+          </Button>
+        </div>
+      )}
+
+      {/* Mobile Tab Filter Bar */}
+      <div className="flex lg:hidden overflow-x-auto gap-2 pb-1 border-b border-slate-800">
         <button
           onClick={() => setMobileLaneFilter("all")}
-          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
             mobileLaneFilter === "all"
               ? "bg-amber-500 text-slate-950"
               : "bg-slate-900 text-slate-400 border border-slate-800"
           }`}
         >
-          All Queues ({allOrders.length})
+          All Tickets ({allOrders.length})
         </button>
-
-        {KDS_STATUSES.map((st) => {
-          const count = allOrders.filter((o) => o.status === st.key).length;
-          const isSelected = mobileLaneFilter === st.key;
-
+        {KDS_STATUSES.map((lane) => {
+          const count = allOrders.filter((o) => o.status === lane.key).length;
           return (
             <button
-              key={st.key}
-              onClick={() => setMobileLaneFilter(st.key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
-                isSelected
-                  ? "bg-amber-500 text-slate-950"
+              key={lane.key}
+              onClick={() => setMobileLaneFilter(lane.key)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                mobileLaneFilter === lane.key
+                  ? "bg-slate-100 text-slate-950 font-black"
                   : "bg-slate-900 text-slate-400 border border-slate-800"
               }`}
             >
-              <span>{st.label}</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950/40">
+              <span>{lane.label}</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300">
                 {count}
               </span>
             </button>
@@ -319,185 +488,146 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
         })}
       </div>
 
-      {/* Main 4-Column Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-1 items-start">
-        {filteredStatuses.map((statusConfig) => {
-          const { key, label, headerColor, badgeColor, actionLabel, actionColor } = statusConfig;
-          const columnOrders = allOrders.filter((o) => o.status === key);
+      {/* Multi-Lane Grid Board */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 items-start">
+        {KDS_STATUSES.map((lane) => {
+          if (mobileLaneFilter !== "all" && mobileLaneFilter !== lane.key) {
+            return null;
+          }
+
+          const laneOrders = allOrders.filter((ord) => ord.status === lane.key);
 
           return (
             <div
-              key={key}
-              className="flex flex-col rounded-3xl bg-slate-900/60 border border-slate-800 overflow-hidden min-h-[75vh]"
+              key={lane.key}
+              className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-3.5 flex flex-col gap-3 min-h-[500px] max-h-[82vh] overflow-hidden"
             >
-              {/* Column Header */}
+              {/* Lane Header */}
               <div
-                className={`p-3.5 border-b flex items-center justify-between ${headerColor}`}
+                className={`p-2.5 rounded-xl border flex items-center justify-between font-black text-xs uppercase tracking-wider ${lane.headerColor}`}
               >
-                <span className="text-xs font-black uppercase tracking-wider">
-                  {label}
-                </span>
+                <span>{lane.label}</span>
                 <span
-                  className={`flex h-6 min-w-6 px-2 items-center justify-center rounded-full font-mono font-black text-xs ${badgeColor}`}
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-black ${lane.badgeColor}`}
                 >
-                  {columnOrders.length}
+                  {laneOrders.length}
                 </span>
               </div>
 
-              {/* Ticket Cards List */}
-              <div className="p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-210px)]">
-                {columnOrders.length === 0 ? (
-                  <div className="py-16 text-center space-y-1.5 text-slate-500">
-                    <CheckCircle2 className="h-7 w-7 mx-auto opacity-30 text-emerald-500" />
-                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
-                      Queue Clear
-                    </p>
-                    <p className="text-[11px] text-slate-600 font-medium">
-                      No orders in this queue right now.
-                    </p>
+              {/* Order Ticket Cards Column */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                {laneOrders.length === 0 ? (
+                  <div className="h-48 flex flex-col items-center justify-center text-slate-600 text-xs font-medium">
+                    <p>No orders</p>
                   </div>
                 ) : (
-                  columnOrders.map((order) => {
+                  laneOrders.map((order) => {
                     const elapsed = getElapsedMinutes(order.createdAt);
-                    const isOverdue = elapsed >= 10 && key !== "served";
-                    const isUrgent = elapsed >= 15 && key !== "served";
-
-                    const orderNumber = order.orderToken
-                      ? `#${order.orderToken}`
-                      : `#${order.customOrderID || order._id.slice(-4)}`;
-
-                    const tableName =
-                      order.orderType === "takeaway"
-                        ? "Takeaway 🛍️"
-                        : order.table
-                        ? `Table: ${(order.table as any).name}`
-                        : "Dine-In 🍽️";
+                    const isAnnounced =
+                      activeAnnouncement?.orderId === order._id ||
+                      activeAnnouncement?.orderToken === order.orderToken;
 
                     return (
                       <div
                         key={order._id}
-                        className={`rounded-2xl p-4 border transition-all duration-200 shadow-md ${
-                          isUrgent
-                            ? "bg-rose-950/20 border-rose-600/80"
-                            : isOverdue
-                            ? "bg-amber-950/20 border-amber-600/70"
-                            : "bg-slate-900/90 border-slate-800 hover:border-slate-700"
+                        className={`rounded-xl border bg-slate-900/90 p-3.5 space-y-3 shadow-lg transition-all duration-300 relative overflow-hidden ${
+                          isAnnounced
+                            ? "border-amber-400 ring-2 ring-amber-400/40 scale-[1.02] shadow-amber-500/20"
+                            : "border-slate-800 hover:border-slate-700"
                         }`}
                       >
-                        {/* Header: Token, Source, Table & Elapsed Timer */}
-                        <div className="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5">
+                        {/* Top Card Info Bar */}
+                        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
                           <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-black text-2xl text-white tracking-tight">
-                                {orderNumber}
-                              </span>
-                              {order.source === "qr" ? (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                                  📱 QR Order
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400">
-                                  POS
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="text-xs text-slate-300 font-bold flex items-center gap-1 mt-1">
-                              <span>{tableName}</span>
-                              {order.guestName && (
-                                <span className="text-slate-400 font-normal">
-                                  • {order.guestName}
-                                </span>
-                              )}
-                            </div>
+                            <span className="text-[10px] font-mono font-bold text-slate-500 block">
+                              #{order.orderToken || order.customOrderID?.slice(-4)}
+                            </span>
+                            <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                              {order.table?.name || "Counter Order"}
+                            </h3>
                           </div>
 
-                          {/* Timer Badge */}
-                          <div
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black ${
-                              isUrgent
-                                ? "bg-rose-600 text-white animate-pulse"
-                                : isOverdue
-                                ? "bg-amber-500 text-slate-950"
-                                : "bg-slate-800 text-slate-300"
-                            }`}
-                          >
-                            <Clock className="h-3 w-3" />
-                            {elapsed}m
+                          <div className="flex flex-col items-end gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-black font-mono border ${getTimerBadgeStyle(
+                                elapsed
+                              )}`}
+                            >
+                              {elapsed}m ago
+                            </span>
+                            {order.source === "qr" && (
+                              <span className="text-[9px] font-bold uppercase text-amber-400">
+                                QR Order
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        {/* Customer Info */}
-                        {order.customer && (
-                          <p className="text-[11px] text-amber-400 font-semibold mb-2 flex items-center gap-1">
+                        {/* Customer Info (if any) */}
+                        {order.guestName && (
+                          <div className="flex items-center gap-1 text-[11px] text-slate-400">
                             <User className="h-3 w-3" />
-                            {order.customer.name}
-                          </p>
+                            <span className="font-semibold text-slate-300">
+                              {order.guestName}
+                            </span>
+                            {order.guestPhone && (
+                              <span className="text-[10px] text-slate-500">
+                                ({order.guestPhone})
+                              </span>
+                            )}
+                          </div>
                         )}
 
-                        {/* Order Items Breakdown */}
-                        <div className="space-y-2 py-1">
-                          {order.items.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <span className="font-extrabold text-slate-100 leading-snug">
-                                  <span className="text-amber-400 mr-1.5 font-black text-sm">
-                                    {item.quantity}×
+                        {/* Order Items List */}
+                        <div className="space-y-1.5 border-t border-b border-slate-800/60 py-2 text-xs">
+                          {order.items?.map((it, idx) => (
+                            <div key={idx} className="flex justify-between items-start gap-2">
+                              <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                                <span className="font-black text-amber-400 font-mono shrink-0">
+                                  {it.quantity}x
+                                </span>
+                                <div className="min-w-0">
+                                  <span className="font-bold text-slate-200 block truncate">
+                                    {it.name || it.product?.name}
                                   </span>
-                                  {item.name || (item.product as any)?.name || "Item"}
-                                </span>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
-                                  {item.size}
-                                </span>
+                                  {it.size && (
+                                    <span className="text-[10px] text-slate-500 block">
+                                      Size: {it.size}
+                                    </span>
+                                  )}
+                                  {it.selectedModifiers && it.selectedModifiers.length > 0 && (
+                                    <span className="text-[10px] text-amber-300/80 block">
+                                      + {it.selectedModifiers.map((m) => m.optionName).join(", ")}
+                                    </span>
+                                  )}
+                                  {it.itemNote && (
+                                    <span className="text-[10px] text-rose-300 italic block">
+                                      Note: {it.itemNote}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-
-                              {/* Modifiers List */}
-                              {item.selectedModifiers &&
-                                item.selectedModifiers.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-1.5">
-                                    {item.selectedModifiers.map((m, mIdx) => (
-                                      <span
-                                        key={mIdx}
-                                        className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300 border border-amber-500/20"
-                                      >
-                                        +{m.optionName}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-
-                              {/* Item Kitchen Note */}
-                              {item.itemNote && (
-                                <p className="text-[11px] text-amber-300 font-bold italic mt-1 bg-amber-950/40 p-1 rounded">
-                                  Note: "{item.itemNote}"
-                                </p>
-                              )}
                             </div>
                           ))}
                         </div>
 
-                        {/* Order-Level Note */}
+                        {/* Kitchen / Order Note */}
                         {order.orderNote && (
-                          <div className="mt-2 p-2 rounded-xl bg-purple-950/30 border border-purple-800/50 text-[11px] text-purple-200">
-                            <span className="font-bold">Ticket Note:</span>{" "}
+                          <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
+                            <span className="font-bold">Note: </span>
                             {order.orderNote}
                           </div>
                         )}
 
-                        {/* Progress Status Action Button */}
-                        {key !== "served" && actionLabel && (
-                          <div className="mt-3 pt-2 border-t border-slate-800">
-                            <Button
-                              onClick={() => handleAdvanceStatus(order._id, order.status)}
-                              className={`w-full h-11 rounded-xl font-black text-xs shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 ${actionColor}`}
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                              {actionLabel}
-                            </Button>
-                          </div>
+                        {/* Action Advance Status Button */}
+                        {lane.actionLabel && (
+                          <Button
+                            onClick={() => handleAdvanceStatus(order._id, order.status)}
+                            className={`w-full h-8 text-xs font-black rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 ${lane.actionColor}`}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            {lane.actionLabel}
+                          </Button>
                         )}
                       </div>
                     );

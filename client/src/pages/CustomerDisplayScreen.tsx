@@ -263,13 +263,13 @@ export const CustomerDisplayScreen: React.FC = () => {
               onClick={(e) => {
                 e.stopPropagation();
                 handleUserUnlock();
-                orderAnnouncer.testAnnouncement("order_ready");
+                orderAnnouncer.testNotification("new_order");
               }}
               className="h-10 px-3 rounded-xl bg-[#1A110A] border-[#2C1C13] hover:bg-[#25170F] text-[#FAF4ED] text-xs font-semibold flex items-center gap-1.5 shadow-xs"
-              title="টেস্ট ভয়েস অ্যানাউন্সমেন্ট"
+              title="Test English Voice Announcement"
             >
               <Megaphone className="h-3.5 w-3.5 text-[#C4611B]" />
-              <span className="hidden md:inline">টেস্ট অডিও</span>
+              <span className="hidden md:inline">Test Sound</span>
             </Button>
 
             {/* Volume Control Toggle & Slider */}

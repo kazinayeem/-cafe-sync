@@ -1,9 +1,10 @@
-// Professional Real-time Café Order Announcement & Audio Engine for Bornocafe TV Display
+// Professional Real-time Café & Restaurant POS / KDS Order Audio Announcement Engine
+// Strictly English-only voice announcements with Web Audio synthesized café & kitchen chimes.
 
-export type AnnouncementType = "new_order" | "order_ready";
+export type AnnouncementType = "new_order" | "order_ready" | "order_completed";
 
 export interface AnnouncementItem {
-  id: string; // unique event key (e.g. orderId_new or orderId_ready)
+  id: string; // unique event key (e.g. orderId_new, orderId_ready, orderId_completed)
   orderId: string;
   orderToken: string;
   table?: string;
@@ -43,7 +44,7 @@ class OrderAnnouncer {
 
   private loadStateFromStorage() {
     try {
-      const stored = sessionStorage.getItem("bornocafe_announced_events");
+      const stored = sessionStorage.getItem("bornocafe_announced_events_v2");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -57,8 +58,8 @@ class OrderAnnouncer {
 
   private saveStateToStorage() {
     try {
-      const arr = Array.from(this.announcedEvents).slice(-200); // keep recent 200
-      sessionStorage.setItem("bornocafe_announced_events", JSON.stringify(arr));
+      const arr = Array.from(this.announcedEvents).slice(-300); // keep recent 300
+      sessionStorage.setItem("bornocafe_announced_events_v2", JSON.stringify(arr));
     } catch {
       // Ignore storage errors
     }
@@ -91,7 +92,7 @@ class OrderAnnouncer {
     this.activeListeners.forEach((l) => l(state));
   }
 
-  // Unlock browser audio context on user interaction
+  // Unlock browser audio context on user gesture
   public async unlockAudio(): Promise<boolean> {
     try {
       if (!this.audioCtx) {
@@ -115,25 +116,15 @@ class OrderAnnouncer {
     }
   }
 
-  // Format token for speech: "A106" -> "A ১ ০ ৬" or "A 1 0 6"
-  private formatTokenForSpeech(token: string, isBangla: boolean): string {
+  // Format token for English speech articulation (e.g. "A106" -> "A 106" / "A 1 0 6")
+  private formatTokenForSpeech(token: string): string {
     const cleaned = token.replace(/^#/, "").trim();
-    if (isBangla) {
-      const bnDigits: Record<string, string> = {
-        "0": "০", "1": "১", "2": "২", "3": "৩", "4": "৪",
-        "5": "৫", "6": "৬", "7": "৭", "8": "৮", "9": "৯"
-      };
-      // Space out letters and convert numbers to Bangla digits
-      return cleaned
-        .split("")
-        .map((char) => bnDigits[char] || char)
-        .join(" ");
-    }
-    // English: spaced out for clear phonetic articulation
-    return cleaned.split("").join(" ");
+    // Insert space between alphabetic prefix and digits for natural English pronunciation
+    // e.g. "A106" -> "A 106"
+    return cleaned.replace(/([A-Za-z]+)(\d+)/g, "$1 $2");
   }
 
-  // Synthesize a warm café chime sound
+  // Synthesize smooth, premium restaurant POS/KDS notification sounds via Web Audio API
   private async playChime(type: AnnouncementType): Promise<void> {
     if (!this.soundEnabled || this.volume <= 0) return;
     try {
@@ -142,12 +133,12 @@ class OrderAnnouncer {
 
       const now = this.audioCtx.currentTime;
       const masterGain = this.audioCtx.createGain();
-      masterGain.gain.setValueAtTime(this.volume * 0.45, now);
+      masterGain.gain.setValueAtTime(this.volume * 0.4, now);
       masterGain.connect(this.audioCtx.destination);
 
       if (type === "new_order") {
-        // Warm 3-tone acoustic café chime (F5 -> A5 -> C6)
-        const notes = [698.46, 880.0, 1046.5]; // F5, A5, C6
+        // Warm 3-tone acoustic café POS chime (F5 -> A5 -> C6)
+        const notes = [698.46, 880.0, 1046.5];
         notes.forEach((freq, index) => {
           if (!this.audioCtx) return;
           const osc = this.audioCtx.createOscillator();
@@ -155,75 +146,103 @@ class OrderAnnouncer {
           const filter = this.audioCtx.createBiquadFilter();
 
           filter.type = "lowpass";
-          filter.frequency.setValueAtTime(2200, now);
+          filter.frequency.setValueAtTime(2400, now);
 
           osc.type = "sine";
-          osc.frequency.setValueAtTime(freq, now + index * 0.12);
+          osc.frequency.setValueAtTime(freq, now + index * 0.11);
 
-          gain.gain.setValueAtTime(0, now + index * 0.12);
-          gain.gain.linearRampToValueAtTime(0.35, now + index * 0.12 + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.12 + 0.65);
+          gain.gain.setValueAtTime(0, now + index * 0.11);
+          gain.gain.linearRampToValueAtTime(0.35, now + index * 0.11 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.11 + 0.65);
 
           osc.connect(filter);
           filter.connect(gain);
           gain.connect(masterGain);
 
-          osc.start(now + index * 0.12);
-          osc.stop(now + index * 0.12 + 0.65);
+          osc.start(now + index * 0.11);
+          osc.stop(now + index * 0.11 + 0.65);
         });
-        await new Promise((r) => setTimeout(r, 650));
-      } else {
+        await new Promise((r) => setTimeout(r, 600));
+      } else if (type === "order_ready") {
         // Bright double bell chime for ORDER READY (E5 -> B5 -> E6)
-        const notes = [659.25, 987.77, 1318.51]; // E5, B5, E6
+        const notes = [659.25, 987.77, 1318.51];
         notes.forEach((freq, index) => {
           if (!this.audioCtx) return;
           const osc = this.audioCtx.createOscillator();
           const gain = this.audioCtx.createGain();
 
           osc.type = "triangle";
-          osc.frequency.setValueAtTime(freq, now + index * 0.14);
+          osc.frequency.setValueAtTime(freq, now + index * 0.13);
 
-          gain.gain.setValueAtTime(0, now + index * 0.14);
-          gain.gain.linearRampToValueAtTime(0.4, now + index * 0.14 + 0.015);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.14 + 0.8);
+          gain.gain.setValueAtTime(0, now + index * 0.13);
+          gain.gain.linearRampToValueAtTime(0.38, now + index * 0.13 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.13 + 0.75);
 
           osc.connect(gain);
           gain.connect(masterGain);
 
-          osc.start(now + index * 0.14);
-          osc.stop(now + index * 0.14 + 0.8);
+          osc.start(now + index * 0.13);
+          osc.stop(now + index * 0.13 + 0.75);
         });
-        await new Promise((r) => setTimeout(r, 750));
+        await new Promise((r) => setTimeout(r, 700));
+      } else if (type === "order_completed") {
+        // Subtle confirmation soft chime (A5 -> E6)
+        const notes = [880.0, 1318.51];
+        notes.forEach((freq, index) => {
+          if (!this.audioCtx) return;
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, now + index * 0.1);
+
+          gain.gain.setValueAtTime(0, now + index * 0.1);
+          gain.gain.linearRampToValueAtTime(0.25, now + index * 0.1 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.5);
+
+          osc.connect(gain);
+          gain.connect(masterGain);
+
+          osc.start(now + index * 0.1);
+          osc.stop(now + index * 0.1 + 0.5);
+        });
+        await new Promise((r) => setTimeout(r, 500));
       }
     } catch {
-      // AudioContext fallback
+      // Ignore audio error
     }
   }
 
-  // Text-To-Speech Speech Synthesis helper
-  private async speakText(text: string, lang: string): Promise<void> {
+  // Pure English Text-To-Speech SpeechSynthesis helper
+  private async speakTextEnglish(text: string): Promise<void> {
     if (!this.soundEnabled || this.volume <= 0 || !("speechSynthesis" in window)) {
-      await new Promise((r) => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 1000));
       return;
     }
 
     return new Promise((resolve) => {
       try {
-        window.speechSynthesis.cancel(); // clear previous stuck speech
+        window.speechSynthesis.cancel(); // clear previous stuck utterances
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.volume = this.volume;
-        utterance.rate = 0.92; // Natural, calm unhurried pace
+        utterance.rate = 0.95; // Calm, clear, professional pace
         utterance.pitch = 1.0;
-        utterance.lang = lang;
+        utterance.lang = "en-US";
 
-        // Find best voice match
+        // Find high-quality natural English voice
         const voices = window.speechSynthesis.getVoices();
-        const matchingVoice = voices.find(
-          (v) => v.lang.toLowerCase().startsWith(lang.toLowerCase()) || v.name.toLowerCase().includes("bangla")
+        const preferredVoice = voices.find(
+          (v) =>
+            v.lang === "en-US" ||
+            v.lang === "en-GB" ||
+            v.name.includes("Google US English") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Natural") ||
+            v.lang.startsWith("en")
         );
-        if (matchingVoice) {
-          utterance.voice = matchingVoice;
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
         }
 
         let resolved = false;
@@ -237,8 +256,8 @@ class OrderAnnouncer {
         utterance.onend = done;
         utterance.onerror = done;
 
-        // Safety timeout in case speech synth hangs
-        setTimeout(done, 6000);
+        // Safety timeout in case speech synth takes too long
+        setTimeout(done, 5000);
 
         window.speechSynthesis.speak(utterance);
       } catch {
@@ -247,7 +266,7 @@ class OrderAnnouncer {
     });
   }
 
-  // Process the announcement queue sequentially without overlap
+  // Process the announcement queue sequentially without audio collisions
   private async processQueue() {
     if (this.isProcessing || this.queue.length === 0) return;
     this.isProcessing = true;
@@ -261,60 +280,36 @@ class OrderAnnouncer {
         type: item.type,
       });
 
-      // 1. Play chime sound
+      const tokenSpoken = this.formatTokenForSpeech(item.orderToken);
+
+      // 1. Play professional short chime
       await this.playChime(item.type);
 
-      // 2. 500ms pause
-      await new Promise((r) => setTimeout(r, 500));
+      // 2. 400ms pause
+      await new Promise((r) => setTimeout(r, 400));
 
-      // Check available voices for Bangla
-      const voices = "speechSynthesis" in window ? window.speechSynthesis.getVoices() : [];
-      const hasBanglaVoice = voices.some(
-        (v) => v.lang.startsWith("bn") || v.name.toLowerCase().includes("bangla")
-      );
-
-      const tokenSpokenBn = this.formatTokenForSpeech(item.orderToken, true);
-      const tokenSpokenEn = this.formatTokenForSpeech(item.orderToken, false);
-
-      if (hasBanglaVoice) {
-        if (item.type === "new_order") {
-          // Phrase 1: "অর্ডার নম্বর A106 এসেছে।"
-          await this.speakText(`অর্ডার নম্বর ${tokenSpokenBn} এসেছে।`, "bn-BD");
-          // 400ms pause
-          await new Promise((r) => setTimeout(r, 400));
-          // Phrase 2: exact 2nd repetition of order number
-          await this.speakText(tokenSpokenBn, "bn-BD");
-        } else {
-          // READY
-          // Phrase 1: "অর্ডার নম্বর A106 প্রস্তুত।"
-          await this.speakText(`অর্ডার নম্বর ${tokenSpokenBn} প্রস্তুত।`, "bn-BD");
-          // 400ms pause
-          await new Promise((r) => setTimeout(r, 400));
-          // Phrase 2: exact 2nd repetition
-          await this.speakText(`${tokenSpokenBn}, আপনার অর্ডার প্রস্তুত।`, "bn-BD");
-        }
-      } else {
-        // English Fallback
-        if (item.type === "new_order") {
-          // Phrase 1: "Order number A106 is now in preparation."
-          await this.speakText(`Order number ${tokenSpokenEn} is now in preparation.`, "en-US");
-          // 400ms pause
-          await new Promise((r) => setTimeout(r, 400));
-          // Phrase 2: exact 2nd repetition
-          await this.speakText(tokenSpokenEn, "en-US");
-        } else {
-          // READY
-          // Phrase 1: "Order number A106 is ready."
-          await this.speakText(`Order number ${tokenSpokenEn} is ready.`, "en-US");
-          // 400ms pause
-          await new Promise((r) => setTimeout(r, 400));
-          // Phrase 2: exact 2nd repetition
-          await this.speakText(`Order ${tokenSpokenEn}, your order is ready.`, "en-US");
-        }
+      // 3. Strictly English Announcement Sequence with EXACTLY 2 Token Repetitions
+      if (item.type === "new_order") {
+        // "New order. Order A106."
+        await this.speakTextEnglish(`New order. Order ${tokenSpoken}.`);
+        // 350ms pause
+        await new Promise((r) => setTimeout(r, 350));
+        // Repeat order number exactly 2nd time: "A106."
+        await this.speakTextEnglish(`${tokenSpoken}.`);
+      } else if (item.type === "order_ready") {
+        // "Order A106 is ready."
+        await this.speakTextEnglish(`Order ${tokenSpoken} is ready.`);
+        // 350ms pause
+        await new Promise((r) => setTimeout(r, 350));
+        // Repeat order number exactly 2nd time: "A106."
+        await this.speakTextEnglish(`${tokenSpoken}.`);
+      } else if (item.type === "order_completed") {
+        // "Order A106 completed."
+        await this.speakTextEnglish(`Order ${tokenSpoken} completed.`);
       }
 
-      // Small cooldown before clearing visual highlight / next in queue
-      await new Promise((r) => setTimeout(r, 1200));
+      // Small cooldown before clearing visual highlight / moving to next in queue
+      await new Promise((r) => setTimeout(r, 900));
       this.notifyActive(null);
       await new Promise((r) => setTimeout(r, 400));
     }
@@ -322,13 +317,16 @@ class OrderAnnouncer {
     this.isProcessing = false;
   }
 
-  // Initialize initial orders on page load (so refresh / reconnect does NOT announce old orders)
+  // Initialize initial orders on page load (so refresh / reconnect does NOT replay old orders)
   public initializeSnapshot(orders: { _id: string; status: string }[]) {
     if (this.isInitialized) return;
     orders.forEach((ord) => {
       this.announcedEvents.add(`${ord._id}_new`);
-      if (ord.status === "ready" || ord.status === "completed" || ord.status === "served") {
+      if (ord.status === "ready" || ord.status === "served" || ord.status === "completed") {
         this.announcedEvents.add(`${ord._id}_ready`);
+      }
+      if (ord.status === "served" || ord.status === "completed") {
+        this.announcedEvents.add(`${ord._id}_completed`);
       }
     });
     this.saveStateToStorage();
@@ -338,7 +336,7 @@ class OrderAnnouncer {
   // Queue a NEW ORDER announcement
   public announceNewOrder(orderId: string, orderToken: string, table?: string) {
     const key = `${orderId}_new`;
-    if (this.announcedEvents.has(key)) return; // prevent duplicates
+    if (this.announcedEvents.has(key)) return; // prevent duplicate
     this.announcedEvents.add(key);
     this.saveStateToStorage();
 
@@ -356,7 +354,7 @@ class OrderAnnouncer {
   // Queue an ORDER READY announcement
   public announceOrderReady(orderId: string, orderToken: string, table?: string) {
     const key = `${orderId}_ready`;
-    if (this.announcedEvents.has(key)) return; // prevent duplicates
+    if (this.announcedEvents.has(key)) return; // prevent duplicate
     this.announcedEvents.add(key);
     this.saveStateToStorage();
 
@@ -371,18 +369,39 @@ class OrderAnnouncer {
     this.processQueue();
   }
 
-  // Test announcement (for staff verification button)
-  public testAnnouncement(type: AnnouncementType = "order_ready") {
+  // Queue an ORDER COMPLETED announcement
+  public announceOrderCompleted(orderId: string, orderToken: string, table?: string) {
+    const key = `${orderId}_completed`;
+    if (this.announcedEvents.has(key)) return; // prevent duplicate
+    this.announcedEvents.add(key);
+    this.saveStateToStorage();
+
+    this.queue.push({
+      id: key,
+      orderId,
+      orderToken,
+      table,
+      type: "order_completed",
+    });
+
+    this.processQueue();
+  }
+
+  // Test announcement (for staff verification button): "New order. Order A106. A106."
+  public testNotification(type: AnnouncementType = "new_order") {
     const testToken = "A106";
     this.queue.push({
       id: `test_${Date.now()}`,
       orderId: `test_${Date.now()}`,
       orderToken: testToken,
-      table: "টেবিল ০৩",
+      table: "Table 03",
       type,
     });
     this.processQueue();
   }
+
+  public testAnnouncement = this.testNotification;
 }
 
 export const orderAnnouncer = new OrderAnnouncer();
+
