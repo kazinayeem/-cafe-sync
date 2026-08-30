@@ -401,7 +401,8 @@ export function App() {
 
               {/* Supporting Copy — Noto Sans Bengali 400, line-height 1.75 */}
               <p className="font-bangla-sans text-sm sm:text-base lg:text-[17px] text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-[520px] mx-auto lg:mx-0 leading-[1.75]">
-                তাজা কফি, সুন্দর কিছু গল্প, আর আপনার জন্য একটু নিজের সময়।
+                বৃষ্টিভেজা বিকেলে জানালার পাশে বসে এক কাপ কফির উষ্ণতা যেন
+                জীবনের সব না পাওয়া আক্ষেপগুলোকে মুহূর্তেই ভুলিয়ে দিতে জানে। 🖤
               </p>
 
               {/* CTAs — Primary dominant, Secondary ghost */}
