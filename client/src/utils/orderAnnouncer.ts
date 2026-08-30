@@ -1,5 +1,5 @@
 // Professional Real-time Café & Restaurant POS / KDS Order Audio Announcement Engine
-// Strictly English-only voice announcements with Web Audio synthesized café & kitchen chimes.
+// Warm, elegant, natural female English voice announcements with Web Audio synthesized café chimes.
 
 export type AnnouncementType = "new_order" | "order_ready" | "order_completed";
 
@@ -116,15 +116,13 @@ class OrderAnnouncer {
     }
   }
 
-  // Format token for English speech articulation (e.g. "A106" -> "A 106" / "A 1 0 6")
+  // Format token for clean English pronunciation (e.g. "A106" -> "A 106")
   private formatTokenForSpeech(token: string): string {
     const cleaned = token.replace(/^#/, "").trim();
-    // Insert space between alphabetic prefix and digits for natural English pronunciation
-    // e.g. "A106" -> "A 106"
     return cleaned.replace(/([A-Za-z]+)(\d+)/g, "$1 $2");
   }
 
-  // Synthesize smooth, premium restaurant POS/KDS notification sounds via Web Audio API
+  // Synthesize smooth, soft café chimes via Web Audio API (warm, non-piercing)
   private async playChime(type: AnnouncementType): Promise<void> {
     if (!this.soundEnabled || this.volume <= 0) return;
     try {
@@ -133,11 +131,11 @@ class OrderAnnouncer {
 
       const now = this.audioCtx.currentTime;
       const masterGain = this.audioCtx.createGain();
-      masterGain.gain.setValueAtTime(this.volume * 0.4, now);
+      masterGain.gain.setValueAtTime(this.volume * 0.38, now);
       masterGain.connect(this.audioCtx.destination);
 
       if (type === "new_order") {
-        // Warm 3-tone acoustic café POS chime (F5 -> A5 -> C6)
+        // Soft acoustic 3-tone café POS chord (F5 -> A5 -> C6)
         const notes = [698.46, 880.0, 1046.5];
         notes.forEach((freq, index) => {
           if (!this.audioCtx) return;
@@ -146,13 +144,13 @@ class OrderAnnouncer {
           const filter = this.audioCtx.createBiquadFilter();
 
           filter.type = "lowpass";
-          filter.frequency.setValueAtTime(2400, now);
+          filter.frequency.setValueAtTime(2200, now);
 
           osc.type = "sine";
           osc.frequency.setValueAtTime(freq, now + index * 0.11);
 
           gain.gain.setValueAtTime(0, now + index * 0.11);
-          gain.gain.linearRampToValueAtTime(0.35, now + index * 0.11 + 0.02);
+          gain.gain.linearRampToValueAtTime(0.32, now + index * 0.11 + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.11 + 0.65);
 
           osc.connect(filter);
@@ -164,7 +162,7 @@ class OrderAnnouncer {
         });
         await new Promise((r) => setTimeout(r, 600));
       } else if (type === "order_ready") {
-        // Bright double bell chime for ORDER READY (E5 -> B5 -> E6)
+        // Soft, sparkling double bell chime for ORDER READY (E5 -> B5 -> E6)
         const notes = [659.25, 987.77, 1318.51];
         notes.forEach((freq, index) => {
           if (!this.audioCtx) return;
@@ -172,19 +170,19 @@ class OrderAnnouncer {
           const gain = this.audioCtx.createGain();
 
           osc.type = "triangle";
-          osc.frequency.setValueAtTime(freq, now + index * 0.13);
+          osc.frequency.setValueAtTime(freq, now + index * 0.12);
 
-          gain.gain.setValueAtTime(0, now + index * 0.13);
-          gain.gain.linearRampToValueAtTime(0.38, now + index * 0.13 + 0.015);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.13 + 0.75);
+          gain.gain.setValueAtTime(0, now + index * 0.12);
+          gain.gain.linearRampToValueAtTime(0.35, now + index * 0.12 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.12 + 0.75);
 
           osc.connect(gain);
           gain.connect(masterGain);
 
-          osc.start(now + index * 0.13);
-          osc.stop(now + index * 0.13 + 0.75);
+          osc.start(now + index * 0.12);
+          osc.stop(now + index * 0.12 + 0.75);
         });
-        await new Promise((r) => setTimeout(r, 700));
+        await new Promise((r) => setTimeout(r, 650));
       } else if (type === "order_completed") {
         // Subtle confirmation soft chime (A5 -> E6)
         const notes = [880.0, 1318.51];
@@ -213,8 +211,11 @@ class OrderAnnouncer {
     }
   }
 
-  // Pure English Text-To-Speech SpeechSynthesis helper
-  private async speakTextEnglish(text: string): Promise<void> {
+  // Pure English Text-To-Speech SpeechSynthesis helper (prioritizing warm, natural female English voices)
+  private async speakTextFemaleEnglish(
+    text: string,
+    options: { rate?: number; pitch?: number } = {}
+  ): Promise<void> {
     if (!this.soundEnabled || this.volume <= 0 || !("speechSynthesis" in window)) {
       await new Promise((r) => setTimeout(r, 1000));
       return;
@@ -222,27 +223,45 @@ class OrderAnnouncer {
 
     return new Promise((resolve) => {
       try {
-        window.speechSynthesis.cancel(); // clear previous stuck utterances
+        window.speechSynthesis.cancel(); // clear previous stuck speech
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.volume = this.volume;
-        utterance.rate = 0.95; // Calm, clear, professional pace
-        utterance.pitch = 1.0;
+        utterance.rate = options.rate ?? 0.90; // Gentle, smooth, unhurried pacing
+        utterance.pitch = options.pitch ?? 1.02; // Warm natural pitch
         utterance.lang = "en-US";
 
-        // Find high-quality natural English voice
+        // Find warm, natural female English voice
         const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(
-          (v) =>
-            v.lang === "en-US" ||
-            v.lang === "en-GB" ||
-            v.name.includes("Google US English") ||
-            v.name.includes("Samantha") ||
-            v.name.includes("Natural") ||
-            v.lang.startsWith("en")
-        );
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
+        const preferredFemaleVoice =
+          voices.find((v) => {
+            const name = v.name.toLowerCase();
+            const lang = v.lang.toLowerCase();
+            const isEnglish = lang.startsWith("en");
+            const isFemale =
+              name.includes("samantha") ||
+              name.includes("victoria") ||
+              name.includes("karen") ||
+              name.includes("zira") ||
+              name.includes("jenny") ||
+              name.includes("aria") ||
+              name.includes("fiona") ||
+              name.includes("tessa") ||
+              name.includes("moira") ||
+              name.includes("female") ||
+              name.includes("natural");
+            return isEnglish && isFemale;
+          }) ||
+          voices.find(
+            (v) =>
+              v.lang === "en-US" ||
+              v.lang === "en-GB" ||
+              v.name.includes("Google US English") ||
+              v.lang.startsWith("en")
+          );
+
+        if (preferredFemaleVoice) {
+          utterance.voice = preferredFemaleVoice;
         }
 
         let resolved = false;
@@ -256,8 +275,8 @@ class OrderAnnouncer {
         utterance.onend = done;
         utterance.onerror = done;
 
-        // Safety timeout in case speech synth takes too long
-        setTimeout(done, 5000);
+        // Safety timeout in case speech synth hangs
+        setTimeout(done, 7000);
 
         window.speechSynthesis.speak(utterance);
       } catch {
@@ -266,7 +285,7 @@ class OrderAnnouncer {
     });
   }
 
-  // Process the announcement queue sequentially without audio collisions
+  // Process the announcement queue sequentially without overlapping audio
   private async processQueue() {
     if (this.isProcessing || this.queue.length === 0) return;
     this.isProcessing = true;
@@ -282,33 +301,55 @@ class OrderAnnouncer {
 
       const tokenSpoken = this.formatTokenForSpeech(item.orderToken);
 
-      // 1. Play professional short chime
+      // 1. Play soft café notification chime
       await this.playChime(item.type);
 
-      // 2. 400ms pause
-      await new Promise((r) => setTimeout(r, 400));
+      // 2. Short pause (450ms)
+      await new Promise((r) => setTimeout(r, 450));
 
-      // 3. Strictly English Announcement Sequence with EXACTLY 2 Token Repetitions
-      if (item.type === "new_order") {
+      // 3. Warm, Natural Female Voice Announcement
+      if (item.type === "order_ready") {
+        // "Your order, A106, is ready."
+        await this.speakTextFemaleEnglish(`Your order, ${tokenSpoken}, is ready.`, {
+          rate: 0.90,
+          pitch: 1.02,
+        });
+
+        // Natural pause between sentences (400ms)
+        await new Promise((r) => setTimeout(r, 400));
+
+        // "Please come to the counter and collect order A106. Thank you, and enjoy your coffee."
+        await this.speakTextFemaleEnglish(
+          `Please come to the counter and collect order ${tokenSpoken}. Thank you, and enjoy your coffee.`,
+          {
+            rate: 0.90,
+            pitch: 1.02,
+          }
+        );
+      } else if (item.type === "new_order") {
         // "New order. Order A106."
-        await this.speakTextEnglish(`New order. Order ${tokenSpoken}.`);
+        await this.speakTextFemaleEnglish(`New order. Order ${tokenSpoken}.`, {
+          rate: 0.93,
+          pitch: 1.02,
+        });
+
         // 350ms pause
         await new Promise((r) => setTimeout(r, 350));
+
         // Repeat order number exactly 2nd time: "A106."
-        await this.speakTextEnglish(`${tokenSpoken}.`);
-      } else if (item.type === "order_ready") {
-        // "Order A106 is ready."
-        await this.speakTextEnglish(`Order ${tokenSpoken} is ready.`);
-        // 350ms pause
-        await new Promise((r) => setTimeout(r, 350));
-        // Repeat order number exactly 2nd time: "A106."
-        await this.speakTextEnglish(`${tokenSpoken}.`);
+        await this.speakTextFemaleEnglish(`${tokenSpoken}.`, {
+          rate: 0.93,
+          pitch: 1.02,
+        });
       } else if (item.type === "order_completed") {
         // "Order A106 completed."
-        await this.speakTextEnglish(`Order ${tokenSpoken} completed.`);
+        await this.speakTextFemaleEnglish(`Order ${tokenSpoken} completed.`, {
+          rate: 0.92,
+          pitch: 1.02,
+        });
       }
 
-      // Small cooldown before clearing visual highlight / moving to next in queue
+      // Smooth soft ending before clearing visual highlight
       await new Promise((r) => setTimeout(r, 900));
       this.notifyActive(null);
       await new Promise((r) => setTimeout(r, 400));
@@ -387,8 +428,8 @@ class OrderAnnouncer {
     this.processQueue();
   }
 
-  // Test announcement (for staff verification button): "New order. Order A106. A106."
-  public testNotification(type: AnnouncementType = "new_order") {
+  // Test announcement (for staff verification button):
+  public testNotification(type: AnnouncementType = "order_ready") {
     const testToken = "A106";
     this.queue.push({
       id: `test_${Date.now()}`,
@@ -404,4 +445,3 @@ class OrderAnnouncer {
 }
 
 export const orderAnnouncer = new OrderAnnouncer();
-
