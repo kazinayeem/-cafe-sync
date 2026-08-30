@@ -7,6 +7,7 @@ import { useGetPublicMenuQuery } from "@/services/publicMenuApi";
 import { BanglaCoffeeQuotes } from "@/components/coffee/BanglaCoffeeQuotes";
 import { CoffeeCultureLifestyle } from "@/components/coffee/CoffeeCultureLifestyle";
 import { ThreeDImagePageflip, type PageFlipLeaf } from "@/components/lightswind/3d-image-pageflip";
+import WorldMap, { type MapMarker, type MapArc } from "@/components/lightswind/world-map";
 import {
   Coffee,
   QrCode,
@@ -29,6 +30,7 @@ import {
   Smile,
   Laptop,
   Leaf,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -103,6 +105,140 @@ const BORNOCAFE_PAGES: PageFlipLeaf[] = [
     backSubtitle: "ব্যস্ত শহরে একটু থামার নাম — BornoCafe",
     backBadge:    "গল্প ০৯",
   },
+];
+
+// ─── Global Coffee Culture Map Data ───────────────────────────────────────
+const COFFEE_WORLD_MARKERS: MapMarker[] = [
+  {
+    id: "finland",
+    lat: 60.1699,
+    lng: 24.9384,
+    label: "ফিনল্যান্ড 🇫🇮",
+    country: "Finland",
+    fact: "বিশ্বে ১নং কফি ভোক্তা — গড়ে মাথাপিছু বছরে প্রায় ১২ কেজি কফি উপভোগ করেন!",
+    timeZone: "Europe/Helsinki",
+    ping: "১ম ভোক্তা দেশ",
+    pulse: true,
+  },
+  {
+    id: "norway",
+    lat: 59.9139,
+    lng: 10.7522,
+    label: "নরওয়ে 🇳🇴",
+    country: "Norway",
+    fact: "বিশ্বে ২নং কফিপ্রেমী জাতি — গড়ে মাথাপিছু বছরে ৯.৯ কেজি কফি পান করেন।",
+    timeZone: "Europe/Oslo",
+    ping: "২য় ভোক্তা দেশ",
+    pulse: true,
+  },
+  {
+    id: "iceland",
+    lat: 64.1466,
+    lng: -21.9426,
+    label: "আইসল্যান্ড 🇮🇸",
+    country: "Iceland",
+    fact: "ক্যাফে সংস্কৃতির স্বর্গ — যেখানে প্রতি কোণায় থাকে চমৎকার স্থানীয় রোস্টারি।",
+    timeZone: "Atlantic/Reykjavik",
+    ping: "৩য় ভোক্তা দেশ",
+    pulse: true,
+  },
+  {
+    id: "denmark",
+    lat: 55.6761,
+    lng: 12.5683,
+    label: "ডেনমার্ক 🇩🇰",
+    country: "Denmark",
+    fact: "ডেনিশ 'হাইজ' (Hygge) সংস্কৃতির প্রাণ হলো প্রিয়জনের সাথে গরম কফির কাপ।",
+    timeZone: "Europe/Copenhagen",
+    ping: "৪র্থ স্থান",
+    pulse: true,
+  },
+  {
+    id: "netherlands",
+    lat: 52.3676,
+    lng: 4.9041,
+    label: "নেদারল্যান্ডস 🇳🇱",
+    country: "Netherlands",
+    fact: "বিশ্বজুড়ে কফি বাণিজ্যের প্রাচীন ঐতিহ্যবাহী কেন্দ্র ও দারুণ ফিল্টার কফি।",
+    timeZone: "Europe/Amsterdam",
+    ping: "৫ম স্থান",
+    pulse: true,
+  },
+  {
+    id: "sweden",
+    lat: 59.3293,
+    lng: 18.0686,
+    label: "সুইডেন 🇸🇪",
+    country: "Sweden",
+    fact: "বিশ্ববিখ্যাত 'ফিকা' (Fika) — কাজের ফাঁকে কফি ও সিনামন বানের চমৎকার বিরতি।",
+    timeZone: "Europe/Stockholm",
+    ping: "৬ষ্ঠ স্থান",
+    pulse: true,
+  },
+  {
+    id: "switzerland",
+    lat: 46.9480,
+    lng: 7.4474,
+    label: "সুইজারল্যান্ড 🇨🇭",
+    country: "Switzerland",
+    fact: "উন্নত রোস্টিং ও প্রিমিয়াম ব্লেন্ডিং টেকনোলজির জন্য বিশ্বখ্যাত।",
+    timeZone: "Europe/Zurich",
+    ping: "৭ম স্থান",
+    pulse: true,
+  },
+  {
+    id: "brazil",
+    lat: -15.7975,
+    lng: -47.8919,
+    label: "ব্রাজিল 🇧🇷",
+    country: "Brazil",
+    fact: "বিশ্বের বৃহত্তম কফি উৎপাদক — প্রায় ১৫০ বছর ধরে শীর্ষ কফি সরবরাহকারী।",
+    timeZone: "America/Sao_Paulo",
+    ping: "১ম উৎপাদক",
+    pulse: true,
+  },
+  {
+    id: "italy",
+    lat: 41.9028,
+    lng: 12.4964,
+    label: "ইতালি 🇮🇹",
+    country: "Italy",
+    fact: "ক্লাসিক এসপ্রেসো, ক্যাপুচিনো ও বারিস্তা সংস্কৃতির আঁতুড়ঘর।",
+    timeZone: "Europe/Rome",
+    ping: "এসপ্রেসো সংস্কৃতি",
+    pulse: true,
+  },
+  {
+    id: "ethiopia",
+    lat: 9.0320,
+    lng: 38.7480,
+    label: "ইথিওপিয়া 🇪🇹",
+    country: "Ethiopia",
+    fact: "কফির ঐতিহাসিক আদি জন্মভূমি — যেখান থেকে শুরু হয় কফির বিশ্বজয়।",
+    timeZone: "Africa/Addis_Ababa",
+    ping: "কফির জন্মভূমি",
+    pulse: true,
+  },
+  {
+    id: "bd",
+    lat: 23.8103,
+    lng: 90.4125,
+    label: "বাংলাদেশ — BornoCafe ❤️ 🇧🇩",
+    country: "Bangladesh",
+    fact: "আমাদের ঠিকানা — মিরপুর ও উত্তরা, ঢাকা। বিশ্বমানের স্বাদ এবার আপনার কাপে।",
+    timeZone: "Asia/Dhaka",
+    color: "#C4611B",
+    size: 6,
+    pulse: true,
+    ping: "আমাদের ঠিকানা ❤️",
+  },
+];
+
+const COFFEE_WORLD_ARCS: MapArc[] = [
+  { start: { lat: 23.8103, lng: 90.4125 }, end: { lat: -15.7975, lng: -47.8919 }, color: "#C4611B", strokeWidth: 1.5 }, // BD -> Brazil (beans)
+  { start: { lat: 23.8103, lng: 90.4125 }, end: { lat: 41.9028, lng: 12.4964 }, color: "#C4611B", strokeWidth: 1.5 },   // BD -> Italy (espresso)
+  { start: { lat: 23.8103, lng: 90.4125 }, end: { lat: 9.0320, lng: 38.7480 }, color: "#C4611B", strokeWidth: 1.5 },    // BD -> Ethiopia (origin)
+  { start: { lat: 23.8103, lng: 90.4125 }, end: { lat: 60.1699, lng: 24.9384 }, color: "#C4611B", strokeWidth: 1.5 },   // BD -> Finland (top consumer)
 ];
 
 export function App() {
@@ -412,6 +548,16 @@ export function App() {
           );
         });
       }
+
+      // ── World map section ────────────────────────────────────────────────
+      gsap.from('[data-gsap="world-header"]', {
+        y: 40, opacity: 0, duration: 0.8, ease,
+        scrollTrigger: { trigger: "#world-coffee", ...ST_DEFAULTS },
+      });
+      gsap.from('[data-gsap="world-map-box"]', {
+        y: 45, opacity: 0, duration: 0.9, ease, delay: 0.15,
+        scrollTrigger: { trigger: "#world-coffee", ...ST_DEFAULTS },
+      });
 
       // ── Final CTA — dramatic, slower entrance ────────────────────────────
       gsap.from('[data-gsap="final-badge"]', {
@@ -1072,6 +1218,60 @@ export function App() {
                 <p className="font-bangla-sans text-xs text-[#6E4F39] dark:text-[#BDB0A2] leading-[1.75] font-normal">{desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================= */}
+      {/* 7.5 GLOBAL COFFEE CULTURE / WORLD MAP SECTION                    */}
+      {/* ================================================================= */}
+      <section id="world-coffee" className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header */}
+        <div data-gsap="world-header" className="text-center space-y-3 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#D4A373]">
+            <Globe className="h-3.5 w-3.5" style={{ color: A }} />
+            <span>গ্লোবাল কফি সংস্কৃতি</span>
+          </div>
+          <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
+            বিশ্বজুড়ে কফির নেশা
+          </h2>
+          <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
+            পৃথিবীর যেসব দেশ কফিকে ভালোবাসে সবচেয়ে বেশি — এবং যেখানকার ঐতিহ্য অনুপ্রাণিত করে BornoCafe-কে।
+          </p>
+        </div>
+
+        {/* Interactive Map Box */}
+        <div
+          data-gsap="world-map-box"
+          className="relative rounded-[16px] sm:rounded-[20px] bg-[#FAF6F0] dark:bg-[#1A1009] border border-[#E9DAC8] dark:border-[#382417] p-4 sm:p-7 overflow-hidden will-change-transform"
+          style={{ boxShadow: "0 4px 32px 0 rgba(34,21,12,0.08), 0 1px 4px 0 rgba(34,21,12,0.04)" }}
+        >
+          {/* Map container with responsive height */}
+          <div className="w-full h-[320px] sm:h-[440px] lg:h-[490px] relative">
+            <WorldMap
+              markers={COFFEE_WORLD_MARKERS}
+              arcs={COFFEE_WORLD_ARCS}
+              markerColor={A}
+              pulse={true}
+              enableTooltips={true}
+              interactive={true}
+              dotRadius={1.7}
+              className="w-full h-full"
+            />
+          </div>
+
+          {/* Map footer info / Key Highlights */}
+          <div className="mt-4 pt-4 border-t border-[#EDE1D1] dark:border-[#332317] flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-[#6E4F39] dark:text-[#BDB0A2]">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#C4611B] animate-pulse" />
+              <span className="font-bold text-[#22150C] dark:text-[#FAF4ED]">বাংলাদেশ (BornoCafe)</span>
+              <span className="opacity-60 hidden sm:inline">•</span>
+              <span className="hidden sm:inline">সারা বিশ্বের সেরা কফি সংস্কৃতি থেকে অনুপ্রাণিত</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-[#8C6446] dark:text-[#9F8A77]">
+              <Sparkles className="h-3 w-3 text-[#C4611B]" />
+              <span>যেকোনো মার্কারের উপর হোভার করে তথ্য দেখুন</span>
+            </div>
           </div>
         </div>
       </section>
