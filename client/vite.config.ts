@@ -9,4 +9,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // recharts has a missing react-is peer — silence by providing a stub
+      external: [],
+      onwarn(warning, warn) {
+        if (warning.code === "UNRESOLVED_IMPORT" && warning.id?.includes("react-is")) return;
+        warn(warning);
+      },
+    },
+  },
 });
+

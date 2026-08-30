@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin 'lightswind/plugin';
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -169,13 +170,9 @@
   line-height: 1.75;
 }
 
-/* ─── Product Card Hover: Lift + Shadow ───────────────────── */
+/* ─── Product Card Hover: GSAP manages transform, CSS manages shadow ─ */
 .card-lift {
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-}
-.card-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card-hover);
+  transition: box-shadow 250ms ease, border-color 200ms ease;
 }
 
 /* ─── Scroll-Reveal Animation ─────────────────────────────── */
