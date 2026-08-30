@@ -218,10 +218,14 @@ export const ThreeDImagePageflip = forwardRef<ThreeDImagePageflipHandle, ThreeDI
     useEffect(() => {
         if (!autoplay || (pauseOnHover && isHovered) || totalLeaves <= 1) return;
         const timer = setInterval(() => {
-            setInternalTurned((prev) => (prev >= totalLeaves ? 0 : prev + 1));
+            setInternalTurned((prev) => {
+                const nextVal = prev >= totalLeaves ? 0 : prev + 1;
+                onPageChange?.(nextVal, totalLeaves);
+                return nextVal;
+            });
         }, autoplayInterval);
         return () => clearInterval(timer);
-    }, [autoplay, autoplayInterval, pauseOnHover, isHovered, totalLeaves]);
+    }, [autoplay, autoplayInterval, pauseOnHover, isHovered, totalLeaves, onPageChange]);
 
     // Keyboard Navigation
     useEffect(() => {
@@ -246,13 +250,8 @@ export const ThreeDImagePageflip = forwardRef<ThreeDImagePageflipHandle, ThreeDI
 
     return (
         <div
-            className={cn("w-full flex flex-col items-center justify-center select-none py-6", className)}
+            className={cn("w-full flex flex-col items-center justify-center select-none py-4", className)}
             style={style}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => {
-                setIsHovered(false);
-                setPeekingIndex(null);
-            }}
         >
             {/* 3D Book Viewport Stage */}
             <div
@@ -261,6 +260,11 @@ export const ThreeDImagePageflip = forwardRef<ThreeDImagePageflipHandle, ThreeDI
                     perspective: `${perspective}px`,
                     width: `${pageWidth * 2 + 40}px`,
                     height: `${pageHeight + 40}px`,
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => {
+                    setIsHovered(false);
+                    setPeekingIndex(null);
                 }}
             >
                 {/* 3D Book Container */}

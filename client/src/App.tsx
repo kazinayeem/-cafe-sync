@@ -815,7 +815,7 @@ export function App() {
                     spineShift={true}
                     /* ── Interaction ── */
                     autoplay={true}
-                    autoplayInterval={4500}
+                    autoplayInterval={4000}
                     pauseOnHover={true}
                     interactive={true}
                     showControls={true}
