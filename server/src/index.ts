@@ -116,11 +116,11 @@ const clientDistPath = potentialClientPaths.find((p) => fs.existsSync(p));
 if (clientDistPath) {
   console.log(`📦 Serving static client from: ${clientDistPath}`);
   app.use(express.static(clientDistPath));
-  app.get("*", (req: Request, res: Response, next: NextFunction) => {
-    if (req.originalUrl.startsWith("/api") || req.originalUrl.startsWith("/health")) {
-      return next();
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method === "GET" && !req.originalUrl.startsWith("/api") && !req.originalUrl.startsWith("/health")) {
+      return res.sendFile(path.join(clientDistPath, "index.html"));
     }
-    res.sendFile(path.join(clientDistPath, "index.html"));
+    next();
   });
 }
 
