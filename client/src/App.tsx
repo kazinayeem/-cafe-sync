@@ -25,12 +25,11 @@ import {
   Flame,
   Heart,
   Store,
-  Sun,
-  Users,
-  Smile,
-  Laptop,
   Leaf,
   Globe,
+  Zap,
+  ShieldCheck,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -277,12 +276,12 @@ export function App() {
   const products = menuData?.data?.products || [];
 
   const categoriesList = [
-    { key: "all", label: "সবগুলো" },
+    { key: "all", label: "সব" },
     { key: "coffee", label: "কফি" },
-    { key: "specialty", label: "বিশেষ পানীয়" },
-    { key: "cold", label: "ঠান্ডা পানীয়" },
-    { key: "smoothies", label: "স্মুদি" },
-    { key: "snacks", label: "স্ন্যাকস ও পেস্ট্রি" },
+    { key: "tea", label: "চা" },
+    { key: "snacks", label: "স্ন্যাকস" },
+    { key: "dessert", label: "ডেজার্ট" },
+    { key: "special", label: "স্পেশাল" },
   ];
 
   const fallbackFeatured = [
@@ -304,7 +303,7 @@ export function App() {
       _id: "f2",
       name: "ক্যারামেল মাকিয়াটো",
       englishName: "Caramel Macchiato",
-      category: "specialty",
+      category: "special",
       description:
         "ফ্রেশ এসপ্রেসো, সুগন্ধি ভ্যানিলা সিরাপ এবং সমৃদ্ধ ক্যারামেল ড্রপসের লোভনীয় মেলবন্ধন।",
       price: 280,
@@ -316,16 +315,16 @@ export function App() {
     },
     {
       _id: "f3",
-      name: "নাইট্রো কোল্ড ব্রিউ",
-      englishName: "Nitro Cold Brew",
-      category: "cold",
+      name: "স্পাইসড মসলা চাই লাতে",
+      englishName: "Spiced Masala Chai Latte",
+      category: "tea",
       description:
-        "১৬ ঘণ্টা ধীর প্রক্রিয়ায় প্রস্তুত সিঙ্গেল-অরিজিন কোল্ড কফি ও তুলতুলে নাইট্রো ক্রেমার পরশ।",
-      price: 260,
+        "দারুচিনি, এলাচ ও লবঙ্গ সমৃদ্ধ খাঁটি মসলা চায়ের সাথে ক্রিমযুক্ত স্টিমড ওট মিল্ক।",
+      price: 220,
       imageUrl:
-        "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80",
-      tag: "ধীর প্রক্রিয়ায় প্রস্তুত",
-      origin: "গুয়াতেমালা অ্যান্টিগুয়া",
+        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80",
+      tag: "ঐতিহ্যবাহী স্বাদ",
+      origin: "শ্রীমঙ্গল আসাম ব্লেন্ড",
       size: "Tall (10oz)",
     },
     {
@@ -346,7 +345,7 @@ export function App() {
       _id: "f5",
       name: "হ্যাজেলনাট মোকা",
       englishName: "Hazelnut Mocha",
-      category: "specialty",
+      category: "special",
       description:
         "বেলজিয়ান ডার্ক চকোলেট গানাশ, ডাবল এসপ্রেসো ও হ্যাজেলনাট মিল্কের ঘন উষ্ণতা।",
       price: 290,
@@ -360,7 +359,7 @@ export function App() {
       _id: "f6",
       name: "বাস্ক বার্নট চিজকেক",
       englishName: "Basque Burnt Cheesecake",
-      category: "snacks",
+      category: "dessert",
       description:
         "খাস্তা ক্যারামেলাইজড ক্রাস্ট ও ভেতরে তুলতুলে মেল্টিং ক্রিম চিজের স্বর্গীয় স্বাদ।",
       price: 320,
@@ -736,26 +735,25 @@ export function App() {
               </div>
 
               {/* Headline — GSAP: staggered line-by-line reveal */}
-              <h1 className="font-bangla-serif font-bold text-3xl sm:text-5xl lg:text-[52px] xl:text-6xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.15]">
-                <span data-hero="line" className="block">এক কাপ কফি,</span>
-                <span data-hero="line" className="block" style={{ color: A }}>একটু আপন সময়।</span>
+              <h1 className="font-bangla-serif font-bold text-4xl sm:text-5xl lg:text-[54px] xl:text-[60px] text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.18]">
+                <span data-hero="line" className="block">এক কাপ কফি।</span>
+                <span data-hero="line" className="block" style={{ color: A }}>একটু নিজের সময়।</span>
               </h1>
 
               {/* Para — GSAP: fade + slide */}
               <p
                 data-hero="para"
-                className="font-bangla-sans text-sm sm:text-base lg:text-[17px] text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-[520px] mx-auto lg:mx-0 leading-[1.75]"
+                className="font-bangla-sans text-sm sm:text-base lg:text-[17px] text-[#5D422E] dark:text-[#C5B4A2] font-normal max-w-[540px] mx-auto lg:mx-0 leading-[1.8]"
               >
-                বৃষ্টিভেজা বিকেলে জানালার পাশে বসে এক কাপ কফির উষ্ণতা যেন
-                জীবনের সব না পাওয়া আক্ষেপগুলোকে মুহূর্তেই ভুলিয়ে দিতে জানে। 🖤
+                তাজা কফি, মন ছুঁয়ে যাওয়া স্বাদ আর শান্ত এক মুহূর্ত—ব্যস্ত দিনের মাঝে নিজের জন্য একটু বিরতি।
               </p>
 
               {/* CTAs — GSAP: back.out bounce stagger */}
-              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
                 <Button
                   data-hero="cta"
                   onClick={() => { const el = document.getElementById("menu"); el?.scrollIntoView({ behavior: "smooth" }); }}
-                  className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-[12px] text-white font-bold text-sm shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-transform flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-[12px] text-white font-bold text-sm shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   style={{ background: A_BTN, boxShadow: `0 4px 20px 0 ${A_BTN}35` }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = A_BTN_HVR; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = A_BTN; }}
@@ -767,10 +765,10 @@ export function App() {
                   data-hero="cta"
                   onClick={() => navigate("/menu")}
                   variant="outline"
-                  className="w-full sm:w-auto h-12 sm:h-13 px-7 rounded-[12px] border border-[#D8C7B5] dark:border-[#422F22] bg-[#FAF6F0]/80 dark:bg-[#1E130B]/80 hover:bg-[#F2E8DC] dark:hover:bg-[#281810] text-[#3A2213] dark:text-[#F3E7DC] font-semibold text-sm hover:-translate-y-0.5 active:translate-y-0 transition-transform flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-[12px] border border-[#D8C7B5] dark:border-[#422F22] bg-[#FAF6F0]/90 dark:bg-[#1E130B]/90 hover:bg-[#F2E8DC] dark:hover:bg-[#281810] text-[#3A2213] dark:text-[#F3E7DC] font-semibold text-sm hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
                   <QrCode className="h-4 w-4" style={{ color: A }} />
-                  টেবিল থেকে অর্ডার
+                  অর্ডার করুন
                 </Button>
               </div>
 
@@ -846,10 +844,10 @@ export function App() {
             <span>সতেজ রোস্ট ও নিখুঁত স্বাদ</span>
           </div>
           <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
-            আজকের কফি কোনটা?
+            আজ কোন কফিটা হবে?
           </h2>
-          <p className="font-bangla-sans text-sm sm:text-base text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
-            সতেজভাবে তৈরি, আপনার দিনের ছোট্ট আনন্দের জন্য।
+          <p className="font-bangla-sans text-sm sm:text-base text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.8]">
+            আপনার মুডের সাথে মিলিয়ে বেছে নিন আজকের প্রিয় কাপটি।
           </p>
           {/* Category filter pills */}
           <div className="pt-3 flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-1">
@@ -988,22 +986,21 @@ export function App() {
 
             {/* Text — GSAP: slides from right */}
             <div data-gsap="story-content" className="lg:col-span-7 space-y-6 will-change-transform">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#D4A373]">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#D4A373]">
                 <Heart className="h-3.5 w-3.5" style={{ color: A }} />
                 <span>আমাদের ভাবনা</span>
               </div>
-              <h2 className="font-bangla-serif font-bold text-3xl sm:text-5xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.2]">
-                কফির কাপে কিছু <br />
-                <span style={{ color: A }}>গল্প থেকে যায়।</span>
+              <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.2]">
+                কফির কাপ থেকে <br />
+                <span style={{ color: A }}>কিছু গল্প</span>
               </h2>
-              <p className="font-bangla-sans text-base text-[#5D422E] dark:text-[#C5B4A2] font-normal leading-[1.75]">
-                সকালের প্রথম কাপে যেমন নতুন দিনের শুরু, তেমনি বিকেলের এক কাপ কফি
-                হতে পারে একটু নিজের কাছে ফিরে আসার সময়।
+              <p className="font-bangla-sans text-base sm:text-lg text-[#5D422E] dark:text-[#C5B4A2] font-normal leading-[1.8]">
+                একটা ভালো কফি শুধু স্বাদ নয়—এর সাথে জড়িয়ে থাকে কিছু মানুষ, কিছু মুহূর্ত আর কিছু গল্প।
               </p>
-              <p className="font-bangla-sans text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
-                কখনো বন্ধুদের সাথে আড্ডা, কখনো প্রিয় মানুষের সাথে কিছুটা সময়,
-                আবার কখনো শুধু নিজের সাথে নীরব একটা বিকেল। কফি হয়তো মুহূর্তটাকে
-                বদলে দেয় না, তবে মুহূর্তটাকে একটু বেশি সুন্দর করে তোলে।
+              <p className="font-bangla-sans text-sm sm:text-base text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.8]">
+                কখনো বন্ধুদের সাথে দীর্ঘ আড্ডা, কখনো প্রিয় মানুষের সাথে নিরিবিলি কিছুটা সময়,
+                আবার কখনো শুধুই নিজের সাথে কাটানো নীরব এক বিকেল। কফি হয়তো মুহূর্তটাকে
+                বদলে দেয় না, তবে স্মৃতিটাকে করে তোলে আরো স্নিগ্ধ ও সুন্দর।
               </p>
               <div className="pt-2 flex items-center gap-6 text-xs font-semibold text-[#8C6446] dark:text-[#AA9380]">
                 <div className="flex items-center gap-2">
@@ -1031,9 +1028,9 @@ export function App() {
             কফি প্রক্রিয়া
           </span>
           <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
-            বীজ থেকে আপনার কাপ পর্যন্ত
+            কফির যাত্রা—বীজ থেকে আপনার কাপ পর্যন্ত
           </h2>
-          <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
+          <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.8]">
             প্রতিটি ধাপে থাকে চরম সতর্কতা, নিখুঁত মাপ এবং আন্তরিক ভালোবাসা।
           </p>
         </div>
@@ -1041,10 +1038,10 @@ export function App() {
         {/* Process Cards — GSAP: stagger + icon rotation settle */}
         <div data-gsap="bean-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { step: "০১", title: "ভালো কফি বাছাই",        desc: "সেরা সিঙ্গেল অরিজিন ও স্পেশালিটি অ্যারাবিকা কফি বিনের সতেজ সংগ্রহ।",               Icon: Leaf },
-            { step: "০২", title: "সতেজভাবে গ্রাইন্ড",    desc: "প্রতিটি অর্ডারের সময় অন-ডিমান্ড প্রিসিশন গ্রাইন্ডিং।",                              Icon: Sliders },
-            { step: "০৩", title: "যত্নে ব্রু করা",        desc: "৯৩°C ক্যালিব্রেটেড তাপমাত্রা ও নিখুঁত ৯-বার প্রেসার এক্সট্রাকশন।",                   Icon: ChefHat },
-            { step: "০৪", title: "আপনার হাতে পৌঁছে দেওয়া", desc: "টেবিলে গরম কফি, মন জুড়ানো সুবাস ও সিল্কি লাতে আর্ট।",                           Icon: Heart },
+            { step: "০১", title: "বাছাই",    desc: "সেরা কফি বিন বেছে নেওয়া হয়।",                           Icon: Leaf },
+            { step: "০২", title: "রোস্টিং",   desc: "সঠিক তাপমাত্রায় ধীরে ধীরে রোস্ট করা হয়।",              Icon: Flame },
+            { step: "০৩", title: "গ্রাইন্ডিং", desc: "অর্ডার অনুযায়ী তাজা করে গ্রাইন্ড করা হয়।",            Icon: Sliders },
+            { step: "০৪", title: "ব্রুইং",    desc: "দক্ষতার সাথে তৈরি হয় আপনার perfect cup।",              Icon: ChefHat },
           ].map((stepItem, idx) => (
             <div
               key={idx}
@@ -1069,7 +1066,7 @@ export function App() {
                 <h3 className="font-bangla-serif font-bold text-lg text-[#22150C] dark:text-[#FAF4ED]">
                   {stepItem.title}
                 </h3>
-                <p className="font-bangla-sans text-xs text-[#6E4F39] dark:text-[#BDB0A2] leading-[1.75] font-normal">
+                <p className="font-bangla-sans text-xs sm:text-[13px] text-[#6E4F39] dark:text-[#BDB0A2] leading-[1.8] font-normal">
                   {stepItem.desc}
                 </p>
               </div>
@@ -1097,36 +1094,47 @@ export function App() {
                 <Sparkles className="h-3.5 w-3.5" style={{ color: A }} />
                 <span>স্মার্ট ক্যাফে সার্ভিস</span>
               </div>
-              <h2 className="font-bangla-serif font-bold text-3xl sm:text-5xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.2]">
+              <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight leading-[1.2]">
                 আপনার টেবিল থেকেই <br />
-                <span style={{ color: A }}>অর্ডার করুন।</span>
+                <span style={{ color: A }}>অর্ডার করুন সহজে।</span>
               </h2>
-              <p className="font-bangla-sans text-sm sm:text-base text-[#5D422E] dark:text-[#C5B4A2] font-normal leading-[1.75] max-w-xl">
-                QR স্ক্যান করুন, পছন্দের কফি বেছে নিন, আর অপেক্ষা করুন আপনার অর্ডারের জন্য।
+              <p className="font-bangla-sans text-sm sm:text-base text-[#5D422E] dark:text-[#C5B4A2] font-normal leading-[1.8] max-w-xl">
+                মেনু দেখুন, পছন্দের খাবার বেছে নিন এবং কয়েকটি ট্যাপেই অর্ডার সম্পন্ন করুন।
               </p>
               <div className="p-3.5 rounded-[12px] bg-white/70 dark:bg-black/30 border border-[#DFCBB5]/70 dark:border-[#382417] max-w-md">
-                <div className="grid grid-cols-4 gap-1 text-center text-[10px] font-bold uppercase tracking-wider">
+                <div className="grid grid-cols-4 gap-1 text-center text-[11px] font-bold uppercase tracking-wider">
                   <div className="p-1.5 rounded-[8px] text-white" style={{ background: A }}>১. স্ক্যান</div>
-                  <div className="p-1.5 rounded-[8px] bg-[#EFE3D3] dark:bg-[#261810] text-[#5D422E] dark:text-[#D4A373]">২. অর্ডার</div>
+                  <div className="p-1.5 rounded-[8px] bg-[#EFE3D3] dark:bg-[#261810] text-[#5D422E] dark:text-[#D4A373]">২. পছন্দ</div>
                   <div className="p-1.5 rounded-[8px] bg-[#EFE3D3] dark:bg-[#261810] text-[#5D422E] dark:text-[#D4A373]">৩. প্রস্তুত</div>
                   <div className="p-1.5 rounded-[8px] bg-[#EFE3D3] dark:bg-[#261810] text-[#5D422E] dark:text-[#D4A373]">৪. পরিবেশন</div>
                 </div>
               </div>
-              <div className="pt-2 flex flex-wrap gap-3">
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <Button
                   onClick={() => navigate("/menu")}
-                  className="h-12 px-7 rounded-[12px] text-white font-bold text-sm shadow-md flex items-center gap-2"
+                  className="h-12 px-7 rounded-[12px] text-white font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer"
                   style={{ background: A_BTN, boxShadow: `0 4px 20px 0 ${A_BTN}30` }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = A_BTN_HVR)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = A_BTN)}
                 >
-                  <QrCode className="h-4 w-4" />
+                  <Coffee className="h-4 w-4" />
+                  মেনু দেখুন
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/menu")}
+                  className="h-12 px-6 rounded-[12px] border-[#DFCBB5] dark:border-[#422F22] bg-[#FAF6F0]/90 dark:bg-[#1E130B]/90 hover:bg-[#F2E8DC] dark:hover:bg-[#281810] font-semibold text-sm flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <QrCode className="h-4 w-4" style={{ color: A }} />
                   অর্ডার শুরু করুন
                 </Button>
-                <Button variant="outline" onClick={() => navigate("/display")} className="h-12 px-6 rounded-[12px] border-[#DFCBB5] dark:border-[#422F22] font-semibold text-sm flex items-center gap-2">
-                  <Monitor className="h-4 w-4 text-blue-600" />
-                  লাইভ টিভি ডিসপ্লে
-                </Button>
+                <button
+                  onClick={() => navigate("/display")}
+                  className="text-xs font-semibold text-[#8C5D3D] dark:text-[#E8925A] hover:underline flex items-center gap-1.5 px-2 py-1 transition-colors cursor-pointer"
+                >
+                  <Monitor className="h-3.5 w-3.5" />
+                  <span>অর্ডারের অবস্থা দেখুন →</span>
+                </button>
               </div>
             </div>
 
@@ -1188,7 +1196,7 @@ export function App() {
             <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
               কফির চেয়েও বেশি কিছু
             </h2>
-            <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
+            <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.8]">
               একটি শান্ত, নান্দনিক, আধুনিক কফি শপ — যেখানে কফি শুধু পানীয় নয়, ছোট্ট একটি অনুভূতি।
             </p>
           </div>
@@ -1196,10 +1204,10 @@ export function App() {
           {/* Atmosphere Cards — GSAP: stagger + icon settle */}
           <div data-gsap="atm-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { Icon: Sun,    title: "সকালের নীরবতা",          desc: "শান্ত সুর ও মিষ্টি রোদের উষ্ণতায় বই পড়ার কিংবা দিনের শুরু করার একান্ত অবসর।" },
-              { Icon: Users,  title: "বন্ধুর সাথে দীর্ঘ আড্ডা", desc: "হাসিমুখের খুনসুটি, স্মৃতিচারণ আর ধোঁয়া ওঠা প্রিয় কফির সাথে গল্প।" },
-              { Icon: Smile,  title: "একটু নিজের সময়",         desc: "ব্যস্ত শহরের ক্লান্তি ভুলে নিজের সাথে একান্তে কয়েক চুমুক কফি উপভোগ করা।" },
-              { Icon: Laptop, title: "কাজের ফাঁকে ছোট্ট বিরতি", desc: "ফ্রেশ এনার্জি নিয়ে কাজে ফেরার মিষ্টি রিফ্রেশমেন্ট ও অনুপ্রেরণা।" },
+              { Icon: Coffee,      title: "তাজা কফি প্রতিদিন", desc: "সেরা বিন থেকে প্রতিদিনের fresh brew।" },
+              { Icon: Zap,         title: "দ্রুত সার্ভিস",     desc: "অর্ডার থেকে পরিবেশন—সবকিছু দ্রুত ও সহজ।" },
+              { Icon: ShieldCheck, title: "নিরাপদ পেমেন্ট",   desc: "আপনার পছন্দের payment method-এ সহজ checkout।" },
+              { Icon: Smartphone,  title: "স্মার্ট অর্ডারিং",  desc: "টেবিল থেকেই menu দেখুন ও order করুন।" },
             ].map(({ Icon, title, desc }, idx) => (
               <div
                 key={idx}
@@ -1215,7 +1223,7 @@ export function App() {
                   <Icon className="h-5 w-5" strokeWidth={1.75} />
                 </div>
                 <h3 className="font-bangla-serif font-bold text-lg text-[#22150C] dark:text-[#FAF4ED]">{title}</h3>
-                <p className="font-bangla-sans text-xs text-[#6E4F39] dark:text-[#BDB0A2] leading-[1.75] font-normal">{desc}</p>
+                <p className="font-bangla-sans text-xs sm:text-[13px] text-[#6E4F39] dark:text-[#BDB0A2] leading-[1.8] font-normal">{desc}</p>
               </div>
             ))}
           </div>
@@ -1228,15 +1236,15 @@ export function App() {
       <section id="world-coffee" className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header */}
         <div data-gsap="world-header" className="text-center space-y-3 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#D4A373]">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#EFE3D3] dark:bg-[#261810] text-xs font-bold uppercase tracking-wider text-[#8C5D3D] dark:text-[#D4A373]">
             <Globe className="h-3.5 w-3.5" style={{ color: A }} />
             <span>গ্লোবাল কফি সংস্কৃতি</span>
           </div>
           <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl text-[#22150C] dark:text-[#FAF4ED] tracking-tight">
-            বিশ্বজুড়ে কফির নেশা
+            বিশ্বজুড়ে কফির গল্প
           </h2>
-          <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.75]">
-            পৃথিবীর যেসব দেশ কফিকে ভালোবাসে সবচেয়ে বেশি — এবং যেখানকার ঐতিহ্য অনুপ্রাণিত করে BornoCafe-কে।
+          <p className="font-bangla-sans text-xs sm:text-sm text-[#6E4F39] dark:text-[#BDB0A2] font-normal leading-[1.8]">
+            একেক দেশের কফির স্বাদ, ঐতিহ্য আর সংস্কৃতির গল্প এক কাপের মধ্যে।
           </p>
         </div>
 
@@ -1289,39 +1297,39 @@ export function App() {
         className="py-14 sm:py-20 bg-gradient-to-br from-[#2A180E] via-[#201108] to-[#140A04] text-white text-center border-t border-[#4E311F]"
       >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div data-gsap="final-badge" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wider text-amber-300">
+          <div data-gsap="final-badge" className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wider text-amber-300">
             <Sparkles className="h-3.5 w-3.5" />
             <span>বর্নক্যাফে অভিজ্ঞতা</span>
           </div>
 
           {/* Heading — GSAP: scale-up entrance, staggered lines */}
-          <h2 className="font-bangla-serif font-bold text-3xl sm:text-5xl text-[#FAF4ED] tracking-tight leading-[1.2]">
+          <h2 className="font-bangla-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-[#FAF4ED] tracking-tight leading-[1.2]">
             <span data-gsap="final-line" className="block will-change-transform">আজকের কাপটা</span>
             <span data-gsap="final-line" className="block text-[#E8925A] will-change-transform">আপনার জন্য অপেক্ষায়।</span>
           </h2>
 
-          <p data-gsap="final-para" className="font-bangla-sans text-sm sm:text-base text-[#D8C7B5] max-w-xl mx-auto font-normal leading-[1.75] will-change-transform">
-            পছন্দের কফি বেছে নিন, আর শুরু হোক আপনার ছোট্ট বিরতি।
+          <p data-gsap="final-para" className="font-bangla-sans text-sm sm:text-base text-[#D8C7B5] max-w-xl mx-auto font-normal leading-[1.8] will-change-transform">
+            আপনার পছন্দের কফি দিয়ে শুরু হোক আজকের ছোট্ট বিরতি।
           </p>
 
           <div data-gsap="final-buttons" className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5 will-change-transform">
             <Button
-              onClick={() => { const el = document.getElementById("menu"); el?.scrollIntoView({ behavior: "smooth" }); }}
-              className="w-full sm:w-auto h-12 px-9 rounded-[12px] text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2"
+              onClick={() => navigate("/menu")}
+              className="w-full sm:w-auto h-12 px-9 rounded-[12px] text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               style={{ background: A_BTN, boxShadow: `0 4px 24px 0 ${A_BTN}40` }}
               onMouseEnter={(e) => (e.currentTarget.style.background = A_BTN_HVR)}
               onMouseLeave={(e) => (e.currentTarget.style.background = A_BTN)}
             >
-              <Coffee className="h-4 w-4" />
-              মেনু দেখুন
+              <QrCode className="h-4 w-4" />
+              অর্ডার করুন
             </Button>
             <Button
-              onClick={() => navigate("/menu")}
+              onClick={() => { const el = document.getElementById("menu"); el?.scrollIntoView({ behavior: "smooth" }); }}
               variant="outline"
-              className="w-full sm:w-auto h-12 px-7 rounded-[12px] border border-[#68462F] bg-white/8 hover:bg-white/15 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+              className="w-full sm:w-auto h-12 px-8 rounded-[12px] border border-[#68462F] bg-white/8 hover:bg-white/15 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <QrCode className="h-4 w-4 text-[#E8925A]" />
-              টেবিল থেকে অর্ডার করুন
+              <Coffee className="h-4 w-4 text-[#E8925A]" />
+              মেনু দেখুন
             </Button>
           </div>
         </div>
