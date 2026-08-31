@@ -71,8 +71,8 @@ io.on("connection", (socket) => {
   );
 });
 
-// Root & Health check
-app.get("/", (req: Request, res: Response) => {
+// Health & API info check
+app.get("/api", (req: Request, res: Response) => {
   res.json({
     name: "Cafe Sync POS API",
     version: "2.0.0",
@@ -121,6 +121,16 @@ if (clientDistPath) {
       return res.sendFile(path.join(clientDistPath, "index.html"));
     }
     next();
+  });
+} else {
+  app.get("/", (req: Request, res: Response) => {
+    res.json({
+      name: "Cafe Sync POS API",
+      version: "2.0.0",
+      status: "online",
+      message: "Frontend client not built yet. Run 'npm run build:client'",
+      time: new Date().toISOString(),
+    });
   });
 }
 
