@@ -9,9 +9,9 @@ export default function DashboardHome() {
   const { role } = useSelector((state: RootState) => state.user);
 
   return (
-    <div className="mx-auto p-0 w-full overflow-x-hidden">
+    <div className="h-full w-full overflow-hidden">
       {role === "admin" ? (
-        <div className="flex flex-col gap-6 p-4">
+        <div className="h-full overflow-y-auto flex flex-col gap-6 p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div className="w-full min-w-0">
               <TableRealTimeUpdate />

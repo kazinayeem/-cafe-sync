@@ -36,14 +36,19 @@ import {
   ShoppingBag,
   CreditCard,
   Edit3,
+  X,
 } from "lucide-react";
 import Swal from "sweetalert2";
 
 interface OrderSidebarProps {
   disabled?: boolean;
+  onClose?: () => void;
 }
 
-export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) => {
+export const OrderSidebar: React.FC<OrderSidebarProps> = ({
+  disabled = false,
+  onClose,
+}) => {
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart);
   const {
@@ -173,25 +178,42 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
 
   return (
     <>
-      <div className="w-full lg:w-96 flex flex-col h-full bg-card border-l border-border/80 text-foreground">
+      <div className="w-full flex flex-col h-full bg-card text-foreground overflow-hidden">
         {/* Header: Order Type & Clear */}
-        <div className="p-4 border-b border-border/80 space-y-3">
+        <div className="p-4 border-b border-border/80 space-y-3 shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="font-extrabold text-base sm:text-lg tracking-tight flex items-center gap-2">
               <Receipt className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               Active Ticket
+              {items.length > 0 && (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                  {items.length} {items.length === 1 ? "item" : "items"}
+                </span>
+              )}
             </h2>
 
-            {items.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => dispatch(clearCart())}
-                className="h-8 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-              >
-                Clear
-              </Button>
-            )}
+            <div className="flex items-center gap-1.5">
+              {items.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => dispatch(clearCart())}
+                  className="h-8 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                >
+                  Clear
+                </Button>
+              )}
+              {onClose && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground lg:hidden"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Dine-In vs Takeaway Toggle */}
@@ -292,8 +314,8 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
           </div>
         </div>
 
-        {/* Order Items List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[160px]">
+        {/* Order Items List - Independently Scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2.5 scroll-smooth">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-border/80 rounded-2xl bg-muted/20">
               <Receipt className="h-10 w-10 text-muted-foreground/40 mb-2" />
@@ -402,8 +424,8 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({ disabled = false }) 
           )}
         </div>
 
-        {/* Footer Financial Breakdown */}
-        <div className="p-4 border-t border-border/80 bg-accent/20 space-y-3">
+        {/* Footer Financial Breakdown - Fixed at Bottom */}
+        <div className="p-4 border-t border-border/80 bg-accent/20 space-y-3 shrink-0">
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between text-muted-foreground font-medium">
               <span>Subtotal</span>

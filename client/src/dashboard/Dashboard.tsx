@@ -10,7 +10,7 @@ export default function Dashboard() {
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-background">
           <Navbar />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background/50">
+          <main className="flex-1 min-h-0 flex flex-col overflow-hidden bg-background/50">
             <Outlet />
           </main>
         </div>

@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { Product } from "../models/Product";
 import { Category } from "../models/Category";
+import {
+  uploadToCloudinary,
+  uploadBase64ToCloudinary,
+} from "../utils/cloudinary";
 
 const handleError = (
   res: Response,
@@ -33,10 +37,23 @@ export const createProduct = async (req: Request, res: Response) => {
     const cat = await Category.findById(category);
     if (!cat) return handleError(res, "Category not found", null, 404);
 
-    let imageUrl = "";
+    let imageUrl = req.body.imageUrl || "";
     if (req.file) {
-      const base64 = req.file.buffer.toString("base64");
-      imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+      try {
+        const uploadRes = await uploadToCloudinary(req.file.buffer, "cafe_sync/products");
+        imageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error, falling back to base64:", uploadErr);
+        const base64 = req.file.buffer.toString("base64");
+        imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+      }
+    } else if (req.body.imageBase64 || (typeof imageUrl === "string" && imageUrl.startsWith("data:image"))) {
+      try {
+        const base64Data = req.body.imageBase64 || imageUrl;
+        imageUrl = await uploadBase64ToCloudinary(base64Data, "cafe_sync/products");
+      } catch (uploadErr) {
+        console.error("Cloudinary base64 upload error:", uploadErr);
+      }
     }
 
     let parsedSizes = sizes;
@@ -161,8 +178,22 @@ export const updateProduct = async (req: Request, res: Response) => {
     }
 
     if (req.file) {
-      const base64 = req.file.buffer.toString("base64");
-      product.imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+      try {
+        const uploadRes = await uploadToCloudinary(req.file.buffer, "cafe_sync/products");
+        product.imageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error, falling back to base64:", uploadErr);
+        const base64 = req.file.buffer.toString("base64");
+        product.imageUrl = `data:${req.file.mimetype};base64,${base64}`;
+      }
+    } else if (req.body.imageUrl && req.body.imageUrl.startsWith("data:image")) {
+      try {
+        product.imageUrl = await uploadBase64ToCloudinary(req.body.imageUrl, "cafe_sync/products");
+      } catch (uploadErr) {
+        product.imageUrl = req.body.imageUrl;
+      }
+    } else if (req.body.imageUrl !== undefined) {
+      product.imageUrl = req.body.imageUrl;
     }
 
     await product.save();

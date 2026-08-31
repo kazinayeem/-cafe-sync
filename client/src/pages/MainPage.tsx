@@ -17,13 +17,10 @@ import type { Product } from "@/services/productApi";
 
 import { Search, ShoppingBag, X, RefreshCcw, AlertTriangle, Coffee } from "lucide-react";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetContent,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useGetSettingsQuery } from "@/services/SettingsApi";
 
 const formatAMPM = (time: string) => {
@@ -122,7 +119,7 @@ export default function MainPage() {
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden bg-background">
-      {/* Center / Catalog Area */}
+      {/* Center / Catalog Area (Fixed header & categories, scrollable product grid) */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Operating Warning Banner if outside hours */}
         {isClosed && (
@@ -141,7 +138,7 @@ export default function MainPage() {
           </div>
         )}
 
-        {/* Top Control Bar: Search & Refresh */}
+        {/* Top Control Bar: Search, Refresh, & Mobile Ticket Button */}
         <div className="p-4 pb-2 flex items-center gap-3 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -171,9 +168,28 @@ export default function MainPage() {
           >
             <RefreshCcw className="h-4 w-4 text-muted-foreground" />
           </Button>
+
+          {/* Quick Ticket Drawer Trigger for Tablets / Mobile */}
+          <Button
+            variant="outline"
+            onClick={() => setIsDrawerOpen(true)}
+            className="lg:hidden h-10 px-3 rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 font-bold text-xs flex items-center gap-2 shrink-0 shadow-xs active:scale-95 transition-all"
+          >
+            <div className="relative">
+              <ShoppingBag className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              {items.length > 0 && (
+                <span className="absolute -top-1.5 -right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-600 text-white text-[9px] font-black">
+                  {items.length}
+                </span>
+              )}
+            </div>
+            <span className="font-tabular font-bold">
+              {totalPrice > 0 ? `৳${totalPrice.toFixed(0)}` : "Ticket"}
+            </span>
+          </Button>
         </div>
 
-        {/* Categories Bar */}
+        {/* Fixed Categories Bar */}
         <div className="px-4 shrink-0">
           <Categories
             activeCategory={activeCategory}
@@ -183,8 +199,8 @@ export default function MainPage() {
           />
         </div>
 
-        {/* Product Cards Grid */}
-        <div className="flex-1 overflow-y-auto px-4 pb-20 lg:pb-6">
+        {/* Independently Scrollable Product Cards Grid */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-20 lg:pb-6 pt-1 select-none scroll-smooth">
           {prodLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 pt-1">
               {Array(10)
@@ -214,49 +230,41 @@ export default function MainPage() {
         </div>
       </div>
 
-      {/* Right Column: Order Ticket Sidebar (Desktop) */}
-      <div className="hidden lg:flex shrink-0 h-full">
+      {/* Right Column: Order Ticket Sidebar (Desktop: Fixed 3-column, independent scroll) */}
+      <div className="hidden lg:flex shrink-0 h-full w-80 xl:w-96 border-l border-border/80 bg-card overflow-hidden">
         <OrderSidebar disabled={false} />
       </div>
 
-      {/* Mobile Sticky Order Drawer Trigger */}
+      {/* Mobile / Tablet Floating Order Trigger */}
       <div className="lg:hidden fixed bottom-4 right-4 z-40">
-        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-3 px-5 py-3 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-2xl active:scale-95 transition-all"
-            >
-              <div className="relative">
-                <ShoppingBag className="h-5 w-5" />
-                {items.length > 0 && (
-                  <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary text-[10px] font-black">
-                    {items.length}
-                  </span>
-                )}
-              </div>
-              <span className="text-sm font-tabular">
-                Ticket • ৳{totalPrice.toFixed(2)}
+        <Button
+          onClick={() => setIsDrawerOpen(true)}
+          className="flex items-center gap-2.5 px-5 py-3 h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-2xl active:scale-95 transition-all"
+        >
+          <div className="relative">
+            <ShoppingBag className="h-5 w-5" />
+            {items.length > 0 && (
+              <span className="absolute -top-2 -right-2.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-white text-primary text-[10px] font-black shadow-sm">
+                {items.length}
               </span>
-            </button>
-          </DrawerTrigger>
-
-          <DrawerContent className="h-[85vh] p-0 rounded-t-3xl bg-card border-t border-border/80 flex flex-col">
-            <DrawerHeader className="p-3 pb-2 border-b flex items-center justify-between">
-              <DrawerTitle className="text-sm font-bold">Active Ticket</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full">
-                  <X className="h-4 w-4" />
-                </Button>
-              </DrawerClose>
-            </DrawerHeader>
-
-            <div className="flex-1 overflow-y-auto">
-              <OrderSidebar disabled={false} />
-            </div>
-          </DrawerContent>
-        </Drawer>
+            )}
+          </div>
+          <span className="text-sm font-tabular">
+            Ticket • ৳{totalPrice.toFixed(2)}
+          </span>
+        </Button>
       </div>
+
+      {/* Slide-over Right Drawer for Tablets & Mobile */}
+      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-md p-0 h-full flex flex-col bg-card border-l border-border/80"
+        >
+          <SheetTitle className="sr-only">Active Ticket</SheetTitle>
+          <OrderSidebar disabled={false} onClose={() => setIsDrawerOpen(false)} />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
