@@ -15,12 +15,17 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run server\" \"npm run client\"",
+    "start": "npm run build && npm run start:prod",
+    "start:prod": "cd server && npm start",
+    "start:all": "concurrently -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"cd server && npm start\" \"cd client && npm run preview -- --host 0.0.0.0 --port 3000\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
+    "seed": "cd server && npm run seed",
     "build": "npm run build:server && npm run build:client",
     "build:server": "cd server && npm run build",
-    "build:client": "cd client && npm run build"
+    "build:client": "cd client && npm run build",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

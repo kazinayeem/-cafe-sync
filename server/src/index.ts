@@ -21,6 +21,7 @@ import morgan from "morgan";
 import { Server } from "socket.io";
 import logger from "./utils/logger";
 import path from "path";
+import fs from "fs";
 
 dotenv.config();
 
@@ -103,7 +104,27 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/activity-logs", activityLogRoutes);
 app.use("/api/public", publicMenuRoutes);
 
-// 404 Route Handler
+// Serve static client assets if built
+const potentialClientPaths = [
+  path.resolve(process.cwd(), "../client/dist"),
+  path.resolve(__dirname, "../../client/dist"),
+  path.resolve(__dirname, "../../../client/dist"),
+  path.resolve(process.cwd(), "client/dist"),
+];
+const clientDistPath = potentialClientPaths.find((p) => fs.existsSync(p));
+
+if (clientDistPath) {
+  console.log(`📦 Serving static client from: ${clientDistPath}`);
+  app.use(express.static(clientDistPath));
+  app.get("*", (req: Request, res: Response, next: NextFunction) => {
+    if (req.originalUrl.startsWith("/api") || req.originalUrl.startsWith("/health")) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+}
+
+// 404 Route Handler for unmatched API routes
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
     success: false,
@@ -120,11 +141,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-if (process.env.NODE_ENV !== "production") {
+const startServer = () => {
   server.listen(PORT, () => {
     console.log(`🚀 Cafe Sync POS Server running on http://localhost:${PORT}`);
     connectDB();
   });
+};
+
+if (!process.env.VERCEL) {
+  startServer();
 } else {
   connectDB();
 }
