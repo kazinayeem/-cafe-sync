@@ -22,7 +22,8 @@ import { CustomerCartSheet } from "@/components/qr/CustomerCartSheet";
 import Swal from "sweetalert2";
 
 export const CustomerOrderPage: React.FC = () => {
-  const { qrToken } = useParams<{ qrToken: string }>();
+  const { qrToken, tableId } = useParams<{ qrToken?: string; tableId?: string }>();
+  const effectiveQrToken = qrToken || tableId || "";
   const navigate = useNavigate();
 
   const {
@@ -30,8 +31,8 @@ export const CustomerOrderPage: React.FC = () => {
     isLoading,
     isError,
     error,
-  } = useGetTableByQrTokenQuery(qrToken || "", {
-    skip: !qrToken,
+  } = useGetTableByQrTokenQuery(effectiveQrToken, {
+    skip: !effectiveQrToken,
   });
 
   const [createQrOrder, { isLoading: isSubmitting }] = useCreateQrOrderMutation();
@@ -46,8 +47,8 @@ export const CustomerOrderPage: React.FC = () => {
 
   // Restore cart from localStorage per table
   useEffect(() => {
-    if (qrToken) {
-      const saved = localStorage.getItem(`cafe_qr_cart_${qrToken}`);
+    if (effectiveQrToken) {
+      const saved = localStorage.getItem(`cafe_qr_cart_${effectiveQrToken}`);
       if (saved) {
         try {
           setCartItems(JSON.parse(saved));
@@ -56,14 +57,14 @@ export const CustomerOrderPage: React.FC = () => {
         }
       }
     }
-  }, [qrToken]);
+  }, [effectiveQrToken]);
 
   // Sync cart to localStorage
   useEffect(() => {
-    if (qrToken) {
-      localStorage.setItem(`cafe_qr_cart_${qrToken}`, JSON.stringify(cartItems));
+    if (effectiveQrToken) {
+      localStorage.setItem(`cafe_qr_cart_${effectiveQrToken}`, JSON.stringify(cartItems));
     }
-  }, [cartItems, qrToken]);
+  }, [cartItems, effectiveQrToken]);
 
   // Socket online status
   useEffect(() => {
@@ -105,6 +106,15 @@ export const CustomerOrderPage: React.FC = () => {
   const totalCartAmount = cartItems.reduce((sum, i) => sum + i.totalPrice, 0);
 
   const handleAddToCart = (newItem: CustomerCartItem) => {
+    if (business?.enableCustomerSelfOrdering === false) {
+      Swal.fire({
+        icon: "info",
+        title: "Ordering Unavailable",
+        text: "Customer self-ordering is currently paused. Please order directly with our barista or cashier.",
+      });
+      return;
+    }
+
     setCartItems((prev) => {
       const index = prev.findIndex((i) => i.id === newItem.id);
       if (index > -1) {
@@ -153,8 +163,8 @@ export const CustomerOrderPage: React.FC = () => {
 
   const handleClearCart = () => {
     setCartItems([]);
-    if (qrToken) {
-      localStorage.removeItem(`cafe_qr_cart_${qrToken}`);
+    if (effectiveQrToken) {
+      localStorage.removeItem(`cafe_qr_cart_${effectiveQrToken}`);
     }
   };
 
@@ -163,11 +173,21 @@ export const CustomerOrderPage: React.FC = () => {
     guestPhone: string;
     orderNote: string;
   }) => {
-    if (!qrToken || cartItems.length === 0 || isSubmitting) return;
+    if (!effectiveQrToken || cartItems.length === 0 || isSubmitting) return;
+
+    if (business?.enableCustomerSelfOrdering === false) {
+      Swal.fire({
+        icon: "warning",
+        title: "Ordering Unavailable",
+        text: "Customer self-ordering is currently paused by store management. Please order directly at the counter.",
+      });
+      return;
+    }
 
     try {
       const payload = {
-        qrToken,
+        qrToken: effectiveQrToken,
+        tableId: effectiveQrToken,
         items: cartItems.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -243,6 +263,21 @@ export const CustomerOrderPage: React.FC = () => {
         <div className="bg-amber-600 text-white text-xs font-bold py-1.5 px-4 text-center flex items-center justify-center gap-1.5 sticky top-0 z-50">
           <WifiOff className="h-3.5 w-3.5" />
           <span>Reconnecting to live menu...</span>
+        </div>
+      )}
+
+      {/* Self Ordering Disabled Notice */}
+      {business?.enableCustomerSelfOrdering === false && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs font-semibold py-2.5 px-4 sticky top-0 z-45">
+          <div className="max-w-md mx-auto flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-extrabold text-xs">Online Ordering Currently Unavailable</p>
+              <p className="opacity-90 text-[11px] mt-0.5 leading-relaxed">
+                Customer mobile self-ordering is currently paused by store management. Please order directly at the counter.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

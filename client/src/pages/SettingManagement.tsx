@@ -12,7 +12,13 @@ import {
   Printer,
   Shield,
   Save,
+  QrCode,
+  Smartphone,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
 } from "lucide-react";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,11 +26,12 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import Swal from "sweetalert2";
 
 export const SettingManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { data: settingsResponse, refetch } = useGetSettingsQuery({});
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
 
   const [activeTab, setActiveTab] = useState<
-    "business" | "finance" | "hours" | "loyalty" | "pos" | "permissions"
+    "business" | "finance" | "hours" | "loyalty" | "pos" | "self_order" | "permissions"
   >("business");
 
   const [formData, setFormData] = useState<SettingsData>({
@@ -38,6 +45,7 @@ export const SettingManagement: React.FC = () => {
     email: "contact@bornocafe.com",
     website: "https://bornocafe.vercel.app",
     receiptFooter: "Thank you for visiting BornoCafe! Please come again.",
+    enableCustomerSelfOrdering: true,
     enableDiscountInput: true,
     enableTaxOverride: false,
     allowNegativeStock: false,
@@ -192,6 +200,7 @@ export const SettingManagement: React.FC = () => {
           { key: "finance", label: "Tax & Financials", icon: DollarSign },
           { key: "hours", label: "Operating Hours", icon: Clock },
           { key: "loyalty", label: "Loyalty Program", icon: Star },
+          { key: "self_order", label: "Customer Self-Ordering", icon: QrCode },
           { key: "pos", label: "POS & Printing", icon: Printer },
           { key: "permissions", label: "Role Permissions", icon: Shield },
         ].map(({ key, label, icon: Icon }) => (
@@ -509,6 +518,128 @@ export const SettingManagement: React.FC = () => {
                 <p className="text-[11px] text-muted-foreground mt-1">
                   e.g., 10 points = ৳5.00 discount during checkout
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: Customer Self-Ordering Mode */}
+        {activeTab === "self_order" && (
+          <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-4">
+              <div>
+                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">
+                  <Smartphone className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  Customer Mobile Self-Ordering Mode
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Allow guests to scan table QR codes, browse your menu, and place orders directly from their smartphones
+                </p>
+              </div>
+
+              {/* Big ON / OFF Toggle */}
+              <div className="flex items-center gap-3 bg-accent/40 p-2 rounded-2xl border border-border/80 shrink-0">
+                <div className="flex items-center gap-2 px-2">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      formData.enableCustomerSelfOrdering !== false
+                        ? "bg-emerald-500 animate-pulse"
+                        : "bg-rose-500"
+                    }`}
+                  />
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    {formData.enableCustomerSelfOrdering !== false ? "Status: ON" : "Status: OFF"}
+                  </span>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.enableCustomerSelfOrdering !== false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        enableCustomerSelfOrdering: e.target.checked,
+                      })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-12 h-6.5 bg-muted peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5.5 after:w-5.5 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Status Summary Banner */}
+            <div
+              className={`p-4 rounded-xl border flex items-start gap-3.5 ${
+                formData.enableCustomerSelfOrdering !== false
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200"
+                  : "bg-rose-500/10 border-rose-500/30 text-rose-950 dark:text-rose-200"
+              }`}
+            >
+              {formData.enableCustomerSelfOrdering !== false ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <XCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+              )}
+              <div className="text-xs space-y-1">
+                <p className="font-bold">
+                  {formData.enableCustomerSelfOrdering !== false
+                    ? "Customer Self-Ordering is ACTIVE"
+                    : "Customer Self-Ordering is DISABLED"}
+                </p>
+                <p className="opacity-90 leading-relaxed">
+                  {formData.enableCustomerSelfOrdering !== false
+                    ? "Guests scanning any active Table QR code can browse items, customize coffee drinks, and submit orders directly into POS & KDS in real-time."
+                    : "Customer QR ordering is completely blocked server-side and client-side. When guests scan table QR codes, they will see a polite message asking them to order at the counter. Cashier POS continues working normally."}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Actions & QR Management Link */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-xl border border-border/80 bg-accent/20 flex flex-col justify-between gap-3">
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                    <QrCode className="h-4 w-4 text-amber-600" />
+                    Table QR Codes & Floor Plan
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    Generate individual table QR codes, download PNG cards, or batch print QR stickers for all tables.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/dashboard/tables")}
+                  className="rounded-xl border-border font-bold text-xs flex items-center justify-center gap-1.5 self-start"
+                >
+                  Manage Table QRs
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+              <div className="p-4 rounded-xl border border-border/80 bg-accent/20 flex flex-col justify-between gap-3">
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                    <Smartphone className="h-4 w-4 text-amber-600" />
+                    Public Online Menu
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    View the customer-facing mobile menu as it appears to guests scanning QR codes.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open("/menu", "_blank")}
+                  className="rounded-xl border-border font-bold text-xs flex items-center justify-center gap-1.5 self-start"
+                >
+                  Preview Public Menu
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           </div>

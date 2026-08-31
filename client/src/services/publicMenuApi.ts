@@ -12,6 +12,7 @@ export interface BusinessInfo {
   offDays?: string[];
   taxRate?: number;
   serviceCharge?: number;
+  enableCustomerSelfOrdering?: boolean;
 }
 
 export interface PublicMenuResponse {

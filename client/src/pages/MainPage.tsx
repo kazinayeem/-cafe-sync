@@ -15,7 +15,19 @@ import {
 } from "@/services/productApi";
 import type { Product } from "@/services/productApi";
 
-import { Search, ShoppingBag, X, RefreshCcw, AlertTriangle, Coffee } from "lucide-react";
+import { useNavigate } from "react-router";
+import { socket } from "@/utils/socket";
+import { orderAnnouncer } from "@/utils/orderAnnouncer";
+import {
+  Search,
+  ShoppingBag,
+  X,
+  RefreshCcw,
+  AlertTriangle,
+  Coffee,
+  Smartphone,
+  Eye,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -31,13 +43,24 @@ const formatAMPM = (time: string) => {
   return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
 };
 
+interface SelfOrderToast {
+  orderId: string;
+  orderToken: string;
+  tableName: string;
+  totalPrice: number;
+  itemsSummary: string;
+  guestName?: string;
+}
+
 export default function MainPage() {
+  const navigate = useNavigate();
   const { items } = useSelector((state: RootState) => state.cart);
   const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [incomingOrderAlert, setIncomingOrderAlert] = useState<SelfOrderToast | null>(null);
 
   const [isClosed, setIsClosed] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
@@ -107,6 +130,49 @@ export default function MainPage() {
     setIsClosed(false);
     setClosedMessage("");
   }, [settingsData]);
+
+  useEffect(() => {
+    const handleNewCustomerOrder = (data: any) => {
+      const order = data.order || data;
+      if (order?.source === "qr" || order?.source === "online" || data?.tableName) {
+        const orderId = order?._id || data?.orderId || "";
+        const orderToken = order?.orderToken || data?.orderToken || "New";
+        const tableName = order?.table?.name || data?.table || data?.tableName || "Mobile Guest";
+        const totalPrice = order?.totalPrice || data?.totalPrice || 0;
+        const itemsSummary =
+          data?.itemsSummary ||
+          (order?.items || [])
+            .map((it: any) => `${it.quantity} × ${it.name || it.product?.name || "Item"}`)
+            .join(", ");
+
+        // Trigger POS audio announcement chime
+        orderAnnouncer.announceNewOrder(orderId, orderToken, tableName);
+
+        // Display on-screen alert banner
+        setIncomingOrderAlert({
+          orderId,
+          orderToken,
+          tableName,
+          totalPrice,
+          itemsSummary,
+          guestName: order?.guestName || data?.guestName,
+        });
+
+        // Auto dismiss after 15 seconds
+        setTimeout(() => {
+          setIncomingOrderAlert((prev) => (prev?.orderId === orderId ? null : prev));
+        }, 15000);
+      }
+    };
+
+    socket.on("newCustomerSelfOrder", handleNewCustomerOrder);
+    socket.on("newOrder", handleNewCustomerOrder);
+
+    return () => {
+      socket.off("newCustomerSelfOrder", handleNewCustomerOrder);
+      socket.off("newOrder", handleNewCustomerOrder);
+    };
+  }, []);
 
   const handleRefresh = async () => {
     await Promise.all([refetchCategories(), refetchProducts()]);
@@ -265,6 +331,76 @@ export default function MainPage() {
           <OrderSidebar disabled={false} onClose={() => setIsDrawerOpen(false)} />
         </SheetContent>
       </Sheet>
+
+      {/* Real-time Customer Mobile Self-Order Alert Toast */}
+      {incomingOrderAlert && (
+        <div className="fixed top-4 right-4 z-50 max-w-sm w-full bg-slate-900 text-white rounded-2xl border border-amber-500/40 shadow-2xl p-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-slate-950 font-black animate-pulse shrink-0">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
+                  NEW CUSTOMER ORDER
+                </span>
+                <h4 className="text-xs font-black text-white truncate">
+                  Order #{incomingOrderAlert.orderToken} • {incomingOrderAlert.tableName}
+                </h4>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIncomingOrderAlert(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="py-2.5 space-y-1">
+            <p className="text-xs text-slate-300 font-medium line-clamp-2">
+              {incomingOrderAlert.itemsSummary}
+            </p>
+            <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800/60">
+              <span className="text-slate-400 font-medium">
+                {incomingOrderAlert.guestName
+                  ? `Guest: ${incomingOrderAlert.guestName}`
+                  : "Customer Mobile"}
+              </span>
+              <span className="font-extrabold text-amber-400 font-tabular text-sm">
+                ৳{incomingOrderAlert.totalPrice.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <Button
+              size="sm"
+              onClick={() => {
+                setIncomingOrderAlert(null);
+                navigate("/dashboard/orders");
+              }}
+              className="flex-1 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              View Order
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setIncomingOrderAlert(null);
+                navigate("/dashboard/kitchen");
+              }}
+              className="h-8 rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-bold"
+            >
+              KDS
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

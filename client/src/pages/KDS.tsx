@@ -555,9 +555,9 @@ export const KitchenDisplaySystem: React.FC<KDSProps> = () => {
                             >
                               {elapsed}m ago
                             </span>
-                            {order.source === "qr" && (
-                              <span className="text-[9px] font-bold uppercase text-amber-400">
-                                QR Order
+                            {(order.source === "qr" || order.source === "online") && (
+                              <span className="text-[9px] font-bold uppercase text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                📱 Customer Mobile
                               </span>
                             )}
                           </div>

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
 import { Table } from "../models/Table";
@@ -32,6 +33,7 @@ export const getPublicMenu = async (req: Request, res: Response) => {
           offDays: settings.offDays || [],
           taxRate: settings.taxRate ?? 5,
           serviceCharge: settings.serviceCharge ?? 0,
+          enableCustomerSelfOrdering: settings.enableCustomerSelfOrdering !== false,
         },
         categories,
         products,
@@ -45,12 +47,21 @@ export const getPublicMenu = async (req: Request, res: Response) => {
 // Validate QR Token and get table information + menu
 export const getTableByQrToken = async (req: Request, res: Response) => {
   try {
-    const { qrToken } = req.params;
-    if (!qrToken) {
-      return res.status(400).json({ success: false, message: "QR Token is required" });
+    const { qrToken, tableId } = req.params;
+    const targetToken = qrToken || tableId;
+
+    if (!targetToken) {
+      return res.status(400).json({ success: false, message: "QR Token or Table ID is required" });
     }
 
-    const table = await Table.findOne({ qrToken });
+    let table = await Table.findOne({ qrToken: targetToken });
+    if (!table && mongoose.isValidObjectId(targetToken)) {
+      table = await Table.findById(targetToken);
+    }
+    if (!table) {
+      table = await Table.findOne({ name: targetToken });
+    }
+
     if (!table) {
       return res.status(404).json({
         success: false,
@@ -84,6 +95,7 @@ export const getTableByQrToken = async (req: Request, res: Response) => {
           currency: settings.currency || "BDT",
           taxRate: settings.taxRate ?? 5,
           serviceCharge: settings.serviceCharge ?? 0,
+          enableCustomerSelfOrdering: settings.enableCustomerSelfOrdering !== false,
         },
         categories,
         products,
@@ -97,13 +109,31 @@ export const getTableByQrToken = async (req: Request, res: Response) => {
 // Submit a new Smart QR Order
 export const createQrOrder = async (req: Request, res: Response) => {
   try {
-    const { qrToken, items, guestName, guestPhone, orderNote } = req.body;
+    const { qrToken, tableId, items, guestName, guestPhone, orderNote } = req.body;
+    const targetToken = qrToken || tableId;
 
-    if (!qrToken) {
-      return res.status(400).json({ success: false, message: "QR Token is required" });
+    if (!targetToken) {
+      return res.status(400).json({ success: false, message: "QR Token or Table ID is required" });
     }
 
-    const table = await Table.findOne({ qrToken });
+    const settings = (await SettingModel.findOne()) || defaultSettings;
+
+    // Server-side verification that Customer Self-Ordering is active
+    if (settings.enableCustomerSelfOrdering === false) {
+      return res.status(403).json({
+        success: false,
+        message: "Customer self-ordering is currently unavailable. Please place your order directly at the cashier counter.",
+      });
+    }
+
+    let table = await Table.findOne({ qrToken: targetToken });
+    if (!table && mongoose.isValidObjectId(targetToken)) {
+      table = await Table.findById(targetToken);
+    }
+    if (!table) {
+      table = await Table.findOne({ name: targetToken });
+    }
+
     if (!table) {
       return res.status(404).json({
         success: false,
@@ -115,7 +145,6 @@ export const createQrOrder = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "Cart cannot be empty" });
     }
 
-    const settings = (await SettingModel.findOne()) || defaultSettings;
     const taxRate = settings.taxRate ?? 5;
     const serviceChargeRate = settings.serviceCharge ?? 0;
 
@@ -216,6 +245,19 @@ export const createQrOrder = async (req: Request, res: Response) => {
 
     // Realtime Broadcast to KDS, POS, Display & Stats
     io.emit("newOrder", populatedOrder);
+    io.emit("newCustomerSelfOrder", {
+      order: populatedOrder,
+      orderId: order._id,
+      customOrderID: order.customOrderID,
+      orderToken: order.orderToken,
+      table: table.name,
+      tableName: table.name,
+      totalPrice: order.totalPrice,
+      itemsSummary: orderItems.map((i) => `${i.quantity} × ${i.name}`).join(", "),
+      itemsCount: orderItems.length,
+      guestName: order.guestName,
+      createdAt: order.createdAt,
+    });
     io.emit("orderStatusUpdated", {
       orderId: order._id,
       customOrderID: order.customOrderID,

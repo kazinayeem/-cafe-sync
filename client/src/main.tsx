@@ -50,6 +50,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
             {/* Smart QR Ordering & Tracking (Public for customers at tables) */}
             <Route path="/order/:qrToken" element={<CustomerOrderPage />} />
+            <Route path="/order/:storeId/:tableId" element={<CustomerOrderPage />} />
             <Route path="/track/:orderId" element={<CustomerOrderTracking />} />
 
             {/* Public TV / Monitor Order Status Display */}

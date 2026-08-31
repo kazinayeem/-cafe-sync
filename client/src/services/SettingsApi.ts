@@ -13,6 +13,7 @@ export interface SettingsData {
   website?: string;
   receiptFooter?: string;
   showTableName?: boolean;
+  enableCustomerSelfOrdering?: boolean;
   enableDiscountInput: boolean;
   enableTaxOverride: boolean;
   allowNegativeStock: boolean;

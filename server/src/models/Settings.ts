@@ -19,7 +19,8 @@ export interface IBusinessSettings {
   logoUrl?: string;
   showTableName?: boolean;
 
-  // ⚙️ POS Behavior
+  // ⚙️ POS & Self-Ordering Behavior
+  enableCustomerSelfOrdering: boolean;
   enableDiscountInput: boolean;
   enableTaxOverride: boolean;
   allowNegativeStock: boolean;
@@ -69,7 +70,8 @@ const settingSchema = new Schema<BusinessSettingsDocument>(
     logoUrl: { type: String },
     showTableName: { type: Boolean, default: true },
 
-    // ⚙️ POS Behavior
+    // ⚙️ POS & Self-Ordering Behavior
+    enableCustomerSelfOrdering: { type: Boolean, default: true },
     enableDiscountInput: { type: Boolean, default: true },
     enableTaxOverride: { type: Boolean, default: false },
     allowNegativeStock: { type: Boolean, default: false },
@@ -110,6 +112,7 @@ export const defaultSettings: IBusinessSettings = {
   email: "contact@bornocafe.com",
   website: "https://bornocafe.vercel.app",
   receiptFooter: "Thank you for visiting BornoCafe! Please come again.",
+  enableCustomerSelfOrdering: true,
   enableDiscountInput: true,
   enableTaxOverride: false,
   allowNegativeStock: false,

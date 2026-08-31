@@ -22,6 +22,7 @@ import {
   Edit3,
   Clock,
   Eye,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -337,20 +338,32 @@ export const OrderList: React.FC = () => {
                       </p>
                     </td>
 
-                    {/* Type / Table */}
+                    {/* Type / Table / Source */}
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 font-bold text-foreground">
-                        {order.orderType === "takeaway" ? (
-                          <ShoppingBag className="h-3.5 w-3.5 text-purple-600" />
-                        ) : (
-                          <Utensils className="h-3.5 w-3.5 text-amber-600" />
-                        )}
-                        {order.orderType === "takeaway"
-                          ? "Takeaway"
-                          : order.table
-                          ? (order.table as any).name
-                          : "Dine-In"}
-                      </span>
+                      {order.source === "qr" || order.source === "online" ? (
+                        <span className="inline-flex items-center gap-1 font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded-full text-xs border border-blue-500/20">
+                          <Smartphone className="h-3.5 w-3.5 text-blue-600" />
+                          <span>Customer Mobile</span>
+                          {order.table && (
+                            <span className="text-[11px] font-semibold opacity-85">
+                              ({(order.table as any).name})
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 font-bold text-foreground">
+                          {order.orderType === "takeaway" ? (
+                            <ShoppingBag className="h-3.5 w-3.5 text-purple-600" />
+                          ) : (
+                            <Utensils className="h-3.5 w-3.5 text-amber-600" />
+                          )}
+                          {order.orderType === "takeaway"
+                            ? "Takeaway"
+                            : order.table
+                            ? (order.table as any).name
+                            : "Dine-In"}
+                        </span>
+                      )}
                     </td>
 
                     {/* Customer */}
