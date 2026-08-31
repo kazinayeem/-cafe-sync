@@ -126,15 +126,18 @@ export const createQrOrder = async (req: Request, res: Response) => {
       });
     }
 
-    let table = await Table.findOne({ qrToken: targetToken });
-    if (!table && mongoose.isValidObjectId(targetToken)) {
-      table = await Table.findById(targetToken);
-    }
-    if (!table) {
-      table = await Table.findOne({ name: targetToken });
+    let table = null;
+    if (targetToken && targetToken !== "counter" && targetToken !== "takeaway") {
+      table = await Table.findOne({ qrToken: targetToken });
+      if (!table && mongoose.isValidObjectId(targetToken)) {
+        table = await Table.findById(targetToken);
+      }
+      if (!table) {
+        table = await Table.findOne({ name: targetToken });
+      }
     }
 
-    if (!table) {
+    if (targetToken && !table && targetToken !== "counter" && targetToken !== "takeaway") {
       return res.status(404).json({
         success: false,
         message: "Invalid table QR code. Please scan the QR code at your table again.",
@@ -211,27 +214,27 @@ export const createQrOrder = async (req: Request, res: Response) => {
 
     const order = new Order({
       source: "qr",
-      guestName: guestName || "Guest Customer",
+      guestName: guestName || (table ? `Guest at ${table.name}` : "Guest Customer"),
       guestPhone: guestPhone || "",
-      orderType: "dine_in",
+      orderType: table ? "dine_in" : (req.body.orderType || "takeaway"),
       items: orderItems,
       subtotal,
       taxRate,
       taxAmount,
-      serviceChargeRate,
-      serviceChargeAmount,
+      serviceChargeRate: table ? serviceChargeRate : 0,
+      serviceChargeAmount: table ? serviceChargeAmount : 0,
       totalPrice,
       status: "pending",
       paymentStatus: "unpaid",
       paymentMethod: "cash",
-      table: table._id,
+      table: table ? table._id : undefined,
       orderNote: orderNote || "",
     });
 
     await order.save();
 
     // Mark table as occupied if free
-    if (table.status === "free") {
+    if (table && table.status === "free") {
       table.status = "occupied";
       table.activeOrder = order._id as any;
       await table.save();
@@ -243,6 +246,8 @@ export const createQrOrder = async (req: Request, res: Response) => {
       .populate("table", "name section seats")
       .populate("items.product", "name imageUrl category");
 
+    const tableName = table ? table.name : "Customer Mobile";
+
     // Realtime Broadcast to KDS, POS, Display & Stats
     io.emit("newOrder", populatedOrder);
     io.emit("newCustomerSelfOrder", {
@@ -250,8 +255,8 @@ export const createQrOrder = async (req: Request, res: Response) => {
       orderId: order._id,
       customOrderID: order.customOrderID,
       orderToken: order.orderToken,
-      table: table.name,
-      tableName: table.name,
+      table: tableName,
+      tableName: tableName,
       totalPrice: order.totalPrice,
       itemsSummary: orderItems.map((i) => `${i.quantity} × ${i.name}`).join(", "),
       itemsCount: orderItems.length,
@@ -263,14 +268,14 @@ export const createQrOrder = async (req: Request, res: Response) => {
       customOrderID: order.customOrderID,
       orderToken: order.orderToken,
       status: order.status,
-      table: table.name,
+      table: tableName,
     });
     io.emit("displayUpdate");
     await broadcastStats();
 
     await ActivityLog.create({
       action: "order_created",
-      details: `Customer QR order placed: #${order.orderToken} (${order.customOrderID}) for ${table.name}`,
+      details: `Customer QR order placed: #${order.orderToken} (${order.customOrderID}) for ${tableName}`,
     });
 
     return res.status(201).json({

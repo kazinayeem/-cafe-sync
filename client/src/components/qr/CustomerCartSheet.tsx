@@ -244,6 +244,25 @@ export const CustomerCartSheet: React.FC<CustomerCartSheetProps> = ({
               </div>
             </div>
           )}
+          {/* Payment Method - Cash Only */}
+          {items.length > 0 && (
+            <div className="border-t border-border/60 pt-3 space-y-2">
+              <p className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+                Payment Method
+              </p>
+              <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-950/30 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-black text-emerald-900 dark:text-emerald-200 uppercase">
+                    Cash — Pay When You Receive
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Please pay in cash when you receive your order. Your coffee & food will be prepared right away.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Breakdown & Submit Button */}
@@ -283,10 +302,10 @@ export const CustomerCartSheet: React.FC<CustomerCartSheetProps> = ({
             <Button
               onClick={handlePlaceOrder}
               disabled={isSubmitting}
-              className="w-full h-12 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm shadow-md flex items-center justify-center gap-2 mt-2"
+              className="w-full h-12 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md flex items-center justify-center gap-2 mt-2 active:scale-98 transition-all"
             >
               {isSubmitting ? (
-                "Submitting Order..."
+                "Placing Your Order..."
               ) : (
                 <>
                   <ShoppingBag className="h-4 w-4" />
