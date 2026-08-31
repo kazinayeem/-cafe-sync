@@ -274,8 +274,17 @@ export const createQrOrder = async (req: Request, res: Response) => {
     await broadcastStats();
 
     await ActivityLog.create({
-      action: "order_created",
-      details: `Customer QR order placed: #${order.orderToken} (${order.customOrderID}) for ${tableName}`,
+      action: `Created Customer Self-Order #${order.customOrderID || order.orderToken} (${tableName})`,
+      category: "order",
+      details: {
+        orderId: order._id,
+        orderToken: order.orderToken,
+        customOrderID: order.customOrderID,
+        table: tableName,
+        totalPrice: order.totalPrice,
+        itemsCount: orderItems.length,
+        source: "qr",
+      },
     });
 
     return res.status(201).json({
@@ -284,7 +293,14 @@ export const createQrOrder = async (req: Request, res: Response) => {
       message: "Order placed successfully! Keep your tracking screen open.",
     });
   } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Self-order creation error:", error);
+    return res.status(500).json({
+      success: false,
+      message:
+        error?.message?.includes("validation failed")
+          ? "Failed to process order. Please try again."
+          : error?.message || "Failed to place order.",
+    });
   }
 };
 
