@@ -110,7 +110,8 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({
           name: i.product.name,
           quantity: i.quantity,
           size: i.size,
-          price: i.unitPrice,
+          // The API adds selected modifier prices to this base price.
+          price: i.product.sizes?.[i.size] ?? 0,
           selectedModifiers: (i.selectedModifiers || []).map((m) => ({
             groupName: m.groupName,
             optionName: m.optionName,
@@ -217,9 +218,10 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({
           </div>
 
           {/* Dine-In vs Takeaway Toggle */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/60">
+          <div role="group" aria-label="Order type" className="grid grid-cols-2 gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/60">
             <button
               type="button"
+              aria-pressed={orderType === "dine_in"}
               onClick={() => dispatch(setOrderType("dine_in"))}
               className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 orderType === "dine_in"
@@ -232,6 +234,7 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({
             </button>
             <button
               type="button"
+              aria-pressed={orderType === "takeaway"}
               onClick={() => dispatch(setOrderType("takeaway"))}
               className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 orderType === "takeaway"
